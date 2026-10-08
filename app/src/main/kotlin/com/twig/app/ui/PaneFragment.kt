@@ -463,7 +463,7 @@ class PaneFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val tracks = runCatching {
                 withContext(Dispatchers.IO) {
-                    com.twig.app.M3uPlaylist.parse(file).mapNotNull { viewModel.trackFrom(it) }
+                    com.twig.app.M3uPlaylist.tracks(ctx, file)
                 }
             }.getOrDefault(emptyList())
             if (tracks.isEmpty()) { toast(getString(R.string.music_no_playable)); return@launch }

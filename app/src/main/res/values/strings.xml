@@ -408,6 +408,12 @@
     <string name="music_new_playlist">New playlist</string>
     <string name="music_new_playlist_hint">Playlist name</string>
     <string name="music_rename">Rename</string>
+    <string name="music_export">Export</string>
+    <string name="music_export_missing">Playlist no longer exists</string>
+    <string name="music_export_source_missing">Source unavailable: %1$s</string>
+    <string name="music_export_done">Exported %1$s</string>
+    <string name="music_export_failed">Export failed: %1$s</string>
+    <string name="music_export_invalid_path">A track path contains a line break</string>
     <string name="music_save">Save</string>
     <string name="music_resume">Resume playback</string>
     <string name="music_delete">Delete playlist</string>

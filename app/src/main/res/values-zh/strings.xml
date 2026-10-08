@@ -405,6 +405,12 @@
     <string name="music_new_playlist">新建列表</string>
     <string name="music_new_playlist_hint">列表名称</string>
     <string name="music_rename">重命名</string>
+    <string name="music_export">导出</string>
+    <string name="music_export_missing">播放列表已不存在</string>
+    <string name="music_export_source_missing">来源不可用：%1$s</string>
+    <string name="music_export_done">已导出 %1$s</string>
+    <string name="music_export_failed">导出失败：%1$s</string>
+    <string name="music_export_invalid_path">曲目路径包含换行符</string>
     <string name="music_save">保存</string>
     <string name="music_resume">恢复播放</string>
     <string name="music_delete">删除列表</string>

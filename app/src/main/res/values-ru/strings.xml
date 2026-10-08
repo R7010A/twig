@@ -407,6 +407,12 @@
     <string name="music_new_playlist">Новый плейлист</string>
     <string name="music_new_playlist_hint">Название плейлиста</string>
     <string name="music_rename">Переименовать</string>
+    <string name="music_export">Экспорт</string>
+    <string name="music_export_missing">Плейлист больше не существует</string>
+    <string name="music_export_source_missing">Источник недоступен: %1$s</string>
+    <string name="music_export_done">Экспортирован %1$s</string>
+    <string name="music_export_failed">Ошибка экспорта: %1$s</string>
+    <string name="music_export_invalid_path">Путь трека содержит перенос строки</string>
     <string name="music_save">Сохранить</string>
     <string name="music_resume">Продолжить воспроизведение</string>
     <string name="music_delete">Удалить плейлист</string>

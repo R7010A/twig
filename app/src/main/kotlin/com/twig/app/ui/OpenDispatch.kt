@@ -105,23 +105,26 @@ object OpenDispatch {
     )
 
     /**
-     * m3u/m3u8: only local playlists yield useful content (entries are mostly relative
-     * paths and must be persistable into the playlist); other sources are treated as
-     * text. Parsing is a small local file read, done synchronously — callers only reach
-     * this from a "read and go" relay, never from the main UI thread's hot path.
+     * Local m3u/m3u8 files can refer to saved servers as well as local paths. Parse on a
+     * worker because restoring a connection and listing track metadata may use the network.
+     * The relay Activity can finish before this completes, so work isn't tied to its lifecycle.
      */
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private fun openM3u(ctx: Context, file: XFile) {
         if (file.scheme != "file") { TextViewerActivity.start(ctx, file); return }
-        val tracks = com.twig.app.M3uPlaylist.parse(file).filter { it.scheme == "file" }.map { trackOf(it) }
-        if (tracks.isEmpty()) {
-            android.widget.Toast.makeText(ctx, com.twig.app.R.string.music_no_playable, android.widget.Toast.LENGTH_SHORT).show()
-            TextViewerActivity.start(ctx, file)
-            return
-        }
-        val name = file.name.substringBeforeLast('.').ifEmpty { file.name }
-        MusicEngine.play(ctx, PlaylistStore.setNow(ctx, name, tracks), 0, autoPlay = true)
-        ctx.startActivity(Intent(ctx, MusicPlayerActivity::class.java))
+        Thread {
+            val tracks = runCatching { com.twig.app.M3uPlaylist.tracks(ctx, file) }.getOrDefault(emptyList())
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                if (tracks.isEmpty()) {
+                    android.widget.Toast.makeText(ctx, com.twig.app.R.string.music_no_playable, android.widget.Toast.LENGTH_SHORT).show()
+                    TextViewerActivity.start(ctx, file)
+                } else {
+                    val name = file.name.substringBeforeLast('.').ifEmpty { file.name }
+                    MusicEngine.play(ctx, PlaylistStore.setNow(ctx, name, tracks), 0, autoPlay = true)
+                    ctx.startActivity(Intent(ctx, MusicPlayerActivity::class.java))
+                }
+            }
+        }.apply { name = "twig-m3u"; isDaemon = true }.start()
     }
 
     /** Archive: return to the main screen and mount it as a single row in the current pane, expanding in place (same path as tapping an archive in the tree). */
