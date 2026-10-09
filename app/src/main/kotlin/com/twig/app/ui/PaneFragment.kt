@@ -436,7 +436,7 @@ class PaneFragment : Fragment() {
 
     /**
      * Open audio: same-directory audio files join "Now playing" (ordered by pane), start from the tapped track, launch the background service + main UI.
-     * Non-persistent sources (audio inside zip/restic/saf) fall back to the legacy MediaPlayerActivity for direct playback.
+     * Mounted archives/restic use a temporary queue; unsupported sources use MediaPlayerActivity.
      */
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private fun openAudio(file: XFile) {
@@ -454,7 +454,7 @@ class PaneFragment : Fragment() {
 
     /**
      * Open m3u/m3u8 playlist: parse in the background (relative paths resolve against the m3u's directory and same source),
-     * load its tracks into "Now playing" and play from the start. Only persistent sources (local / connected servers) join the queue; entries from other sources are skipped.
+     * load its tracks into "Now playing" and play from the start. Mounted archive/restic entries make the queue temporary. Unsupported entries are skipped.
      */
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private fun openM3u(file: XFile) {

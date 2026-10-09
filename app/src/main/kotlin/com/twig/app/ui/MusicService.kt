@@ -131,7 +131,7 @@ class MusicService : Service() {
     }
 
     private fun isFav(): Boolean =
-        MusicEngine.currentTrack()?.let { PlaylistStore.isFav(this, it.id) } == true
+        MusicEngine.currentTrack()?.let { !it.temporary && PlaylistStore.isFav(this, it.id) } == true
 
     private fun updateSession() {
         val track = MusicEngine.currentTrack()
@@ -153,13 +153,13 @@ class MusicService : Service() {
                 // ★ From Android 13, the media control buttons in the notification are taken by
                 // the system from the standard actions + custom actions of PlaybackState;
                 // Notification.Action only works on older systems — the heart needs to be on both sides.
-                .addCustomAction(
+                .also { builder -> if (track?.temporary != true) builder.addCustomAction(
                     PlaybackState.CustomAction.Builder(
                         ACTION_FAV,
                         getString(if (fav) R.string.music_remove_fav else R.string.music_add_fav),
                         if (fav) R.drawable.ic_heart_filled_notif else R.drawable.ic_heart_notif,
                     ).build(),
-                )
+                ) }
                 .setActions(
                     PlaybackState.ACTION_PLAY or PlaybackState.ACTION_PAUSE or
                         PlaybackState.ACTION_PLAY_PAUSE or PlaybackState.ACTION_SKIP_TO_NEXT or
@@ -198,7 +198,7 @@ class MusicService : Service() {
         )
         builder.addAction(action(R.drawable.ic_skip_next, "next", ACTION_NEXT, 3))
         val fav = isFav()
-        builder.addAction(
+        if (track?.temporary != true) builder.addAction(
             action(
                 if (fav) R.drawable.ic_heart_filled_notif else R.drawable.ic_heart_notif,
                 getString(if (fav) R.string.music_remove_fav else R.string.music_add_fav),

@@ -788,7 +788,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         return audios to idx
     }
 
-    /** Convert an XFile into a persistable playlist track (local / connected server); other sources return null. */
+    /** Persistent locations keep their identity; mounted archives/restic get session-only tracks. */
     fun trackFrom(file: XFile): com.twig.app.PlaylistTrack? = when {
         file.scheme == "file" ->
             com.twig.app.PlaylistTrack(
@@ -812,7 +812,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                 kind = "saf", path = file.path, size = file.size, lastModified = file.lastModified,
                 displayName = file.displayName.orEmpty(),
             )
-        else -> null
+        else -> com.twig.app.PlaylistTrack.fromMounted(file)
     }
 
     // ---- Interaction ----

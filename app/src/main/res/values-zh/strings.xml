@@ -897,4 +897,5 @@
     <string name="date_format_ymd">YY-MM-DD</string>
     <string name="date_format_dmy">DD.MM.YY</string>
     <string name="date_format_mdy">MM/DD/YY</string>
+    <string name="music_temporary_playlist">临时播放列表</string>
 </resources>

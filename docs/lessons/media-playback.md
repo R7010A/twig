@@ -315,3 +315,14 @@
   - **`GlFrameGrabber` builds its own `ExoPlayer` and still takes the defaults.** It grabs one
     frame and releases, so the buffer has no time to fill; left alone on purpose, but it is the
     same trap if it ever starts decoding longer.
+
+- **Mounted music queues are temporary (2026-10-09)**: archive and restic entries
+  previously fell back to single-file playback. They now share the music queue, using
+  the current mount's scheme and the listing's size/name metadata. Persisting that
+  scheme would leave unusable tracks after process death; reconstructing the mount
+  would require archive host, repository, snapshot and unlock handling. Keep these
+  tracks in `Playlist.TEMP` in memory, exclude them from favorites, saved playlists
+  and M3U export, and clear them on player exit. Keep the last durable queue intact.
+  Queue loading is asynchronous: the player page must not restore the last saved
+  queue while a new one is loading, and exit must invalidate pending loads so a late
+  callback cannot recreate the player. `TemporaryPlaylistTest` covers these limits.

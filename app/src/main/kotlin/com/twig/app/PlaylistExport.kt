@@ -9,6 +9,7 @@ object PlaylistExport {
         tracks: List<Pair<PlaylistTrack, XFile>>,
         connectionFor: (PlaylistTrack) -> SavedConnection? = { null },
     ): String = buildString {
+        check(tracks.none { it.first.temporary })
         append("#EXTM3U\n")
         for ((track, file) in tracks) {
             val title = track.title.ifEmpty { track.name }

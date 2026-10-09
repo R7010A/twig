@@ -902,4 +902,5 @@
     <string name="date_format_dmy">DD.MM.YY</string>
     <string name="date_format_mdy">MM/DD/YY</string>
     <string name="viewer_load_external_resources">Загрузить внешние ресурсы</string>
+    <string name="music_temporary_playlist">Временный плейлист</string>
 </resources>

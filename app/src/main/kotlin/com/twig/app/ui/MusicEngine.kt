@@ -59,6 +59,9 @@ object MusicEngine {
     private var tracks: List<PlaylistTrack> = emptyList()
     private var files: List<XFile> = emptyList()
     private var errorSkips = 0 // consecutive playback failure counter; stop if all tracks in the queue have been tried and failed
+    @Volatile var loadingQueue = false
+        private set
+    @Volatile private var loadGeneration = 0L
 
     /** Whoever changes "favorite" calls this so other places (player page heart, notification heart) update too. */
     fun notifyFavChanged() { listeners.forEach { it.onFavChanged() } }
@@ -129,7 +132,10 @@ object MusicEngine {
     // ---- Queue loading ----
 
     /** Loads the playlist and starts playback from [startIndex]; conn tracks build connections in the background, missing ones are skipped. */
+    @Synchronized
     fun play(ctx: Context, playlist: Playlist, startIndex: Int, startPosMs: Long = 0L, autoPlay: Boolean = true) {
+        val generation = ++loadGeneration
+        loadingQueue = true
         val appCtx = ctx.applicationContext
         io.execute {
             val resolved = ArrayList<Pair<PlaylistTrack, XFile>>()
@@ -138,12 +144,15 @@ object MusicEngine {
                 val f = resolve(appCtx, t) ?: return@forEachIndexed
                 resolved.add(t to f); origIdx.add(i)
             }
+            if (generation != loadGeneration) return@execute
             if (resolved.isEmpty()) {
                 // None could be resolved (typical: tracks on SMB/SFTP but the server can't be connected).
                 // Previously this returned silently — the player was never even built, so tapping
                 // play/prev/next (`player?.`) buttons did nothing, while pure UI buttons like
                 // "Playlist" / "Drawer" still worked, looking like "buttons are broken". Show a hint.
                 main.post {
+                    if (generation != loadGeneration) return@post
+                    loadingQueue = false
                     android.widget.Toast.makeText(appCtx, com.twig.app.R.string.music_load_failed, android.widget.Toast.LENGTH_LONG).show()
                 }
                 return@execute
@@ -153,6 +162,9 @@ object MusicEngine {
             // track with no playable after wraps back to the first playable one.
             val startPos = origIdx.indexOfFirst { it >= startIndex }.let { if (it < 0) 0 else it }
             main.post {
+                if (generation != loadGeneration) return@post
+                loadingQueue = false
+                if (playlist.id != Playlist.TEMP) PlaylistStore.clearTemporary()
                 val p = ensurePlayer(appCtx)
                 tracks = resolved.map { it.first }
                 files = resolved.map { it.second }
@@ -223,6 +235,11 @@ object MusicEngine {
     // be regenerated.
     private fun resolve(ctx: Context, t: PlaylistTrack): XFile? = runCatching {
         when (t.kind) {
+            "temporary" -> {
+                FsRegistry.of(t.sessionScheme) // only an already-mounted source can serve this track
+                XFile(t.sessionScheme, t.path, isDir = false, size = t.size,
+                    lastModified = t.lastModified, displayName = t.displayName.ifEmpty { null })
+            }
             // Local: openRandom uses the real file length, so missing size is fine; we stat here
             // as a bonus so the list subtitle can show size
             "local" -> if (t.size > 0) {
@@ -335,7 +352,7 @@ object MusicEngine {
         val id = queueId.ifEmpty { return }
         val trackId = currentTrack()?.id ?: return
         val pos = positionMs()
-        com.twig.app.Prefs.setLastQueueId(ctx, id) // on cold-start resume we need to know which queue was being played (NOW or some named list)
+        if (id != Playlist.TEMP) com.twig.app.Prefs.setLastQueueId(ctx, id)
         io.execute { runCatching { PlaylistStore.saveResume(ctx, id, trackId, pos) } }
     }
 
@@ -347,10 +364,13 @@ object MusicEngine {
     /** Full exit: save progress, release player, clear queue (used by "Exit player"; notification is removed by [MusicService] stopping the foreground). */
     @Synchronized
     fun shutdown() {
+        ++loadGeneration
+        loadingQueue = false
         saveResume()
         player?.release()
         player = null
         AudioCache.releaseAll() // release cache connections/files after the player stops reading them
+        PlaylistStore.clearTemporary()
         tracks = emptyList()
         files = emptyList()
         queueId = ""

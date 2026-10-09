@@ -276,7 +276,7 @@ class PlaylistActivity : AppCompatActivity() {
             Unit
         }
         items += getString(R.string.music_info) to { showInfo(track) }
-        items += getString(R.string.music_send_to) to { MusicDialogs.sendToPlaylist(this, listOf(track)) }
+        if (!track.temporary) items += getString(R.string.music_send_to) to { MusicDialogs.sendToPlaylist(this, listOf(track)) }
         items += getString(R.string.music_share) to { share(track) }
         val file = synchronized(files) { files[track.id] }
         if (file != null && MusicDialogs.canLocate(file)) {
@@ -287,7 +287,7 @@ class PlaylistActivity : AppCompatActivity() {
         } else {
             getString(R.string.music_add_fav)
         }
-        items += favLabel to { PlaylistStore.toggleFav(this, track); MusicEngine.notifyFavChanged() }
+        if (!track.temporary) items += favLabel to { PlaylistStore.toggleFav(this, track); MusicEngine.notifyFavChanged() }
         items += getString(R.string.music_remove_from) to { removeTrack(track) }
         AlertDialog.Builder(this)
             .setItems(items.map { it.first }.toTypedArray()) { _, which -> items[which].second() }

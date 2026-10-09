@@ -10,11 +10,12 @@ import java.util.UUID
  * not stored; instead we store "how to reach it" (mirroring [Favorite]):
  * - local: path = absolute local path
  * - conn:  connLabel = SavedConnection.label(), path = path within that connection
+ * - temporary: mounted archive/restic entries, kept only in this process
  * Metadata (title/artist/duration) is cached so the playlist page renders without
  * reading the file; 0/empty = unknown — a background job fills it in and writes back.
  */
 data class PlaylistTrack(
-    val kind: String,            // "local" | "conn" | "share" (content:// from other apps)
+    val kind: String,            // "local" | "conn" | "saf" | "share" | "temporary"
     val path: String,
     val connLabel: String = "",
     val size: Long = 0L,         // File size in bytes — required for network sources:
@@ -34,9 +35,11 @@ data class PlaylistTrack(
     /** Display name. Required for sources like content:// that don't carry a filename
      * in their path (both name and extension have to come from here). */
     val displayName: String = "",
+    val sessionScheme: String = "", // live source of a temporary track; never serialized
 ) {
+    val temporary: Boolean get() = kind == "temporary"
     /** Stable unique id. */
-    val id: String get() = "$kind|$connLabel|$path"
+    val id: String get() = if (temporary) "$kind|$sessionScheme|$path" else "$kind|$connLabel|$path"
 
     /** Filename: [displayName] takes priority, otherwise the last segment of the path. */
     val name: String
@@ -53,6 +56,7 @@ data class PlaylistTrack(
         copy(title = t, artist = a, album = al, durationMs = d, sampleRate = sr, bitrate = br)
 
     fun toJson(): JSONObject = JSONObject().apply {
+        check(!temporary)
         put("kind", kind); put("path", path); put("connLabel", connLabel); put("size", size)
         put("lastModified", lastModified)
         put("title", title); put("artist", artist); put("album", album); put("durationMs", durationMs)
@@ -61,6 +65,14 @@ data class PlaylistTrack(
     }
 
     companion object {
+        fun fromMounted(file: com.twig.core.XFile): PlaylistTrack? =
+            when (runCatching { com.twig.core.FsRegistry.of(file) }.getOrNull()) {
+                is com.twig.fs.restic.ResticFileSystem, is com.twig.fs.archive.ArchiveFileSystem ->
+                    PlaylistTrack("temporary", file.path, size = file.size, lastModified = file.lastModified,
+                        displayName = file.displayName.orEmpty(), sessionScheme = file.scheme)
+                else -> null
+            }
+
         fun fromJson(o: JSONObject) = PlaylistTrack(
             kind = o.getString("kind"),
             path = o.getString("path"),
@@ -92,11 +104,13 @@ data class Playlist(
     val lastIndex: Int = 0,
     val lastPosMs: Long = 0L,
 ) {
-    val isNow: Boolean get() = id == NOW
+    val temporary: Boolean get() = id == TEMP || tracks.any { it.temporary }
+    val isNow: Boolean get() = id == NOW || id == TEMP
     val isFav: Boolean get() = id == FAV
     val fixed: Boolean get() = isNow || isFav
 
     fun toJson(): JSONObject = JSONObject().apply {
+        check(!temporary)
         put("id", id)
         // The "Favorites" list's display name is owned by R.string.playlist_favorites
         // (translatable). Persisting a snapshot of it freezes the label in whichever
@@ -109,6 +123,7 @@ data class Playlist(
 
     companion object {
         const val NOW = "now"
+        const val TEMP = "temporary"
         const val FAV = "fav"
 
         fun newId(): String = UUID.randomUUID().toString()
@@ -134,6 +149,9 @@ data class Playlist(
 object PlaylistStore {
     private const val FILE = "twig_playlists"
     private const val KEY = "list"
+    @Volatile private var temporaryQueue: Playlist? = null
+
+    fun clearTemporary() { temporaryQueue = null }
 
     private fun sp(ctx: Context) = ctx.getSharedPreferences(FILE, Context.MODE_PRIVATE)
 
@@ -145,7 +163,8 @@ object PlaylistStore {
         }.getOrDefault(emptyList())
     }
 
-    fun get(ctx: Context, id: String): Playlist? = all(ctx).firstOrNull { it.id == id }
+    fun get(ctx: Context, id: String): Playlist? =
+        if (id == Playlist.TEMP) temporaryQueue else all(ctx).firstOrNull { it.id == id }
 
     /** "Favorites" is always present (created on first access). The display name is
      *  reconstructed from [R.string.playlist_favorites] on every read so a locale change
@@ -159,6 +178,8 @@ object PlaylistStore {
     }
 
     fun save(ctx: Context, pl: Playlist) {
+        if (pl.id == Playlist.TEMP) { temporaryQueue = pl; return }
+        if (pl.temporary) return
         val list = all(ctx).toMutableList()
         val i = list.indexOfFirst { it.id == pl.id }
         if (i >= 0) list[i] = pl else list.add(pl)
@@ -179,6 +200,7 @@ object PlaylistStore {
      */
     fun rename(ctx: Context, id: String, name: String): Playlist? {
         val pl = get(ctx, id) ?: return null
+        if (pl.temporary) return null
         if (pl.isFav) return pl // Favorites cannot be renamed
         return if (pl.isNow) {
             val promoted = pl.copy(id = Playlist.newId(), name = name)
@@ -191,21 +213,23 @@ object PlaylistStore {
     }
 
     fun delete(ctx: Context, id: String) {
-        if (id == Playlist.FAV || id == Playlist.NOW) return // special lists cannot be deleted
+        if (id == Playlist.FAV || id == Playlist.NOW || id == Playlist.TEMP) return // special lists cannot be deleted
         persist(ctx, all(ctx).filter { it.id != id })
     }
 
     /** Replaces the "Now playing" contents (called when an audio file in a directory is tapped). */
     fun setNow(ctx: Context, name: String, tracks: List<PlaylistTrack>): Playlist {
-        val pl = Playlist(Playlist.NOW, name, tracks)
+        val pl = Playlist(if (tracks.any { it.temporary }) Playlist.TEMP else Playlist.NOW, name, tracks)
+        if (!pl.temporary) clearTemporary()
         save(ctx, pl)
         return pl
     }
 
     fun addTracks(ctx: Context, id: String, tracks: List<PlaylistTrack>): Playlist? {
         val pl = get(ctx, id) ?: return null
+        if (pl.temporary) return null
         val existing = pl.tracks.map { it.id }.toHashSet()
-        val merged = pl.tracks + tracks.filter { it.id !in existing }
+        val merged = pl.tracks + tracks.filter { !it.temporary && it.id !in existing }
         return pl.copy(tracks = merged).also { save(ctx, it) }
     }
 
@@ -217,6 +241,7 @@ object PlaylistStore {
     /** Heart button: adds/removes a track in "Favorites". Returns whether it's now a
      * favorite (state after the operation). */
     fun toggleFav(ctx: Context, track: PlaylistTrack): Boolean {
+        if (track.temporary) return false
         val f = fav(ctx)
         return if (f.tracks.any { it.id == track.id }) {
             save(ctx, f.copy(tracks = f.tracks.filter { it.id != track.id })); false

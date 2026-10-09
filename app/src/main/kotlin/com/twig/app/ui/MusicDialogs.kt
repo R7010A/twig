@@ -82,6 +82,7 @@ object MusicDialogs {
 
     /** Choose a target playlist (or create one) and add [tracks] to it. */
     fun sendToPlaylist(activity: Activity, tracks: List<PlaylistTrack>) {
+        if (tracks.any { it.temporary }) return
         val lists = PlaylistStore.all(activity).filter { it.id != Playlist.NOW }
             .sortedBy { if (it.isFav) 0 else 1 }
         val names = lists.map { it.name } + activity.getString(R.string.music_new_playlist)

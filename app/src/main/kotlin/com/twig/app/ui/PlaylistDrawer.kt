@@ -7,6 +7,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.media3.common.util.UnstableApi
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -37,9 +39,18 @@ class PlaylistDrawer(
     exitRow: View,
 ) {
     private val adapter = Adapter()
-    private var exportId: String? = activity.savedStateRegistry
-        .consumeRestoredStateForKey(EXPORT_STATE)?.getString("id")
-    private val exportPicker = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    class ExportState : ViewModel() { var id: String? = null }
+    private val exportState = ViewModelProvider(activity)[ExportState::class.java].also {
+        activity.savedStateRegistry.consumeRestoredStateForKey(EXPORT_STATE)?.let { state ->
+            it.id = state.getString("id")
+        }
+    }
+    private var exportId: String?
+        get() = exportState.id
+        set(value) { exportState.id = value }
+    private val exportPicker = activity.activityResultRegistry.register(
+        EXPORT_STATE, ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
         val id = exportId
         exportId = null
         if (result.resultCode == android.app.Activity.RESULT_OK && id != null) {
@@ -51,6 +62,7 @@ class PlaylistDrawer(
     }
 
     init {
+        activity.savedStateRegistry.unregisterSavedStateProvider(EXPORT_STATE)
         activity.savedStateRegistry.registerSavedStateProvider(EXPORT_STATE) {
             android.os.Bundle().apply { putString("id", exportId) }
         }
@@ -65,7 +77,7 @@ class PlaylistDrawer(
         private var rows: List<Playlist?> = emptyList() // null = "new playlist" row
 
         fun reload() {
-            val now = PlaylistStore.get(activity, Playlist.NOW)
+            val now = PlaylistStore.get(activity, Playlist.TEMP) ?: PlaylistStore.get(activity, Playlist.NOW)
             val fav = PlaylistStore.fav(activity)
             val users = PlaylistStore.all(activity).filter { it.id != Playlist.NOW && it.id != Playlist.FAV }
             rows = (listOfNotNull(now, fav) + users) + listOf<Playlist?>(null)
@@ -96,7 +108,7 @@ class PlaylistDrawer(
                     else -> R.drawable.ic_queue
                 },
             )
-            h.b.name.text = pl.name
+            h.b.name.text = if (pl.temporary) activity.getString(R.string.music_temporary_playlist) else pl.name
             h.b.count.text = "${pl.tracks.size}"
             h.b.root.setOnClickListener { drawer.closeDrawers(); PlaylistActivity.start(activity, pl.id) }
             h.b.root.setOnLongClickListener { rowMenu(pl); true }
@@ -108,12 +120,12 @@ class PlaylistDrawer(
     private fun rowMenu(pl: Playlist) {
         val opts = ArrayList<Pair<String, () -> Unit>>()
         opts += activity.getString(R.string.music_resume) to { resume(pl) }
-        opts += activity.getString(R.string.music_export) to {
+        if (!pl.temporary) opts += activity.getString(R.string.music_export) to {
             exportId = pl.id
             exportPicker.launch(PickerActivity.dirIntent(activity, activity.getString(R.string.music_export)))
         }
         // "Now Playing" is a temporary list; renaming it means "save" it as a normal list — the menu label changes accordingly.
-        if (!pl.isFav) opts += activity.getString(if (pl.isNow) R.string.music_save else R.string.music_rename) to { rename(pl) }
+        if (!pl.isFav && !pl.temporary) opts += activity.getString(if (pl.isNow) R.string.music_save else R.string.music_rename) to { rename(pl) }
         if (!pl.fixed) opts += activity.getString(R.string.music_delete) to { confirmDelete(pl) }
         AlertDialog.Builder(activity)
             .setTitle(pl.name)
@@ -122,11 +134,13 @@ class PlaylistDrawer(
     }
 
     private fun export(id: String, dir: XFile) {
+        if (id == Playlist.TEMP) return
         activity.lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
                 runCatching {
                     val pl = if (id == Playlist.FAV) PlaylistStore.fav(activity) else PlaylistStore.get(activity, id)
                     requireNotNull(pl) { activity.getString(R.string.music_export_missing) }
+                    check(!pl.temporary)
                     // Export stored locations without reading audio or requiring its server to be online.
                     val tracks = pl.tracks.map { track ->
                         require('\r' !in track.path && '\n' !in track.path) {

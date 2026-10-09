@@ -71,7 +71,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         override fun onPlayStateChanged(playing: Boolean) { updatePlayButton() }
         override fun onModeChanged() { updateModeButtons() }
         override fun onFavChanged() { updateFavButton(); plDrawer.reload() } // Heart icon tapped from the notification.
-        override fun onQueueChanged() { bindTrack() }
+        override fun onQueueChanged() { bindTrack(); plDrawer.reload() }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,7 +104,7 @@ class MusicPlayerActivity : AppCompatActivity() {
      * otherwise a cold-start while a named list was being played jumps to the wrong list.
      */
     private fun restoreLastQueue() {
-        if (MusicEngine.hasQueue()) return
+        if (MusicEngine.hasQueue() || MusicEngine.loadingQueue) return
         val lastId = Prefs.lastQueueId(this)
         val pl = lastId?.let { PlaylistStore.get(this, it) }
             ?: PlaylistStore.get(this, Playlist.NOW)
@@ -439,7 +439,8 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     private fun updateFavButton() {
         val track = MusicEngine.currentTrack()
-        val fav = track != null && PlaylistStore.isFav(this, track.id)
+        b.btnFav.visibility = if (track?.temporary == true) View.GONE else View.VISIBLE
+        val fav = track != null && !track.temporary && PlaylistStore.isFav(this, track.id)
         b.btnFav.setImageResource(if (fav) R.drawable.ic_heart_filled else R.drawable.ic_heart)
         b.btnFav.setColorFilter(if (fav) effAccent() else tint.secondary)
     }
@@ -462,7 +463,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         // missing, a hardcoded when(which) goes out of alignment
         val items = ArrayList<Pair<String, () -> Unit>>()
         items += getString(R.string.music_info) to { MusicDialogs.showInfo(this, file) }
-        items += getString(R.string.music_send_to) to { MusicDialogs.sendToPlaylist(this, listOf(track)) }
+        if (!track.temporary) items += getString(R.string.music_send_to) to { MusicDialogs.sendToPlaylist(this, listOf(track)) }
         items += getString(R.string.music_share) to { MusicDialogs.share(this, file); Unit }
         if (MusicDialogs.canLocate(file)) {
             items += getString(R.string.music_locate) to { MusicDialogs.locateInFileManager(this, file) }
@@ -472,7 +473,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         } else {
             getString(R.string.music_add_fav)
         }
-        items += favLabel to { toggleFav() }
+        if (!track.temporary) items += favLabel to { toggleFav() }
         items += getString(R.string.music_remove_from) to {
             val id = MusicEngine.queueId
             PlaylistStore.removeTrack(this, id, track.id)

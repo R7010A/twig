@@ -88,7 +88,7 @@ object M3uPlaylist {
                 f.scheme == "saf" -> "saf"
                 f.scheme == "share" -> "share"
                 conn != null -> "conn"
-                else -> return@mapNotNull null
+                else -> return@mapNotNull PlaylistTrack.fromMounted(f)
             }
             PlaylistTrack(kind, f.path, connLabel = conn?.label().orEmpty(), size = f.size,
                 lastModified = f.lastModified, displayName = f.displayName.orEmpty())

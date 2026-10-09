@@ -147,6 +147,11 @@ each write `= null`.
   preferences in `Prefs` — all SharedPreferences.
 - Viewers: `TextViewerActivity` / `HexViewerActivity` / `ImageViewerActivity` /
   `MediaPlayerActivity` (ExoPlayer + ffmpeg software audio decoding).
+  Music inside mounted restic repositories and archives uses an in-memory queue
+  (`Playlist.TEMP`), with same-directory siblings and ordinary playback controls.
+  These tracks cannot be favorited, saved into playlists or exported; player exit
+  clears the queue. Resolve them through the live filesystem, without reopening a
+  repository or archive from a persisted descriptor.
   **Playback choice memory** (`MediaPrefStore` + `TrackMatch`): the audio track, the subtitle
   and the picture scaling a user picks by hand are applied again on the next episode and the
   next time the file is opened (scaling rides along because it has the same scope — every
