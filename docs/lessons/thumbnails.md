@@ -112,3 +112,15 @@
   and the codec input phase for 2790 ms. Lowering RMS sampling alone cannot remove that
   bottleneck. The profile phases are wall time, including IPC/waits, not decoder CPU time.
   No normalization change, so `waves2` remains valid.
+  Keep the final-result callback: analysis finishes first, then the whole waveform grows
+  from its horizontal centre together.
+  Local MP3 now reuses the bundled media3 FFmpeg audio decoder through a small Java
+  bridge in its package (the decoder class is package-private in the pinned extension).
+  Its normal buffer queues own the native context; do not reflectively invoke JNI or
+  concatenate independent MP3 packets. The same 229.3 s MP3 analysed in 573 and 572 ms
+  on two uncached copies, with the same 22,017,024 PCM samples as the platform path.
+  A generated mono 22.05 kHz VBR MP3 also completed. If software decoding fails or
+  produces an incomplete waveform, release it, rewind the extractor and retry the
+  platform path with fresh RMS state. Cancellation returns no result and does not retry.
+  Network MP3 keeps its existing path. Queue/EOS handling, early EOF, cancellation and
+  decoder release are covered by `FfmpegWaveformTest`.

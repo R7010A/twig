@@ -100,11 +100,27 @@ object Waveform {
             durationUs = if (format.containsKey(MediaFormat.KEY_DURATION)) format.getLong(MediaFormat.KEY_DURATION) else 0L
             if (durationUs <= 0) return null
             val mime = format.getString(MediaFormat.KEY_MIME) ?: return null
-            val rms = WaveformRms(BUCKETS)
+            var rms = WaveformRms(BUCKETS)
             val pcm16 = !format.containsKey(MediaFormat.KEY_PCM_ENCODING) ||
                 format.getInteger(MediaFormat.KEY_PCM_ENCODING) == AudioFormat.ENCODING_PCM_16BIT
-            if (local && mime == "audio/raw" && pcm16) {
-                // Android's FLAC extractor may already decode to PCM. Passing that
+            val useFfmpeg = local && mime == "audio/mpeg" && FfmpegWaveform.available()
+            val software = if (useFfmpeg) runCatching {
+                FfmpegWaveform.compute(extractor, format, durationUs, alive)
+            }.onFailure { Log.w("twig", "waveform: ffmpeg failed, retrying platform: ${file.name}: $it") }
+                .getOrNull() else null
+            if (!alive()) return null
+            if (software != null) {
+                codecName = "ffmpeg-mp3"
+                rms = software.rms
+                setupNs = software.setupNs
+                inputNs = software.inputNs
+                extractNs = software.extractNs
+                outputNs = software.outputNs
+                rmsNs = software.rmsNs
+                samples = software.samples
+                buffers = software.buffers
+            } else if (local && mime == "audio/raw" && pcm16) {
+                // The extractor may already decode FLAC to PCM. Passing that
                 // through a raw MediaCodec adds buffer/IPC work without decoding anything.
                 codecName = "extractor-pcm16"
                 val maxInput = if (format.containsKey(MediaFormat.KEY_MAX_INPUT_SIZE))
@@ -135,6 +151,8 @@ object Waveform {
                     inputNs += System.nanoTime() - advanceStartedAt
                 }
             } else {
+                // A failed software attempt may have consumed packets; start over.
+                if (useFfmpeg) extractor.seekTo(0, MediaExtractor.SEEK_TO_PREVIOUS_SYNC)
                 val codec = MediaCodec.createDecoderByType(mime)
                 decoder = codec
                 codecName = codec.name
