@@ -326,3 +326,11 @@
   Queue loading is asynchronous: the player page must not restore the last saved
   queue while a new one is loading, and exit must invalidate pending loads so a late
   callback cannot recreate the player. `TemporaryPlaylistTest` covers these limits.
+
+- **Music status-bar fullscreen and cutouts (2026-10-12)**: keep the player's
+  edge-to-edge blurred background and per-view insets. Share only the window policy
+  and safe-inset calculation with `StatusBarFullscreen`; installing its root-padding
+  listener would duplicate the music page's bottom controls/drawer insets. Fullscreen
+  ignores status-bar and top-cutout padding, including transient status-bar reveals.
+  Normal mode still reserves visible status-bar space. Reinstall listeners after
+  orientation reinflation and request fresh insets when focus returns.

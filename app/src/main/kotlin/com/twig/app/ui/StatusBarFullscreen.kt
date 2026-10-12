@@ -24,12 +24,8 @@ class StatusBarFullscreen(private val activity: Activity, private val root: View
     init {
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
             if (enabled) {
-                val safe = insets.getInsets(WindowInsetsCompat.Type.displayCutout() or
-                    WindowInsetsCompat.Type.navigationBars() or WindowInsetsCompat.Type.ime())
-                val bars = insets.getInsets(WindowInsetsCompat.Type.navigationBars() or
-                    WindowInsetsCompat.Type.ime())
-                // A top cutout is inside the toolbar in fullscreen, not a blank row above it.
-                root.setPadding(left + safe.left, top + bars.top, right + safe.right, bottom + safe.bottom)
+                val safe = contentInsets(insets, fullscreen = true, includeKeyboard = true)
+                root.setPadding(left + safe.left, top + safe.top, right + safe.right, bottom + safe.bottom)
                 // Descendants must not apply a second copy of the insets already handled here.
                 WindowInsetsCompat.CONSUMED
             } else {
@@ -43,22 +39,40 @@ class StatusBarFullscreen(private val activity: Activity, private val root: View
         enabled = fullscreen
         if (fullscreen) root.setBackgroundColor(ContextCompat.getColor(activity, R.color.toolbar))
         else root.background = background
-        if (Build.VERSION.SDK_INT >= 28) {
-            activity.window.attributes = activity.window.attributes.apply {
-                layoutInDisplayCutoutMode = if (fullscreen)
-                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-                else WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
-            }
-        }
-        WindowCompat.setDecorFitsSystemWindows(activity.window, !fullscreen)
-        val controller = WindowCompat.getInsetsController(activity.window, activity.window.decorView)
-        if (fullscreen) {
-            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            controller.hide(WindowInsetsCompat.Type.statusBars())
-        } else {
-            controller.show(WindowInsetsCompat.Type.statusBars())
-            root.setPadding(left, top, right, bottom)
-        }
+        configureWindow(activity, fullscreen)
+        if (!fullscreen) root.setPadding(left, top, right, bottom)
         ViewCompat.requestApplyInsets(root)
     }
+
+    companion object {
+        /** Music remains edge-to-edge even with the status bar visible; its own views apply insets. */
+        fun configureWindow(activity: Activity, fullscreen: Boolean, fittedWhenNormal: Boolean = true) {
+            if (Build.VERSION.SDK_INT >= 28) {
+                activity.window.attributes = activity.window.attributes.apply {
+                    layoutInDisplayCutoutMode = if (fullscreen)
+                        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+                    else WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
+                }
+            }
+            WindowCompat.setDecorFitsSystemWindows(activity.window, fittedWhenNormal && !fullscreen)
+            val controller = WindowCompat.getInsetsController(activity.window, activity.window.decorView)
+            if (fullscreen) {
+                controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                controller.hide(WindowInsetsCompat.Type.statusBars())
+            } else {
+                controller.show(WindowInsetsCompat.Type.statusBars())
+            }
+        }
+
+        /** A hidden status bar and top cutout contribute no top gap, including while bars peek in. */
+        fun contentInsets(insets: WindowInsetsCompat, fullscreen: Boolean, includeKeyboard: Boolean = false): androidx.core.graphics.Insets {
+            val barTypes = WindowInsetsCompat.Type.navigationBars() or
+                (if (includeKeyboard) WindowInsetsCompat.Type.ime() else 0) or
+                (if (fullscreen) 0 else WindowInsetsCompat.Type.statusBars())
+            val bars = insets.getInsets(barTypes)
+            val safe = insets.getInsets(barTypes or WindowInsetsCompat.Type.displayCutout())
+            return androidx.core.graphics.Insets.of(safe.left, if (fullscreen) bars.top else safe.top, safe.right, safe.bottom)
+        }
+    }
+
 }

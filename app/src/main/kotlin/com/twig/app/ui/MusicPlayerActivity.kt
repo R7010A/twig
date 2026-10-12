@@ -178,7 +178,8 @@ class MusicPlayerActivity : AppCompatActivity() {
         applySystemBarIcons()
         applyFullscreen()
         androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(b.content) { v, insets ->
-            val bars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+            val bars = StatusBarFullscreen.contentInsets(insets, Prefs.fullscreen(this))
+            v.setPadding(bars.left, 0, bars.right, 0)
             b.topBar.setPadding(b.topBar.paddingLeft, bars.top, b.topBar.paddingRight, 0)
             b.controls.setPadding(
                 b.controls.paddingLeft, b.controls.paddingTop, b.controls.paddingRight,
@@ -187,8 +188,8 @@ class MusicPlayerActivity : AppCompatActivity() {
             insets
         }
         androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(b.drawerContent) { v, insets ->
-            val bars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, bars.top, 0, 0)
+            val bars = StatusBarFullscreen.contentInsets(insets, Prefs.fullscreen(this))
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom)
             insets
         }
     }
@@ -205,14 +206,10 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     /** Hides/shows the status bar following the main "fullscreen" preference (matches MainActivity.applyFullscreen). */
     private fun applyFullscreen() {
-        val controller =
-            androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
-        if (Prefs.fullscreen(this)) {
-            controller.systemBarsBehavior =
-                androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            controller.hide(androidx.core.view.WindowInsetsCompat.Type.statusBars())
-        } else {
-            controller.show(androidx.core.view.WindowInsetsCompat.Type.statusBars())
+        StatusBarFullscreen.configureWindow(this, Prefs.fullscreen(this), fittedWhenNormal = false)
+        if (::b.isInitialized) {
+            androidx.core.view.ViewCompat.requestApplyInsets(b.content)
+            androidx.core.view.ViewCompat.requestApplyInsets(b.drawerContent)
         }
     }
 

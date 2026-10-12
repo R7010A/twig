@@ -67,4 +67,26 @@ class StatusBarFullscreenTest {
         assertEquals(2, root.paddingTop)
         assertEquals(4, root.paddingBottom)
     }
+
+    @Test
+    fun `music insets omit the top gap but keep navigation padding and normal status space`() {
+        val insets = WindowInsetsCompat.Builder()
+            .setInsets(WindowInsetsCompat.Type.statusBars(), Insets.of(0, 80, 0, 0))
+            .setInsets(WindowInsetsCompat.Type.displayCutout(), Insets.of(10, 30, 0, 0))
+            .setInsets(WindowInsetsCompat.Type.navigationBars(), Insets.of(0, 0, 0, 20))
+            .setInsets(WindowInsetsCompat.Type.ime(), Insets.of(0, 0, 0, 200)).build()
+        assertEquals(Insets.of(10, 0, 0, 20), StatusBarFullscreen.contentInsets(insets, fullscreen = true))
+        assertEquals(Insets.of(10, 80, 0, 20), StatusBarFullscreen.contentInsets(insets, fullscreen = false))
+    }
+
+    @Test
+    @Config(sdk = [24, 28])
+    fun `music keeps its edge to edge background when leaving fullscreen`() {
+        val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
+        StatusBarFullscreen.configureWindow(activity, fullscreen = true, fittedWhenNormal = false)
+        StatusBarFullscreen.configureWindow(activity, fullscreen = false, fittedWhenNormal = false)
+        assertTrue(activity.window.decorView.systemUiVisibility and
+            android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN != 0)
+    }
+
 }
