@@ -340,6 +340,9 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
     private val connecting = HashSet<String>()
     /** Node key currently asynchronously loading children (used to show the loading spinner). */
     private val loadingKeys = HashSet<String>()
+    /** Visible row showing progress while a recent location is connected and listed. */
+    private var revealLoadingKey: String? = null
+    private var revealSequence = 0
 
     /**
      * Key of the row "claimed" by the current tap (see [claimExpand] / [stillExpanding]).
@@ -1009,17 +1012,30 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
      * locate it (the "Last position" entry for a git item).
      */
     fun revealPath(target: XFile, focus: XFile? = null, openGit: Boolean = false) {
+        val request = ++revealSequence
+        val previousLoadingKey = revealLoadingKey
+        val conn = if (target.scheme == "file") null else
+            schemeToConn[target.scheme]
+                ?: ConnectionStore.all(getApplication()).firstOrNull { Connections.schemeOf(it) == target.scheme }
+        revealLoadingKey = conn?.let { c ->
+            val visibleDir = _state.value.rows.filterIsInstance<FileNode>()
+                .filter { it.file.scheme == target.scheme && it.file.isDir &&
+                    (target.path == it.file.path || target.path.startsWith(it.file.path.trimEnd('/') + "/")) }
+                .maxByOrNull { it.file.path.length }
+            visibleDir?.key ?: "s:${c.label()}".also { expanded.add("g:${groupIdFor(c)}") }
+        }
+        revealLoadingKey?.let { claimExpand(it) }
+        if (revealLoadingKey != null || previousLoadingKey != null) rebuild()
         viewModelScope.launch {
-            val r = runCatching {
-                val plan = withContext(io) { planReveal(target, openGit) }
-                applyReveal(plan)   // Main-thread table write
-                plan.gitKey
-            }
+            val r = runCatching { withContext(io) { planReveal(target, openGit) } }
+            if (request != revealSequence) return@launch
+            revealLoadingKey = null
             r.fold(
-                { gitKey ->
+                { plan ->
+                    applyReveal(plan)   // Main-thread table write
                     currentDir = target
                     currentKey = fileKey(target)
-                    scrollKey = gitKey ?: focus?.let { fileKey(it) }
+                    scrollKey = plan.gitKey ?: focus?.let { fileKey(it) }
                     rebuild()
                 },
                 { rebuild(); emitError(it.message) },
@@ -1564,7 +1580,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Should this row show a spinner? Real work is in flight and the user hasn't abandoned it yet (see [abandoned]). */
     private fun busy(key: String): Boolean =
-        key !in abandoned && (loadingKeys.contains(key) || connecting.contains(key))
+        revealLoadingKey == key || (key !in abandoned && (loadingKeys.contains(key) || connecting.contains(key)))
 
     private fun accordionExpand(key: String) {
         val ancestors = ancestorKeysOf(key)
@@ -2609,7 +2625,8 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                 if (currentKey == "search:$k") currentKey = null // The highlight used to point at it; if the row is gone, don't leave it dangling.
             }
         }
-        _state.value = State(rows, currentDir, currentKey, null, null, null, restoring, scrollKey)
+        _state.value = State(rows, currentDir, currentKey, null, null, null,
+            restoring || revealLoadingKey != null, revealLoadingKey ?: scrollKey)
     }
 
     private fun addFile(

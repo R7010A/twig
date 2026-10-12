@@ -200,6 +200,57 @@ class PaneViewModelRevealTest {
     }
 
     @Test
+    fun `a recent network location shows progress on its server until the jump finishes`() = runTest(dispatcher) {
+        val (conn, _) = fakeServer(
+            "history-loading-host",
+            dirs = mapOf("/" to listOf("data"), "/data" to listOf()),
+        )
+
+        assertTrue(vm.revealHistory(HistoryEntry("dir", "/data", conn.label())))
+        val loading = vm.state.value.rows.filterIsInstance<PaneViewModel.ServerNode>()
+            .first { it.conn.label() == conn.label() }
+        assertTrue("the server row should be visible and spinning before IO completes", loading.connecting)
+        assertTrue(vm.state.value.restoring)
+        assertEquals(loading.key, vm.state.value.scrollKey)
+
+        advanceUntilIdle()
+
+        val finished = vm.state.value.rows.filterIsInstance<PaneViewModel.ServerNode>()
+            .first { it.conn.label() == conn.label() }
+        assertFalse(finished.connecting)
+        assertFalse(vm.state.value.restoring)
+        assertEquals("f:${Connections.schemeOf(conn)}:/data", vm.state.value.currentKey)
+    }
+
+    @Test
+    fun `a recent network location shows progress on its closest visible directory`() = runTest(dispatcher) {
+        val (conn, _) = fakeServer(
+            "history-visible-host",
+            dirs = mapOf(
+                "/" to listOf("pub"),
+                "/pub" to listOf("docs"),
+                "/pub/docs" to listOf(),
+            ),
+        )
+        val scheme = Connections.schemeOf(conn)
+        vm.revealPath(XFile(scheme, "/pub", isDir = true))
+        advanceUntilIdle()
+
+        assertTrue(vm.revealHistory(HistoryEntry("dir", "/pub/docs", conn.label())))
+        val loading = vm.state.value.rows.filterIsInstance<PaneViewModel.FileNode>()
+            .first { it.file.path == "/pub/docs" && it.file.scheme == scheme }
+        assertTrue(loading.loading)
+        assertEquals(loading.key, vm.state.value.scrollKey)
+
+        advanceUntilIdle()
+
+        val finished = vm.state.value.rows.filterIsInstance<PaneViewModel.FileNode>()
+            .first { it.file.path == "/pub/docs" && it.file.scheme == scheme }
+        assertFalse(finished.loading)
+        assertEquals("f:$scheme:/pub/docs", vm.state.value.currentKey)
+    }
+
+    @Test
     fun `a recent location pointing at a deleted connection returns false`() = runTest(dispatcher) {
         assertFalse(vm.revealHistory(HistoryEntry("dir", "/x", "ftp://nobody@nowhere:21")))
     }
