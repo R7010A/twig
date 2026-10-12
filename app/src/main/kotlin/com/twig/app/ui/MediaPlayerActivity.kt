@@ -929,7 +929,10 @@ class MediaPlayerActivity : AppCompatActivity(), SurfaceHolder.Callback {
      * which is precisely the case the whole feature exists for.
      */
     private fun seriesKeyFor(f: XFile): String? =
-        com.twig.app.Episodes.parse(f.name)?.let { "${f.scheme}|${it.prefix}" }
+        com.twig.app.Episodes.parse(f.name)?.let {
+            // Number-only files have no show prefix; scope their choices to the directory.
+            "${f.scheme}|${if (it.prefix.isEmpty()) "@${f.parentPath}" else it.prefix}"
+        }
             ?: queue.firstOrNull()?.let { "${it.scheme}|${it.path}" }
 
     private fun memoKeys() = MediaPrefStore.fileKey(file) to seriesKey?.let { MediaPrefStore.seriesKey(it) }

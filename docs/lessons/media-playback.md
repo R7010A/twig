@@ -273,6 +273,11 @@
   - **Fewer than two episodes means no queue** (the buttons stay hidden): real directories are
     full of things like `Holiday photos 01.mp4`, and it is better to offer no button than to
     string a pile of unrelated videos into a "series".
+  - **Number-only videos need an explicit filename case** (`01.mp4`, `(1).mp4`, ` (1).mp4`): the ordinary
+    bare-number parser rejects an empty show prefix. Group these files only with other
+    number-only videos in the same directory, require at least two, and sort numerically.
+    Scope remembered track/subtitle choices to that directory too; otherwise every
+    `01.mp4` on one backend would share the same empty-prefix series key.
   - **Switching episodes does not recreate the Activity**: the surface is still there, and
     recreating flashes black and re-runs immersive mode / gestures / orientation lock.
     ★ But **once the surface exists there will be no further `surfaceCreated` callback**, so

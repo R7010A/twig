@@ -68,6 +68,27 @@ class EpisodesTest {
     }
 
     @Test
+    fun `number-only videos form a directory queue in numeric order`() {
+        val files = listOf(f("03.mp4"), f("01.mp4"), f("02.mp4"))
+        assertEquals(listOf("01.mp4", "02.mp4", "03.mp4"),
+            Episodes.queueOf(files[1], files).map { it.name })
+    }
+
+    @Test
+    fun `parenthesized numbers form a directory queue`() {
+        val files = listOf(f("(2).mp4"), f("(1).mp4"), f("unrelated.mp4"))
+        assertEquals(listOf("(1).mp4", "(2).mp4"),
+            Episodes.queueOf(files[1], files).map { it.name })
+    }
+
+    @Test
+    fun `leading spaces before parenthesized numbers still form a queue`() {
+        val files = listOf(f(" (2).mp4"), f(" (1).mp4"))
+        assertEquals(listOf(" (1).mp4", " (2).mp4"),
+            Episodes.queueOf(files[1], files).map { it.name })
+    }
+
+    @Test
     fun `returns null when no number can be recognized`() {
         assertNull(ref("肖申克的救赎.mkv"))
         assertNull(ref("vacation.mp4"))

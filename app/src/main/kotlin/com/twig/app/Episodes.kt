@@ -47,6 +47,9 @@ object Episodes {
      */
     private val BARE_NUM = Regex("""^(.*?)[\s._\-\[(]?(\d{1,3})[\s._\-\])]*$""")
 
+    /** A directory of numbered files with no show name: `01.mp4`, `(1).mp4`. */
+    private val NUMBER_ONLY = Regex("""^(?:([0-9]{1,3})|\(([0-9]{1,3})\))$""")
+
     /**
      * Parse a **filename** (with or without extension); returns null when unrecognised.
      *
@@ -54,7 +57,7 @@ object Episodes {
      * use that to decide "no episode queue".
      */
     fun parse(name: String): EpisodeRef? {
-        val stem = name.substringBeforeLast('.', name)
+        val stem = name.substringBeforeLast('.', name).trim()
         SEASON_EP.find(stem)?.let { m ->
             return EpisodeRef(norm(m.groupValues[1]), m.groupValues[2].toInt(), m.groupValues[3].toInt())
         }
@@ -63,6 +66,9 @@ object Episodes {
             // any such file could be matched into a queue, which is useless.
             val p = norm(m.groupValues[1])
             if (p.isNotEmpty()) return EpisodeRef(p, null, m.groupValues[2].toInt())
+        }
+        NUMBER_ONLY.matchEntire(stem)?.let { m ->
+            return EpisodeRef("", null, (m.groupValues[1].ifEmpty { m.groupValues[2] }).toInt())
         }
         BARE_NUM.find(stem)?.let { m ->
             val p = norm(m.groupValues[1])
