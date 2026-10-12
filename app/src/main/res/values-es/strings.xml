@@ -78,7 +78,7 @@
     <string name="strip_share">Compartir</string>
     <string name="strip_history">Recientes</string>
     <string name="history_title">Ubicaciones recientes</string>
-    <string name="history_empty">Sin ubicaciones recientes: abre un archivo o la vista Git para añadir su carpeta</string>
+    <string name="history_empty">Todavía no hay ubicaciones recientes</string>
     <string name="history_clear">Borrar</string>
     <string name="history_git_prefix">Git · %1$s</string>
     <string name="history_conn_missing">Esta conexión ya no existe</string>

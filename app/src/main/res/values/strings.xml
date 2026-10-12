@@ -79,7 +79,7 @@
     <string name="strip_share">Share</string>
     <string name="strip_history">Recent</string>
     <string name="history_title">Recent locations</string>
-    <string name="history_empty">No recent locations yet — open a file (or a Git view) and the folder lands here</string>
+    <string name="history_empty">No recent locations yet</string>
     <string name="history_clear">Clear</string>
     <string name="history_git_prefix">Git · %1$s</string>
     <string name="history_conn_missing">That connection no longer exists</string>

@@ -79,7 +79,7 @@
     <string name="strip_share">Поделиться</string>
     <string name="strip_history">Недавние</string>
     <string name="history_title">Недавние расположения</string>
-    <string name="history_empty">Нет недавних расположений — откройте файл (или представление Git), и папка появится здесь</string>
+    <string name="history_empty">Недавних расположений пока нет</string>
     <string name="history_clear">Очистить</string>
     <string name="history_git_prefix">Git · %1$s</string>
     <string name="history_conn_missing">Это соединение больше не существует</string>

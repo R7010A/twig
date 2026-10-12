@@ -976,8 +976,11 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                     putListing(key, it)
                     if (mine) {
                         // An externally-opened archive can also act as a destination directory; a mounted
-                    // directory simply is one.
-                    (it.mountRoot ?: archive.takeIf { f -> f.isDir })?.let { root -> currentDir = root }
+                        // directory simply is one.
+                        (it.mountRoot ?: archive.takeIf { f -> f.isDir })?.let { root -> currentDir = root }
+                        if (it.mountRoot != null) {
+                            noteChangedIn(XFile(archive.scheme, archive.parentPath, isDir = true))
+                        }
                         accordionExpand(key)
                     }
                     rebuild()
@@ -1261,9 +1264,9 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
 
     // ---- Recent locations (see [HistoryStore]: records directories, not files) ----
 
-    /** A file was opened inside [file]: record the **directory** in recent locations. */
-    fun noteOpenedIn(file: XFile) {
-        noteHistory(XFile(file.scheme, file.parentPath, isDir = true), "dir")
+    /** Put a directory in Recent after a file is opened or one of its rows is acted on. */
+    fun noteChangedIn(dir: XFile) {
+        noteHistory(dir, "dir")
     }
 
     private fun noteHistory(dir: XFile, kind: String) {
@@ -1865,7 +1868,10 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                 rebuild()
             }
             children.containsKey(key) && !freshGit && !freshMedia -> {
-                mountRoots[key]?.let { currentDir = it } // Archive: current directory becomes the archive root.
+                mountRoots[key]?.let {
+                    currentDir = it // Archive: current directory becomes the archive root.
+                    noteChangedIn(XFile(n.file.scheme, n.file.parentPath, isDir = true))
+                }
                 accordionExpand(key); rebuild()
                 // ★ A local directory that has been collapsed is not being watched any more
                 // ([PaneFragment.syncObservers] only watches what is on screen), so whatever
@@ -1912,7 +1918,10 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                                 // expanded directory. The archive's row in the tree
                                 // is the host file (isDir=false), so the
                                 // `if (isDir)` line above doesn't cover it.
-                                it.mountRoot?.let { root -> currentDir = root }
+                                it.mountRoot?.let { root ->
+                                    currentDir = root
+                                    noteChangedIn(XFile(n.file.scheme, n.file.parentPath, isDir = true))
+                                }
                                 accordionExpand(key)
                             }
                             rebuild()

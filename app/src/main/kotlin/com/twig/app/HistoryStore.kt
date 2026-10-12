@@ -39,7 +39,7 @@ data class HistoryEntry(
 object HistoryStore {
     private const val FILE = "twig_history"
     private const val KEY = "list"
-    const val MAX = 10
+    const val MAX = 16
 
     private fun sp(ctx: Context) = ctx.getSharedPreferences(FILE, Context.MODE_PRIVATE)
 

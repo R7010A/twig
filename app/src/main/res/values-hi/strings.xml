@@ -78,7 +78,7 @@
     <string name="strip_share">साझा करें</string>
     <string name="strip_history">हाल के</string>
     <string name="history_title">हाल के स्थान</string>
-    <string name="history_empty">कोई हाल का स्थान नहीं; फ़ाइल या Git दृश्य खोलने पर उसका फ़ोल्डर यहाँ दिखेगा</string>
+    <string name="history_empty">अभी कोई हाल का स्थान नहीं है</string>
     <string name="history_clear">साफ़ करें</string>
     <string name="history_git_prefix">Git · %1$s</string>
     <string name="history_conn_missing">यह कनेक्शन अब मौजूद नहीं है</string>

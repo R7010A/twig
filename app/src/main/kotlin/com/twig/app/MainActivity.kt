@@ -640,6 +640,8 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
             android.widget.Toast.makeText(this, R.string.compare_need_two, android.widget.Toast.LENGTH_SHORT).show()
             return
         }
+        paneAt(0)?.viewModel?.noteChangedIn(l)
+        paneAt(1)?.viewModel?.noteChangedIn(r)
         com.twig.app.ui.CompareActivity.start(this, l, r)
     }
 

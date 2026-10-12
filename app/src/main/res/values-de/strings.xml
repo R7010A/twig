@@ -78,7 +78,7 @@
     <string name="strip_share">Teilen</string>
     <string name="strip_history">Zuletzt</string>
     <string name="history_title">Letzte Orte</string>
-    <string name="history_empty">Noch keine Orte — Datei oder Git-Ansicht öffnen, um den Ordner hier zu sehen</string>
+    <string name="history_empty">Noch keine zuletzt verwendeten Orte</string>
     <string name="history_clear">Leeren</string>
     <string name="history_git_prefix">Git · %1$s</string>
     <string name="history_conn_missing">Diese Verbindung existiert nicht mehr</string>

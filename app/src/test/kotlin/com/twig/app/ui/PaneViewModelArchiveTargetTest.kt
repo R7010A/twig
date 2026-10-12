@@ -3,6 +3,7 @@ package com.twig.app.ui
 import android.app.Application
 import android.os.Environment
 import androidx.test.core.app.ApplicationProvider
+import com.twig.app.HistoryStore
 import com.twig.core.FsRegistry
 import com.twig.core.XFile
 import com.twig.core.isWritableDir
@@ -68,11 +69,13 @@ class PaneViewModelArchiveTargetTest {
             z.closeEntry()
         }
         vm = PaneViewModel(app).apply { io = dispatcher }
+        HistoryStore.clear(app)
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+        HistoryStore.clear(app)
         archive.delete()
     }
 
@@ -81,6 +84,24 @@ class PaneViewModelArchiveTargetTest {
 
     private fun openTree() {
         vm.bootstrap(listOf("file\t${ext.path}"))
+    }
+
+    @Test
+    fun `expanding an archive records its host directory once, collapsing does not`() = runTest(dispatcher) {
+        openTree()
+        advanceUntilIdle()
+
+        vm.toggle(nodeFor(archive.path))
+        advanceUntilIdle()
+        assertEquals(listOf(ext.path), HistoryStore.all(app).map { it.path })
+
+        vm.toggle(nodeFor(archive.path)) // collapse
+        advanceUntilIdle()
+        assertEquals(listOf(ext.path), HistoryStore.all(app).map { it.path })
+
+        vm.toggle(nodeFor(archive.path)) // expand from cache
+        advanceUntilIdle()
+        assertEquals(listOf(ext.path), HistoryStore.all(app).map { it.path })
     }
 
     @Test

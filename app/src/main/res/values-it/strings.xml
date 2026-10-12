@@ -78,7 +78,7 @@
     <string name="strip_share">Condividi</string>
     <string name="strip_history">Recenti</string>
     <string name="history_title">Posizioni recenti</string>
-    <string name="history_empty">Nessuna posizione recente: apri un file o una vista Git per aggiungere la cartella</string>
+    <string name="history_empty">Nessuna posizione recente</string>
     <string name="history_clear">Cancella</string>
     <string name="history_git_prefix">Git · %1$s</string>
     <string name="history_conn_missing">Questa connessione non esiste più</string>

@@ -78,7 +78,7 @@
     <string name="strip_share">共享</string>
     <string name="strip_history">歷史</string>
     <string name="history_title">最近位置</string>
-    <string name="history_empty">還沒有記錄——開啟某個目錄裡的檔案(或 Git 檢視)後,這個目錄就會記到這裡</string>
+    <string name="history_empty">還沒有最近位置</string>
     <string name="history_clear">清空</string>
     <string name="history_git_prefix">Git · %1$s</string>
     <string name="history_conn_missing">該連線已不存在</string>

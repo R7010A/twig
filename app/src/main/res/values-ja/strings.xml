@@ -78,7 +78,7 @@
     <string name="strip_share">共有</string>
     <string name="strip_history">履歴</string>
     <string name="history_title">最近の場所</string>
-    <string name="history_empty">履歴はありません。ファイルやGit画面を開くと、そのフォルダーがここに表示されます</string>
+    <string name="history_empty">最近の場所はまだありません</string>
     <string name="history_clear">クリア</string>
     <string name="history_git_prefix">Git · %1$s</string>
     <string name="history_conn_missing">この接続はもう存在しません</string>

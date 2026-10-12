@@ -78,7 +78,7 @@
     <string name="strip_share">Paylaş</string>
     <string name="strip_history">Son</string>
     <string name="history_title">Son konumlar</string>
-    <string name="history_empty">Henüz son konum yok — bir klasördeki dosyayı veya Git görünümünü açınca klasör burada görünür</string>
+    <string name="history_empty">Henüz son konum yok</string>
     <string name="history_clear">Temizle</string>
     <string name="history_git_prefix">Git · %1$s</string>
     <string name="history_conn_missing">Bu bağlantı artık yok</string>

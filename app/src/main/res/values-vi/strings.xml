@@ -78,7 +78,7 @@
     <string name="strip_share">Chia sẻ</string>
     <string name="strip_history">Gần đây</string>
     <string name="history_title">Vị trí gần đây</string>
-    <string name="history_empty">Chưa có vị trí gần đây; mở tệp hoặc màn hình Git để thêm thư mục vào đây</string>
+    <string name="history_empty">Chưa có vị trí gần đây</string>
     <string name="history_clear">Xóa hết</string>
     <string name="history_git_prefix">Git · %1$s</string>
     <string name="history_conn_missing">Kết nối này không còn tồn tại</string>

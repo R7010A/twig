@@ -78,7 +78,7 @@
     <string name="strip_share">공유</string>
     <string name="strip_history">최근</string>
     <string name="history_title">최근 위치</string>
-    <string name="history_empty">최근 위치가 없습니다. 파일이나 Git 화면을 열면 해당 폴더가 여기에 표시됩니다</string>
+    <string name="history_empty">최근 위치가 아직 없습니다</string>
     <string name="history_clear">지우기</string>
     <string name="history_git_prefix">Git · %1$s</string>
     <string name="history_conn_missing">이 연결은 더 이상 없습니다</string>

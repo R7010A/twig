@@ -78,7 +78,7 @@
     <string name="strip_share">مشاركة</string>
     <string name="strip_history">الأخيرة</string>
     <string name="history_title">المواقع الأخيرة</string>
-    <string name="history_empty">لا توجد مواقع أخيرة؛ افتح ملفا أو عرض Git ليظهر مجلده هنا</string>
+    <string name="history_empty">لا توجد مواقع أخيرة بعد</string>
     <string name="history_clear">مسح</string>
     <string name="history_git_prefix">Git · %1$s</string>
     <string name="history_conn_missing">هذا الاتصال لم يعد موجودا</string>

@@ -50,10 +50,13 @@ fun MutableList<MenuAct>.item(
 }
 
 /** Pop up the menu; selecting an item runs its action immediately. */
-fun showActionMenu(ctx: Context, title: CharSequence, actions: List<MenuAct>) {
+fun showActionMenu(ctx: Context, title: CharSequence, actions: List<MenuAct>, onSelected: (() -> Unit)? = null) {
     AlertDialog.Builder(ctx)
         .setTitle(title)
-        .setAdapter(menuAdapter(ctx, actions)) { _, w -> actions[w].run() }
+        .setAdapter(menuAdapter(ctx, actions)) { _, w ->
+            onSelected?.invoke()
+            actions[w].run()
+        }
         .show()
 }
 

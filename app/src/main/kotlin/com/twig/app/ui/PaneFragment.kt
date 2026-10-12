@@ -368,7 +368,7 @@ class PaneFragment : Fragment() {
     private fun open(file: XFile) {
         if (host?.onPickFile(file) == true) return // Picker mode: tap selects, doesn't open.
         if (file.scheme.startsWith("git")) return openGitEntry(file)
-        viewModel.noteOpenedIn(file) // Recent records the containing directory, not the file itself.
+        viewModel.noteChangedIn(XFile(file.scheme, file.parentPath, isDir = true))
         // No extension: nothing below can match by name, so read the head first (see FileSniff).
         if (com.twig.app.FileSniff.applies(file) && file.scheme != AppsFileSystem.SCHEME &&
             com.twig.app.Prefs.sniffTypes(requireContext())
@@ -528,7 +528,10 @@ class PaneFragment : Fragment() {
         viewModel.up()
     }
 
-    fun actionRefresh() = viewModel.refresh()
+    fun actionRefresh() {
+        viewModel.currentDir?.let(viewModel::noteChangedIn)
+        viewModel.refresh()
+    }
 
     /**
      * Expand in the tree and scroll to [target] (triggered by the other pane's "Show on the other side").
@@ -647,6 +650,7 @@ class PaneFragment : Fragment() {
         if (t == null || (!t.isDir && !com.twig.fs.archive.Archives.isArchive(t))) {
             toast(getString(R.string.msg_pick_dir_first)); return
         }
+        if (t.isDir) viewModel.noteChangedIn(t) else noteSourceDirs(listOf(t))
         enterTreemap(t)
     }
 
@@ -765,7 +769,9 @@ class PaneFragment : Fragment() {
         if (e.file.isMutable()) {
             actions.item(getString(R.string.strip_delete), R.drawable.ic_delete, DANGER) { confirmDeleteEntry(e) }
         }
-        showActionMenu(requireContext(), e.name, actions)
+        showActionMenu(requireContext(), e.name, actions) {
+            noteSourceDirs(listOf(e.file))
+        }
     }
 
     private fun confirmDeleteEntry(e: TreemapEntry) {
@@ -799,6 +805,7 @@ class PaneFragment : Fragment() {
         if (t == null || !t.isDir) {
             toast(getString(R.string.msg_pick_dir_first)); return
         }
+        viewModel.noteChangedIn(t)
         promptSearch(t)
     }
 
@@ -975,6 +982,7 @@ class PaneFragment : Fragment() {
         if (sel.size != 1) {
             toast(getString(R.string.msg_pick_one_to_rename)); return
         }
+        noteSourceDirs(sel)
         performRename(sel.first())
     }
 
@@ -1002,6 +1010,7 @@ class PaneFragment : Fragment() {
         if (sel.isEmpty()) {
             toast(getString(R.string.msg_no_selection)); return
         }
+        noteSourceDirs(sel)
         performDelete(sel)
     }
 
@@ -1148,6 +1157,7 @@ class PaneFragment : Fragment() {
         if (sel.isEmpty()) {
             toast(getString(R.string.msg_no_selection)); return
         }
+        noteSourceDirs(sel)
         performCopy(sel, move)
     }
 
@@ -1301,6 +1311,7 @@ class PaneFragment : Fragment() {
         if (sel.isEmpty()) {
             toast(getString(R.string.msg_no_selection)); return
         }
+        noteSourceDirs(sel)
         performCompress(sel)
     }
 
@@ -1568,6 +1579,13 @@ class PaneFragment : Fragment() {
         }
     }
 
+    /** Record each operated-on item's actual parent, even after another tree row became current. */
+    private fun noteSourceDirs(files: List<XFile>) {
+        files.distinctBy { it.scheme to it.parentPath }.forEach { file ->
+            viewModel.noteChangedIn(XFile(file.scheme, file.parentPath, isDir = true))
+        }
+    }
+
     private fun longClickFile(node: PaneViewModel.FileNode) {
         if (node.label != null) { rootNodeMenu(node); return } // Top-level storage nodes take the "non-mutable directory" path.
         if (SafFileSystem.isTreeRoot(node.file)) { safRootMenu(node); return }
@@ -1606,7 +1624,9 @@ class PaneFragment : Fragment() {
             actions.item(getString(R.string.strip_search), R.drawable.ic_search) { promptSearch(node.file) }
         }
         actions += commonFileActions(node.file)
-        showActionMenu(requireContext(), node.file.name, actions)
+        showActionMenu(requireContext(), node.file.name, actions) {
+            noteSourceDirs(listOf(node.file))
+        }
     }
 
     /**
@@ -1632,7 +1652,9 @@ class PaneFragment : Fragment() {
         if (mutable) {
             actions.item(getString(R.string.strip_delete), R.drawable.ic_delete, DANGER) { performDelete(targets) }
         }
-        showActionMenu(requireContext(), getString(R.string.title_selected_count, targets.size), actions)
+        showActionMenu(requireContext(), getString(R.string.title_selected_count, targets.size), actions) {
+            noteSourceDirs(targets)
+        }
     }
 
     /**

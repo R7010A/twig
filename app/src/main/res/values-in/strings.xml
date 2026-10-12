@@ -78,7 +78,7 @@
     <string name="strip_share">Bagikan</string>
     <string name="strip_history">Terakhir</string>
     <string name="history_title">Lokasi terakhir</string>
-    <string name="history_empty">Belum ada lokasi: buka file atau tampilan Git untuk menambahkan foldernya</string>
+    <string name="history_empty">Belum ada lokasi terbaru</string>
     <string name="history_clear">Bersihkan</string>
     <string name="history_git_prefix">Git · %1$s</string>
     <string name="history_conn_missing">Koneksi ini sudah tidak ada</string>
