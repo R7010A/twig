@@ -172,3 +172,15 @@
   Terminal now creates a local shell when no session exists. Keep all four pinned
   buttons present, ordered Terminal / Panes, then Music / Menu. `IssueOneLayoutTest`
   checks the empty-session case and the actual two-row geometry.
+
+- **Fullscreen retained an empty band above the toolbar on cutout screens (2026-10-12)**:
+  hiding the status bar alone allowed the window manager to reserve the cutout area.
+  Permitting short-edge cutouts and drawing the surround in the toolbar color was
+  insufficient: adding the cutout's safe top inset recreated the same empty band in
+  the app itself. In status-bar-only fullscreen, MainActivity lays out into that top
+  area and does not add top cutout padding. Side cutouts, navigation and IME insets
+  are still respected; the navigation bar remains visible. Do not substitute the
+  hidden status bar's height or apply another copy of the insets in descendants.
+  Leaving fullscreen restores the system-fitted layout and original background/padding.
+  `StatusBarFullscreenTest` checks the toolbar's actual top position and API 24/28
+  compatibility. Vendor cutout behavior still needs a device check.

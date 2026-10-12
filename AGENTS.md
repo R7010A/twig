@@ -539,7 +539,7 @@ add its symptom here.
   accordionExpand" ≠ "do not expand"; writes are gated by `isMutable()` /
   `isWritableDir()` at six entry points; selection changes use payloads, never
   `notifyDataSetChanged`.
-  *Explains*: a landscape Terminal button missing without active sessions, the same archive empty in one place, a directory that closes itself, a
+  *Explains*: a fullscreen empty band above the toolbar on a cutout screen, a landscape Terminal button missing without active sessions, the same archive empty in one place, a directory that closes itself, a
   spinner that never stops, the whole list flickering when you tick a box, collapsing
   Apps / Installed crashing after an app APK was opened as an archive and restored.
 - **[Text handling and editing](docs/lessons/text-handling.md)** — one decoding entry

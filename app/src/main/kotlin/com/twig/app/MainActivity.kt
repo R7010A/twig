@@ -25,9 +25,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutInfoCompat
 import com.twig.app.ui.ShortcutIcons
 import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -59,6 +56,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
 
     private lateinit var b: ActivityMainBinding
     private var activeIndex = 0
+    private lateinit var fullscreenLayout: com.twig.app.ui.StatusBarFullscreen
     /** Snapshot of layout-affecting preferences; when changed in onResume (after settings edit), recreate. */
     private var uiSig = ""
 
@@ -223,6 +221,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         if (Prefs.rememberLocation(this)) activeIndex = Prefs.activePane(this)
         b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
+        fullscreenLayout = com.twig.app.ui.StatusBarFullscreen(this, b.root)
         com.twig.app.ui.NavBarTint.surface(this) // tint the nav bar to the pane's background, no longer a black strip at the bottom
         setSupportActionBar(b.toolbar)
         // Portrait's "up" on the left of the title bar: same action as the strip's as_up
@@ -354,7 +353,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) applyFullscreen() // the system may restore the status bar after switching; re-apply
+        if (hasFocus && ::fullscreenLayout.isInitialized) applyFullscreen() // the system may restore the status bar after switching; re-apply
     }
 
     override fun onResume() {
@@ -438,14 +437,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
     }
 
     private fun applyFullscreen() {
-        val controller = WindowCompat.getInsetsController(window, window.decorView)
-        if (Prefs.fullscreen(this)) {
-            controller.systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            controller.hide(WindowInsetsCompat.Type.statusBars()) // hide only the status bar
-        } else {
-            controller.show(WindowInsetsCompat.Type.statusBars())
-        }
+        fullscreenLayout.apply(Prefs.fullscreen(this))
     }
 
     // ---- Side action row ----
