@@ -338,6 +338,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (activePane()?.handleBack() == true) return // inside a takeover view: go up a level / exit the takeover view
+        if (activePane()?.viewModel?.unmountPinnedDirectory() == true) return
         // Came here from a terminal session's "Locate current directory": take the temporary node
         // down, put the pane back the way it was, and return to the session — which is still
         // running in its own task, so this brings that task forward rather than starting anything.
@@ -478,7 +479,17 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
             startActivity(Intent(this, com.twig.app.ui.MusicPlayerActivity::class.java))
         }
         s.asSwap.setOnClickListener { setActiveIndex(1 - activeIndex) }
+        s.asSwap.setOnLongClickListener { showCurrentDirInOtherPane(); true }
         s.asMenu.setOnClickListener { showStripOverflow(it) }
+    }
+
+    private fun showCurrentDirInOtherPane() {
+        val dir = activePane()?.viewModel?.currentDir
+        if (dir == null) {
+            Toast.makeText(this, R.string.msg_pick_dir_first, Toast.LENGTH_SHORT).show()
+            return
+        }
+        paneAt(1 - activeIndex)?.mountPinnedDirectory(dir, Format.pathLabel(dir))
     }
 
     /** Landscape has no Toolbar; the overflow menu becomes a PopupMenu anchored on the action strip's "menu" button (items and handling both reuse R.menu.main). */
@@ -1059,6 +1070,15 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
                 if (activeIndex == 0) R.drawable.ic_pane_to_right else R.drawable.ic_pane_to_left,
             )
             setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+            actionView = androidx.appcompat.widget.AppCompatImageButton(
+                b.toolbar.context, null, androidx.appcompat.R.attr.actionButtonStyle,
+            ).apply {
+                setImageDrawable(icon)
+                contentDescription = getString(R.string.menu_swap_pane)
+                minimumWidth = (48 * resources.displayMetrics.density).toInt()
+                setOnClickListener { setActiveIndex(1 - activeIndex) }
+                setOnLongClickListener { showCurrentDirInOtherPane(); true }
+            }
         }
         return true
     }

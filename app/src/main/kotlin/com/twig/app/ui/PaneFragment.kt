@@ -554,6 +554,13 @@ class PaneFragment : Fragment() {
         viewModel.mountLocated(dir, label)
     }
 
+    /** Show a directory from the other pane as an independent top-level tree entry. */
+    fun mountPinnedDirectory(dir: XFile, label: String?) {
+        if (mapMode) exitTreemap()
+        pendingScrollToCurrent = true
+        viewModel.mountPinnedDirectory(dir, label)
+    }
+
     /** Undo [mountLocated]; false when no such mount is up. */
     fun unmountLocated(): Boolean = viewModel.unmountLocated()
 

@@ -335,6 +335,8 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
     private class MountSnapshot(val mount: XFile?, val label: String?, val dir: XFile?, val key: String?)
 
     private var locateRestore: MountSnapshot? = null
+    private var pinnedRestore: MountSnapshot? = null
+    private var pinnedExpanded: Set<String> = emptySet()
     private val connecting = HashSet<String>()
     /** Node key currently asynchronously loading children (used to show the loading spinner). */
     private val loadingKeys = HashSet<String>()
@@ -921,6 +923,36 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         externalLabel = snap.label
         currentDir = snap.dir
         currentKey = snap.key
+        rebuild()
+        return true
+    }
+
+    /** Temporary directory supplied by the other pane; its Back action stays in the file manager. */
+    fun mountPinnedDirectory(dir: XFile, label: String?) {
+        if (!dir.isDir) return
+        if (pinnedRestore == null) {
+            pinnedRestore = MountSnapshot(externalMount, externalLabel, currentDir, currentKey)
+            pinnedExpanded = expanded.toSet()
+        }
+        mountAt(dir, label)
+    }
+
+    fun unmountPinnedDirectory(): Boolean {
+        val snap = pinnedRestore ?: return false
+        pinnedRestore = null
+        // Abandon an in-flight listing so it cannot re-expand the temporary directory later.
+        pendingExpand?.takeIf { it.startsWith(EXTERNAL_KEY_PREFIX) }?.let {
+            abandoned.add(it)
+            pendingExpand = null
+        }
+        expanded.clear()
+        expanded.addAll(pinnedExpanded)
+        pinnedExpanded = emptySet()
+        externalMount = snap.mount
+        externalLabel = snap.label
+        currentDir = snap.dir
+        currentKey = snap.key
+        snap.mount?.let { expanded.add(EXTERNAL_KEY_PREFIX + fileKey(it)) }
         rebuild()
         return true
     }
