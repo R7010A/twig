@@ -434,7 +434,8 @@ add its symptom here.
   *Explains*: 111 MB and 14 s for one thumbnail, green or black frames, a multi-audio 4K
   release whose thumbnail only appears if you wait and retry, a flat-looking waveform,
   cover rounding that never shows, slow local FLAC waveforms caused by sending already
-  decoded PCM through a raw codec.
+  decoded PCM through a raw codec, ALAC that plays but has no waveform because the
+  platform lacks an ALAC decoder.
 - **[Media playback](docs/lessons/media-playback.md)** — internal media URIs must carry a
   real extension (`twig:///media.$ext`); M2TS packets are 192 bytes and HDMV stream types
   collide with the standard registry; never allocate in a `DataSource.read()` hot path;

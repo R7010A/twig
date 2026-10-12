@@ -69,7 +69,45 @@ class FfmpegWaveformTest {
         format = MediaFormat.createAudioFormat("audio/mpeg", 44100, 2)
     }
     private fun analyse(alive: () -> Boolean = { true }) = FfmpegWaveform.compute(
-        MediaExtractor(), format, 240000, alive) { _, _, _ -> decoder }
+        MediaExtractor(), format, 240000, alive) { _, _ -> decoder }
+
+    @Test fun `AAC and ALAC configuration is copied without changing fallback buffers`() {
+        for (mime in listOf("audio/mp4a-latm", "audio/alac")) {
+            val original = MediaFormat.createAudioFormat(mime, 48000, 2)
+            val csd = ByteBuffer.wrap(byteArrayOf(9, 1, 2, 3, 8)).apply {
+                position(1)
+                limit(4)
+            }
+            original.setByteBuffer("csd-0", csd)
+            original.setByteBuffer("csd-1", ByteBuffer.wrap(byteArrayOf(4, 5)))
+            val converted = FfmpegWaveform.decoderFormat(original)
+            assertEquals(mime, converted.sampleMimeType)
+            assertEquals(48000, converted.sampleRate)
+            assertEquals(2, converted.channelCount)
+            assertEquals(2, converted.initializationData.size)
+            assertArrayEquals(byteArrayOf(1, 2, 3), converted.initializationData[0])
+            assertArrayEquals(byteArrayOf(4, 5), converted.initializationData[1])
+            assertEquals(1, csd.position())
+            assertEquals(4, csd.limit())
+            csd.put(1, 7)
+            assertArrayEquals(byteArrayOf(1, 2, 3), converted.initializationData[0])
+        }
+    }
+
+    @Test fun `decoder receives the actual codec instead of a hardcoded MP3 format`() {
+        format = MediaFormat.createAudioFormat("audio/alac", 44100, 2).apply {
+            setByteBuffer("csd-0", ByteBuffer.wrap(byteArrayOf(1, 2, 3)))
+        }
+        var received = false
+        val result = FfmpegWaveform.compute(MediaExtractor(), format, 240000, { true }) { converted, _ ->
+            assertEquals("audio/alac", converted.sampleMimeType)
+            assertArrayEquals(byteArrayOf(1, 2, 3), converted.initializationData.single())
+            received = true
+            decoder
+        }
+        assertTrue(received)
+        assertNotNull(result)
+    }
 
     @Test fun `all packets contribute and EOS is drained without counting its bytes`() {
         val result = analyse()!!
@@ -102,7 +140,7 @@ class FfmpegWaveformTest {
         try {
             analyse()
             fail("Expected incomplete waveform")
-        } catch (e: IllegalStateException) { assertEquals("Incomplete MP3 waveform", e.message) }
+        } catch (e: IllegalStateException) { assertEquals("Incomplete audio waveform", e.message) }
         assertTrue(decoder.released)
         assertEquals(121, decoder.outputReleases)
     }

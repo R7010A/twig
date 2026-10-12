@@ -104,17 +104,15 @@
   of RMS work. Most time was spent feeding and draining MediaCodec, not squaring samples.
   Android's FLAC extractor on this device already outputs `audio/raw`: routing those
   bytes through `c2.android.raw.decoder` adds codec buffer/IPC work without decoding.
-  Local `audio/raw` with PCM16 now feeds `WaveformRms` directly; other formats and network
-  sources keep the codec path. The same FLAC, with a different temporary filename to
+  `audio/raw` with PCM16 now feeds `WaveformRms` directly. The same FLAC, with a different temporary filename to
   avoid the waveform cache, took 388 ms after the change, with the same 15,588,632
   samples and 1903 buffers. This is a device/sample measurement, not a universal speedup.
   MP3 still took 3732 ms: reading encoded samples accounted for 90 ms, RMS for 55 ms,
   and the codec input phase for 2790 ms. Lowering RMS sampling alone cannot remove that
   bottleneck. The profile phases are wall time, including IPC/waits, not decoder CPU time.
-  No normalization change, so `waves2` remains valid.
   Keep the final-result callback: analysis finishes first, then the whole waveform grows
-  from its horizontal centre together.
-  Local MP3 now reuses the bundled media3 FFmpeg audio decoder through a small Java
+  from its horizontal centre together. No normalization change, so `waves2` remains valid.
+  Supported compressed audio now reuses the bundled media3 FFmpeg audio decoder through a small Java
   bridge in its package (the decoder class is package-private in the pinned extension).
   Its normal buffer queues own the native context; do not reflectively invoke JNI or
   concatenate independent MP3 packets. The same 229.3 s MP3 analysed in 573 and 572 ms
@@ -122,5 +120,16 @@
   A generated mono 22.05 kHz VBR MP3 also completed. If software decoding fails or
   produces an incomplete waveform, release it, rewind the extractor and retry the
   platform path with fresh RMS state. Cancellation returns no result and does not retry.
-  Network MP3 keeps its existing path. Queue/EOS handling, early EOF, cancellation and
-  decoder release are covered by `FfmpegWaveformTest`.
+  The choice is based on `FfmpegLibrary.supportsFormat(mime)`, including network sources
+  that still share downloaded bytes through AudioCache; unsupported codecs keep the
+  platform path. Queue/EOS handling, early EOF, cancellation and decoder release are
+  covered by `FfmpegWaveformTest`.
+  **AAC/ALAC need their container's codec configuration.** Carry the actual MIME,
+  sample rate, channel count and copies of every `csd-N` buffer into the decoder's
+  media3 Format. Hardcoding MP3's MIME or dropping AAC's AudioSpecificConfig / ALAC's
+  cookie breaks the generic path; reading CSD must not move the original buffers,
+  because a platform fallback still needs them. On the same 176.7 s song, AAC/M4A
+  went from 3120 ms with the platform decoder to 340 ms with FFmpeg. ALAC/M4A playback
+  already worked, but waveform generation failed with `audio/alac NAME_NOT_FOUND`;
+  FFmpeg now generates it completely in 488 ms. These timings used new filenames
+  to avoid waveform-cache hits. Normalization and the single final animation are unchanged.

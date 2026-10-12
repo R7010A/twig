@@ -103,14 +103,14 @@ object Waveform {
             var rms = WaveformRms(BUCKETS)
             val pcm16 = !format.containsKey(MediaFormat.KEY_PCM_ENCODING) ||
                 format.getInteger(MediaFormat.KEY_PCM_ENCODING) == AudioFormat.ENCODING_PCM_16BIT
-            val useFfmpeg = local && mime == "audio/mpeg" && FfmpegWaveform.available()
+            val useFfmpeg = mime != "audio/raw" && FfmpegWaveform.available(mime)
             val software = if (useFfmpeg) runCatching {
                 FfmpegWaveform.compute(extractor, format, durationUs, alive)
             }.onFailure { Log.w("twig", "waveform: ffmpeg failed, retrying platform: ${file.name}: $it") }
                 .getOrNull() else null
             if (!alive()) return null
             if (software != null) {
-                codecName = "ffmpeg-mp3"
+                codecName = "ffmpeg-$mime"
                 rms = software.rms
                 setupNs = software.setupNs
                 inputNs = software.inputNs
@@ -119,7 +119,7 @@ object Waveform {
                 rmsNs = software.rmsNs
                 samples = software.samples
                 buffers = software.buffers
-            } else if (local && mime == "audio/raw" && pcm16) {
+            } else if (mime == "audio/raw" && pcm16) {
                 // The extractor may already decode FLAC to PCM. Passing that
                 // through a raw MediaCodec adds buffer/IPC work without decoding anything.
                 codecName = "extractor-pcm16"

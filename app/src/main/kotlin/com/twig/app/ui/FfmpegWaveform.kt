@@ -3,6 +3,7 @@ package com.twig.app.ui
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import androidx.media3.common.C
+import androidx.media3.common.Format
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.decoder.Decoder
 import androidx.media3.decoder.DecoderInputBuffer
@@ -12,7 +13,7 @@ import androidx.media3.decoder.ffmpeg.FfmpegLibrary
 import androidx.media3.decoder.ffmpeg.WaveformDecoder
 import java.util.concurrent.locks.LockSupport
 
-/** Reuses the bundled software decoder for local MP3 analysis. Encoded packets
+/** Reuses the bundled software decoders for supported compressed audio. Encoded packets
  * still keep their extractor timestamps; every decoded PCM sample contributes. */
 @androidx.annotation.OptIn(UnstableApi::class)
 internal object FfmpegWaveform {
@@ -27,23 +28,44 @@ internal object FfmpegWaveform {
         val buffers: Long,
     )
 
-    fun available(): Boolean = runCatching {
-        FfmpegLibrary.isAvailable() && FfmpegLibrary.supportsFormat("audio/mpeg")
+    fun available(mime: String): Boolean = runCatching {
+        FfmpegLibrary.isAvailable() && FfmpegLibrary.supportsFormat(mime)
     }.getOrDefault(false)
+
+    /** Compressed AAC/ALAC need codec configuration from their container. Copy
+     * csd buffers without changing the MediaFormat used by platform fallback. */
+    internal fun decoderFormat(format: MediaFormat): Format {
+        val initializationData = ArrayList<ByteArray>()
+        var index = 0
+        while (format.containsKey("csd-$index")) {
+            format.getByteBuffer("csd-$index")?.duplicate()?.let { buffer ->
+                val bytes = ByteArray(buffer.remaining())
+                buffer.get(bytes)
+                initializationData.add(bytes)
+            }
+            index++
+        }
+        return Format.Builder()
+            .setSampleMimeType(format.getString(MediaFormat.KEY_MIME))
+            .setSampleRate(if (format.containsKey(MediaFormat.KEY_SAMPLE_RATE))
+                format.getInteger(MediaFormat.KEY_SAMPLE_RATE) else Format.NO_VALUE)
+            .setChannelCount(if (format.containsKey(MediaFormat.KEY_CHANNEL_COUNT))
+                format.getInteger(MediaFormat.KEY_CHANNEL_COUNT) else Format.NO_VALUE)
+            .setInitializationData(initializationData)
+            .build()
+    }
 
     /** Throws on failure so the caller can rewind and retry using MediaCodec.
      * Cancellation returns null and must never trigger a retry. */
     fun compute(
         extractor: MediaExtractor, format: MediaFormat, durationUs: Long, alive: () -> Boolean,
-        createDecoder: (Int, Int, Int) -> Decoder<DecoderInputBuffer, SimpleDecoderOutputBuffer, FfmpegDecoderException> =
-            WaveformDecoder::createMp3,
+        createDecoder: (Format, Int) -> Decoder<DecoderInputBuffer, SimpleDecoderOutputBuffer, FfmpegDecoderException> =
+            WaveformDecoder::create,
     ): Result? {
         val startedAt = System.nanoTime()
         val initialSize = maxOf(4096, if (format.containsKey(MediaFormat.KEY_MAX_INPUT_SIZE))
             format.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE) else 0)
-        val decoder = createDecoder(
-            format.getInteger(MediaFormat.KEY_SAMPLE_RATE),
-            format.getInteger(MediaFormat.KEY_CHANNEL_COUNT), initialSize)
+        val decoder = createDecoder(decoderFormat(format), initialSize)
         try {
             val setupNs = System.nanoTime() - startedAt
             val rms = WaveformRms(Waveform.BUCKETS)
@@ -66,7 +88,7 @@ internal object FfmpegWaveform {
                     input.clear()
                     val size = if (android.os.Build.VERSION.SDK_INT >= 28)
                         maxOf(initialSize.toLong(), extractor.sampleSize) else initialSize.toLong()
-                    require(size <= Int.MAX_VALUE) { "MP3 packet too large" }
+                    require(size <= Int.MAX_VALUE) { "Audio packet too large" }
                     input.ensureSpaceForWrite(size.toInt())
                     val buffer = input.data!!
                     val extractStartedAt = System.nanoTime()
@@ -118,7 +140,7 @@ internal object FfmpegWaveform {
                 }
             }
             if (!alive()) return null
-            check(rms.filled >= Waveform.BUCKETS * 0.9) { "Incomplete MP3 waveform" }
+            check(rms.filled >= Waveform.BUCKETS * 0.9) { "Incomplete audio waveform" }
             return Result(rms, setupNs, inputNs, extractNs, outputNs, rmsNs, samples, buffers)
         } finally { decoder.release() }
     }

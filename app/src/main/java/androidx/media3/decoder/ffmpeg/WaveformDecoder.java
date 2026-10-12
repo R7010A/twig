@@ -13,12 +13,7 @@ public final class WaveformDecoder {
     private WaveformDecoder() {}
 
     public static Decoder<DecoderInputBuffer, SimpleDecoderOutputBuffer, FfmpegDecoderException>
-            createMp3(int sampleRate, int channelCount, int inputSize) throws FfmpegDecoderException {
-        Format format = new Format.Builder()
-                .setSampleMimeType("audio/mpeg")
-                .setSampleRate(sampleRate)
-                .setChannelCount(channelCount)
-                .build();
+            create(Format format, int inputSize) throws FfmpegDecoderException {
         return new FfmpegAudioDecoder(format, 16, 16, inputSize, false);
     }
 }
