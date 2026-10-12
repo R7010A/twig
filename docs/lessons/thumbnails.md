@@ -98,3 +98,17 @@
   bounds) and draw the rounded corners on that rectangle, baked into the bitmap itself —
   original aspect ratio and visible rounding at once, no custom square View needed.
 
+- **Local music waveform latency (★ 2026-10-12)**: reducing RMS sampling was the initial
+  suspect, but wall-time profiling on the XQ-DQ72 showed otherwise. A 176.7 s FLAC took
+  1285 ms to analyse, of which RMS was only 28 ms; a 229.3 s MP3 took 3871 ms with 57 ms
+  of RMS work. Most time was spent feeding and draining MediaCodec, not squaring samples.
+  Android's FLAC extractor on this device already outputs `audio/raw`: routing those
+  bytes through `c2.android.raw.decoder` adds codec buffer/IPC work without decoding.
+  Local `audio/raw` with PCM16 now feeds `WaveformRms` directly; other formats and network
+  sources keep the codec path. The same FLAC, with a different temporary filename to
+  avoid the waveform cache, took 388 ms after the change, with the same 15,588,632
+  samples and 1903 buffers. This is a device/sample measurement, not a universal speedup.
+  MP3 still took 3732 ms: reading encoded samples accounted for 90 ms, RMS for 55 ms,
+  and the codec input phase for 2790 ms. Lowering RMS sampling alone cannot remove that
+  bottleneck. The profile phases are wall time, including IPC/waits, not decoder CPU time.
+  No normalization change, so `waves2` remains valid.

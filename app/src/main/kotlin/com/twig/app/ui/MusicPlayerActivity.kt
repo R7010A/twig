@@ -406,7 +406,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         if (waveForId == id) return
         waveForId = id
         b.wave.setWaveform(null)
-        Waveform.request(this, file) { if (waveForId == id && !isFinishing) b.wave.setWaveform(it) }
+        Waveform.request(this, file) { if (waveForId == id && !isFinishing && !isDestroyed) b.wave.setWaveform(it) }
     }
 
     private fun toggleView() {

@@ -1,6 +1,7 @@
 package com.twig.app.ui
 
 import android.content.Context
+import android.media.AudioFormat
 import android.media.MediaCodec
 import android.media.MediaDataSource
 import android.media.MediaExtractor
@@ -11,26 +12,13 @@ import android.util.Log
 import com.twig.core.RandomSource
 import com.twig.core.XFile
 import java.io.File
+import java.nio.ByteBuffer
 import java.security.MessageDigest
 import java.util.concurrent.Executors
-import kotlin.math.pow
-import kotlin.math.sqrt
 
-/**
- * Waveform calculation: full decode to compute RMS, normalised into [BUCKETS]
- * buckets of 0..255. Disk cache `cacheDir/waves/<md5(name:size:mtime)>` (same
- * key rule as thumbnails); single-threaded in the background. Any failure
- * returns silently (UI falls back to a flat bar), playback is unaffected.
- *
- * ★ Foreground (current track on the player) and prefetch (next track) each
- * occupy their own slot and **do not cancel each other**: the old version
- * shared a global token, and whoever issued later would displace the one in
- * progress — `MusicEngine` issues a prefetch 4s into playback, network tracks
- * take dozens of seconds to decode, so the current track's waveform was always
- * killed mid-flight by the prefetch (no callback, no cache), appearing as
- * "the track I'm listening to never has a waveform, and still doesn't after
- * I exit and come back". Single-threaded FIFO guarantees order: an earlier
- * foreground request finishes first.
+/** Full-track RMS analysis with shared jobs, independent cache reads and one final result.
+ * Foreground and next-track prefetch share a decode when they want the same track.
+ * Only complete results are persisted; playback shares downloaded bytes through AudioCache.
  */
 object Waveform {
 
@@ -46,49 +34,23 @@ object Waveform {
         Thread(r, "twig-waveform").apply { isDaemon = true }
     }
     private val main = Handler(Looper.getMainLooper())
-    @Volatile private var uiKey: String? = null   // the track the foreground wants
-    @Volatile private var uiSeq = 0               // foreground request sequence number (for prefetch yielding)
-    @Volatile private var preKey: String? = null  // the track the prefetch wants
+    private val cacheExecutor = Executors.newSingleThreadExecutor { r ->
+        Thread(r, "twig-wave-cache").apply { isDaemon = true }
+    }
+    private val loader = WaveformLoader(BUCKETS, cacheExecutor, executor,
+        { action -> main.post { action() } }, ::compute)
 
-    /**
-     * Request the waveform; cache hits fire the callback immediately, otherwise
-     * decode in the background. Multiple calls within the same slot only deliver
-     * the last one's result. [prefetch] = next-track prefetch: doesn't cancel
-     * the track the foreground is currently computing, but yields itself when the
-     * foreground switches to a different track.
-     */
+    /** The callback runs once, after analysis finishes (or the completed cache is read). */
     fun request(ctx: Context, file: XFile, prefetch: Boolean = false, onReady: (ByteArray) -> Unit) {
-        AudioCache.init(ctx) // network waveforms and playback share AudioCache, ensure the directory is ready first
-        val key = keyOf(file)
-        if (prefetch) preKey = key else { uiKey = key; uiSeq++ }
-        executor.execute {
-            // Prefetch task: continue if I'm still the current prefetch target; but
-            // if the foreground switched to another track after I started (uiSeq
-            // changed), yield this single thread — unless the foreground now wants
-            // exactly this track (the common case when skipping to the next), then
-            // finish the decode.
-            val seq0 = uiSeq
-            val alive: () -> Boolean =
-                if (prefetch) ({ key == preKey && (key == uiKey || uiSeq == seq0) })
-                else ({ key == uiKey })
-            if (!alive()) return@execute
-            val cache = File(dir(ctx), key)
-            val cached = runCatching { if (cache.isFile) cache.readBytes() else null }
-                .getOrNull()?.takeIf { it.size == BUCKETS }
-            val data = cached ?: runCatching { compute(file, alive) }.getOrNull()?.let { w ->
-                if (w.complete) runCatching { cache.writeBytes(w.data) }
-                else Log.w("twig", "waveform: incomplete, not cached: ${file.name}")
-                w.data
-            }
-            if (data != null && alive()) main.post { if (alive()) onReady(data) }
+        AudioCache.init(ctx)
+        val requestedAt = System.nanoTime()
+        loader.request(keyOf(file), File(ctx.applicationContext.cacheDir, "waves2"), file, prefetch) { data ->
+            Log.d("twig", "waveform ready: ${file.name} prefetch=$prefetch elapsedMs=${(System.nanoTime() - requestedAt) / 1_000_000}")
+            onReady(data)
         }
     }
 
-    fun cancel() { uiKey = null; preKey = null }
-
-    // Directory name carries a version: normalize()'s contrast curve changed, old
-    // cache has low-contrast data, renaming the directory lets it expire naturally
-    private fun dir(ctx: Context) = File(ctx.cacheDir, "waves2").apply { mkdirs() }
+    fun cancel() = loader.cancel()
 
     private fun keyOf(f: XFile): String =
         MessageDigest.getInstance("MD5").digest("${f.name}:${f.size}:${f.lastModified}".toByteArray())
@@ -96,14 +58,25 @@ object Waveform {
 
     // ---- Decoding ----
 
-    /** [complete] = buckets essentially filled (decoding reached the declared duration's end); only when true is the result written to cache. */
-    private class Wave(val data: ByteArray, val complete: Boolean)
-
-    private fun compute(file: XFile, alive: () -> Boolean): Wave? {
+    private fun compute(file: XFile, alive: () -> Boolean): WaveformResult? {
+        val startedAt = System.nanoTime()
+        val local = com.twig.app.OpenFiles.directlyReadable(file)
+        var setupNs = 0L
+        var inputNs = 0L
+        var extractNs = 0L
+        var outputNs = 0L
+        var rmsNs = 0L
+        var finishNs = 0L
+        var samples = 0L
+        var buffers = 0L
+        var durationUs = 0L
+        var codecName = "unknown"
+        var status = "unfinished"
         val extractor = MediaExtractor()
         var netSource: RandomSource? = null
+        var decoder: MediaCodec? = null
         try {
-            if (com.twig.app.OpenFiles.directlyReadable(file)) {
+            if (local) {
                 extractor.setDataSource(file.path)
             } else {
                 // Network source: uses AudioCache's per-track shared disk cache — while the
@@ -124,25 +97,70 @@ object Waveform {
             }
             if (track < 0 || format == null) return null
             extractor.selectTrack(track)
-            val durationUs = if (format.containsKey(MediaFormat.KEY_DURATION)) format.getLong(MediaFormat.KEY_DURATION) else 0L
+            durationUs = if (format.containsKey(MediaFormat.KEY_DURATION)) format.getLong(MediaFormat.KEY_DURATION) else 0L
             if (durationUs <= 0) return null
             val mime = format.getString(MediaFormat.KEY_MIME) ?: return null
-            val codec = MediaCodec.createDecoderByType(mime)
-            codec.configure(format, null, null, 0)
-            codec.start()
+            val rms = WaveformRms(BUCKETS)
+            val pcm16 = !format.containsKey(MediaFormat.KEY_PCM_ENCODING) ||
+                format.getInteger(MediaFormat.KEY_PCM_ENCODING) == AudioFormat.ENCODING_PCM_16BIT
+            if (local && mime == "audio/raw" && pcm16) {
+                // Android's FLAC extractor may already decode to PCM. Passing that
+                // through a raw MediaCodec adds buffer/IPC work without decoding anything.
+                codecName = "extractor-pcm16"
+                val maxInput = if (format.containsKey(MediaFormat.KEY_MAX_INPUT_SIZE))
+                    format.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE) else 0
+                var buffer = ByteBuffer.allocateDirect(maxOf(maxInput, 1 shl 20))
+                setupNs = System.nanoTime() - startedAt
+                while (alive()) {
+                    val inputStartedAt = System.nanoTime()
+                    // API 24-27 use the generous initial buffer; newer extractors can
+                    // tell us the exact next packet size before the read.
+                    if (android.os.Build.VERSION.SDK_INT >= 28 && extractor.sampleSize > buffer.capacity()) {
+                        val size = extractor.sampleSize
+                        require(size <= Int.MAX_VALUE) { "PCM sample too large" }
+                        buffer = ByteBuffer.allocateDirect(size.toInt())
+                    }
+                    buffer.clear()
+                    val timestampUs = extractor.sampleTime
+                    val size = extractor.readSampleData(buffer, 0)
+                    inputNs += System.nanoTime() - inputStartedAt
+                    if (size < 0) break
+                    val rmsStartedAt = System.nanoTime()
+                    rms.add(buffer, 0, size, timestampUs, durationUs)
+                    rmsNs += System.nanoTime() - rmsStartedAt
+                    samples += (size / 2).toLong()
+                    buffers++
+                    val advanceStartedAt = System.nanoTime()
+                    extractor.advance()
+                    inputNs += System.nanoTime() - advanceStartedAt
+                }
+            } else {
+                val codec = MediaCodec.createDecoderByType(mime)
+                decoder = codec
+                codecName = codec.name
+                codec.configure(format, null, null, 0)
+                codec.start()
 
-            val sumsq = DoubleArray(BUCKETS)
-            val counts = LongArray(BUCKETS)
-            val info = MediaCodec.BufferInfo()
-            var inEos = false
-            var outEos = false
-            while (!outEos) {
-                if (!alive()) { codec.stop(); codec.release(); return null }
-                if (!inEos) {
-                    val inIdx = codec.dequeueInputBuffer(10_000)
-                    if (inIdx >= 0) {
+                setupNs = System.nanoTime() - startedAt
+                val info = MediaCodec.BufferInfo()
+                var inEos = false
+                var outEos = false
+                while (!outEos) {
+                    if (!alive()) return null
+                    // Batch available buffers with nonblocking polls. Wait only when no
+                    // input was queued, so local decoding runs at decoder throughput.
+                    val inputStartedAt = System.nanoTime()
+                    var worked = false
+                    var inputs = 0
+                    while (!inEos && inputs < 8 && alive()) {
+                        val inIdx = codec.dequeueInputBuffer(0)
+                        if (inIdx < 0) break
+                        worked = true
+                        inputs++
                         val buf = codec.getInputBuffer(inIdx)!!
+                        val extractStartedAt = System.nanoTime()
                         val n = extractor.readSampleData(buf, 0)
+                        extractNs += System.nanoTime() - extractStartedAt
                         if (n < 0) {
                             codec.queueInputBuffer(inIdx, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
                             inEos = true
@@ -151,58 +169,60 @@ object Waveform {
                             extractor.advance()
                         }
                     }
-                }
-                val outIdx = codec.dequeueOutputBuffer(info, 10_000)
-                if (outIdx >= 0) {
-                    if (info.size > 0) {
-                        val out = codec.getOutputBuffer(outIdx)!!
-                        val bucket = ((info.presentationTimeUs.toDouble() / durationUs) * BUCKETS).toInt()
-                            .coerceIn(0, BUCKETS - 1)
-                        out.order(java.nio.ByteOrder.LITTLE_ENDIAN)
-                        out.position(info.offset)
-                        val shorts = info.size / 2
-                        var acc = 0.0
-                        var i = 0
-                        while (i < shorts) {
-                            val s = out.short.toInt()
-                            acc += (s.toDouble() * s)
-                            i++
+                    inputNs += System.nanoTime() - inputStartedAt
+                    val outputStartedAt = System.nanoTime()
+                    val rmsBefore = rmsNs
+                    var outputWaitUs = if (worked) 0L else 10_000L
+                    var outputs = 0
+                    while (!outEos && outputs < 32 && alive()) {
+                        val outIdx = codec.dequeueOutputBuffer(info, outputWaitUs)
+                        outputWaitUs = 0L
+                        if (outIdx == MediaCodec.INFO_TRY_AGAIN_LATER) break
+                        if (outIdx < 0) continue
+                        outputs++
+                        if (info.size > 0) {
+                            val out = codec.getOutputBuffer(outIdx)!!
+                            val rmsStartedAt = System.nanoTime()
+                            rms.add(out, info.offset, info.size, info.presentationTimeUs, durationUs)
+                            rmsNs += System.nanoTime() - rmsStartedAt
+                            samples += (info.size / 2).toLong()
+                            buffers++
                         }
-                        sumsq[bucket] += acc
-                        counts[bucket] += shorts.toLong()
+                        codec.releaseOutputBuffer(outIdx, false)
+                        if (info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0) outEos = true
                     }
-                    codec.releaseOutputBuffer(outIdx, false)
-                    if (info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0) outEos = true
+                    outputNs += System.nanoTime() - outputStartedAt - (rmsNs - rmsBefore)
                 }
             }
-            codec.stop(); codec.release()
+            if (!alive()) return null
             // No samples decoded at all = failure, not a "flat waveform": the old version
             // let normalize emit a flat array of 40s here and treated it as a successful
             // result, writing it to cache — so failures were permanently baked in.
-            val filled = counts.count { it > 0 }
+            val filled = rms.filled
             if (filled == 0) { Log.w("twig", "waveform: no samples decoded: ${file.name}"); return null }
-            return Wave(normalize(sumsq, counts), filled >= BUCKETS * COMPLETE_RATIO)
+            val finishStartedAt = System.nanoTime()
+            val result = WaveformResult(rms.snapshot(), filled >= BUCKETS * COMPLETE_RATIO)
+            finishNs = System.nanoTime() - finishStartedAt
+            status = if (result.complete) "complete" else "incomplete"
+            return result
         } catch (e: Exception) {
             Log.w("twig", "waveform: failed ${file.name}: $e")
             return null
         } finally {
+            val releaseStartedAt = System.nanoTime()
+            decoder?.let { codec ->
+                runCatching { codec.stop() }
+                runCatching { codec.release() }
+            }
             runCatching { extractor.release() }
             netSource?.let { s -> runCatching { s.close() } }
-        }
-    }
-
-    private fun normalize(sumsq: DoubleArray, counts: LongArray): ByteArray {
-        val rms = DoubleArray(BUCKETS) { if (counts[it] > 0) sqrt(sumsq[it] / counts[it]) else 0.0 }
-        // All-zeros can only be a digital-silence track (samples exist but amplitude is 0);
-        // that's a legitimate complete result, give it a flat bar
-        val max = rms.max().takeIf { it > 0 } ?: return ByteArray(BUCKETS) { 40 }
-        return ByteArray(BUCKETS) {
-            // Boost contrast: a linear ratio (no longer square-root compressing dynamic range)
-            // combined with a >1 exponential curve — quiet sections are squashed further,
-            // loud sections stay near full height, so the layering reads more clearly.
-            // Mapped to 8..255.
-            val v = (rms[it] / max).pow(1.6)
-            (8 + v * 247).toInt().coerceIn(0, 255).toByte()
+            val releaseNs = System.nanoTime() - releaseStartedAt
+            // These are wall-time phases: output includes decoder waits/IPC, not codec CPU time.
+            Log.d("twig", "waveform profile: ${file.name} local=$local status=$status codec=$codecName " +
+                "durationMs=${durationUs / 1000} samples=$samples buffers=$buffers " +
+                "totalMs=${(System.nanoTime() - startedAt) / 1_000_000} setupMs=${setupNs / 1_000_000} " +
+                "inputMs=${inputNs / 1_000_000} extractMs=${extractNs / 1_000_000} outputMs=${outputNs / 1_000_000} " +
+                "rmsMs=${rmsNs / 1_000_000} normalizeMs=${finishNs / 1_000_000} releaseMs=${releaseNs / 1_000_000}")
         }
     }
 
