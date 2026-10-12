@@ -107,7 +107,7 @@ restic repositories and Jellyfin/Emby servers are all the same thing to the UI. 
 of them is the same code path — an SMB folder can be compressed straight into a
 local zip, a file inside a remote archive can be streamed to an FTP server.
 
-**It stays small.** A per-device download is about 7.1 MB *including* an FFmpeg
+**It stays small.** The arm64-v8a download is 7.76 MiB *including* an FFmpeg
 audio decoder, an SMB implementation and a video player. Comparable file managers
 ship several times that. Dependencies are added only after their APK cost is
 measured.
@@ -145,28 +145,29 @@ measured.
 
 ## Size
 
-Measured on the 1.7.0 release build (R8 + resource shrinking):
+Measured on the 1.13.0 full release build (R8 + resource shrinking; MiB = 1,048,576 bytes):
 
 | | Size |
 |---|---|
-| Release APK (`arm64-v8a` + `x86_64`) | 9.2 MB |
-| **Per-device download (`arm64-v8a`)** | **≈ 7.1 MB** |
+| Full APK (`arm64-v8a` + `x86_64`) | 9.90 MiB |
+| Libre APK (`arm64-v8a` + `x86_64`) | 9.85 MiB |
+| **Per-device download (`arm64-v8a`)** | **7.76 MiB** |
 
 Where it goes (compressed sizes inside the APK):
 
 | Component | Size |
 |---|---|
-| `classes.dex` (all our code plus every JVM dependency) | 2.8 MB |
-| `libffmpegJNI.so` | 1.4 MB |
-| Bouncy Castle data files | 1.2 MB |
-| Resources (`resources.arsc` + `res`) | 887 KB |
-| `libsamba_jni.so` (libsmb2) | 484 KB |
-| `libtwigzstd` / `libtermux` / `libtwigpty` | 109 KB |
+| `classes*.dex` (all our code plus every JVM dependency) | 2.82 MiB |
+| `libffmpegJNI.so` | 1.39 MiB |
+| Bouncy Castle data files | 1.16 MiB |
+| Resources (`resources.arsc` + `res`) | 1.50 MiB |
+| `libsamba_jni.so` (libsmb2) | 484 KiB |
+| `libtwigzstd` / `libtermux` / `libtwigpty` | 109 KiB |
 
 Nearly all of the Bouncy Castle figure is three lookup tables for the `picnic`
 post-quantum signature scheme (`lowmcL{1,3,5}.bin.properties`). Twig pulls in the
 full Bouncy Castle only because Android's cut-down build lacks X25519, so this is
-1.2 MB of pure dead weight — see the roadmap.
+1.16 MiB of pure dead weight — see the roadmap.
 
 Because every source is a separate Gradle module, a build can drop what it does
 not need — omitting media playback and the network sources removes the large

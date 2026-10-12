@@ -101,7 +101,7 @@ F-Droid 上架(`libre` 版,可复现构建,与上面同一签名)正在审核中
 Jellyfin/Emby 服务器,对 UI 来说是同一个东西。任意两者之间的复制走同一条代码路径——SMB 上的目录可以直接
 压成本地 zip,远程压缩包里的文件可以流式传到 FTP 服务器。
 
-**它一直很小。** 单设备下载约 7.1 MB,而这里面**包含**了 FFmpeg 音频解码器、
+**它一直很小。** arm64-v8a 单设备下载为 7.76 MiB,而这里面**包含**了 FFmpeg 音频解码器、
 一套 SMB 实现和一个视频播放器。同类文件管理器普遍是这个数字的几倍。加依赖之前
 先算它的 APK 增量。
 
@@ -130,27 +130,28 @@ Jellyfin/Emby 服务器,对 UI 来说是同一个东西。任意两者之间的�
 
 ## 体积
 
-1.7.0 release 构建(R8 + 资源裁剪)实测:
+1.13.0 full release 构建实测(R8 + 资源裁剪;1 MiB = 1,048,576 字节):
 
 | | 大小 |
 |---|---|
-| Release APK(`arm64-v8a` + `x86_64`) | 9.2 MB |
-| **单设备下载(`arm64-v8a`)** | **≈ 7.1 MB** |
+| Full APK(`arm64-v8a` + `x86_64`) | 9.90 MiB |
+| Libre APK(`arm64-v8a` + `x86_64`) | 9.85 MiB |
+| **单设备下载(`arm64-v8a`)** | **7.76 MiB** |
 
 构成(APK 内的压缩后大小):
 
 | 组件 | 大小 |
 |---|---|
-| `classes.dex`(自研代码 + 全部 JVM 依赖) | 2.8 MB |
-| `libffmpegJNI.so` | 1.4 MB |
-| Bouncy Castle 的数据文件 | 1.2 MB |
-| 资源(`resources.arsc` + `res`) | 887 KB |
-| `libsamba_jni.so`(libsmb2) | 484 KB |
-| `libtwigzstd` / `libtermux` / `libtwigpty` | 109 KB |
+| `classes*.dex`(自研代码 + 全部 JVM 依赖) | 2.82 MiB |
+| `libffmpegJNI.so` | 1.39 MiB |
+| Bouncy Castle 的数据文件 | 1.16 MiB |
+| 资源(`resources.arsc` + `res`) | 1.50 MiB |
+| `libsamba_jni.so`(libsmb2) | 484 KiB |
+| `libtwigzstd` / `libtermux` / `libtwigpty` | 109 KiB |
 
 Bouncy Castle 那一项几乎全是 `picnic` 后量子签名算法的三张查找表
 (`lowmcL{1,3,5}.bin.properties`)。引入完整 Bouncy Castle 只是因为 Android 自带的
-阉割版缺 X25519,所以这 1.2 MB 是纯粹的死重——见路线图。
+阉割版缺 X25519,所以这 1.16 MiB 是纯粹的死重——见路线图。
 
 每种来源都是独立的 Gradle 模块,所以构建时可以裁掉用不着的部分——去掉媒体播放与
 网络来源,上表中的绝大部分就没了。
