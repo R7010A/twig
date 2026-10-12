@@ -1,5 +1,6 @@
 package com.twig.app.ui
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -7,6 +8,7 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.DecelerateInterpolator
 
 /**
  * Self-drawn waveform progress bar: equal-width vertical bars (fixed [BAR_DP] width
@@ -29,6 +31,8 @@ class WaveformSeekBar @JvmOverloads constructor(
     var onPreview: ((Long?) -> Unit)? = null
 
     private var wave: ByteArray? = null
+    private var displayed = FloatArray(0)
+    private var growth: ValueAnimator? = null
     private var durationMs = 0L
     private var positionMs = 0L
     private var dragFraction = -1f // during drag, >= 0
@@ -37,7 +41,51 @@ class WaveformSeekBar @JvmOverloads constructor(
     // Unplayed bumped to ~170 alpha; the original 90 was too pale on a frosted glass background
     private val unplayed = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(170, 255, 255, 255) }
 
-    fun setWaveform(data: ByteArray?) { wave = data; invalidate() }
+    fun setWaveform(data: ByteArray?) {
+        val next = data?.takeIf { it.isNotEmpty() }
+        if (next != null && wave?.contentEquals(next) == true) return
+        growth?.cancel()
+        growth = null
+        wave = next
+        if (next == null) displayed = FloatArray(0)
+        else if (height > 0) animateWaveform(next)
+        invalidate()
+    }
+
+    private fun targetHeight(value: Int): Float = if (value == 0) dp(PLACEHOLDER_DP)
+        else (height * (0.06f + value / 255f * 0.94f)).coerceAtLeast(dp(2f))
+
+    private fun animateWaveform(data: ByteArray) {
+        val from = if (displayed.size == data.size) displayed.copyOf()
+            else FloatArray(data.size) { dp(PLACEHOLDER_DP) }
+        val target = FloatArray(data.size) { targetHeight(data[it].toInt() and 0xFF) }
+        displayed = from.copyOf()
+        growth = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 220
+            interpolator = DecelerateInterpolator()
+            addUpdateListener { animator ->
+                val fraction = animator.animatedValue as Float
+                for (i in displayed.indices) displayed[i] = from[i] + (target[i] - from[i]) * fraction
+                invalidate()
+            }
+            start()
+        }
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (h != oldh) {
+            growth?.cancel()
+            displayed = FloatArray(0)
+            if (h > 0) wave?.let { animateWaveform(it) }
+        }
+    }
+
+    override fun onDetachedFromWindow() {
+        growth?.end()
+        growth = null
+        super.onDetachedFromWindow()
+    }
 
     /** Played-bar colour dynamically adjusts to the cover's primary tone (0 = restore default accent). */
     fun setAccent(color: Int) { played.color = if (color != 0) color else accent; invalidate() }
@@ -80,8 +128,9 @@ class WaveformSeekBar @JvmOverloads constructor(
         val buckets = data.size
         for (i in 0 until n) {
             val bi = (i.toLong() * buckets / n).toInt().coerceIn(0, buckets - 1)
-            val amp = (data[bi].toInt() and 0xFF) / 255f
-            val bh = (h * (0.06f + amp * 0.94f)).coerceAtLeast(dp(2f))
+            // Animate height around the fixed horizontal centre, equally in both directions.
+            val bh = if (displayed.size == buckets) displayed[bi]
+                else targetHeight(data[bi].toInt() and 0xFF)
             val left = startX + i * (barW + gap)
             val top = (h - bh) / 2f
             canvas.drawRect(left, top, left + barW, top + bh,
