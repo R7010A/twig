@@ -575,14 +575,18 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                                 XFile("file", p[1], isDir = true),
                                 TreeKeys.keyOfDescriptor(p.joinToString("\t"), ::sessionSchemeOf)!!,
                             )
-                            "apps" -> fetchDir(XFile(AppsFileSystem.SCHEME, p[1], isDir = true, canWrite = false))
+                            // A saved app entry can be an APK explicitly opened as an archive.
+                            "apps" -> FsRegistry.of(AppsFileSystem.SCHEME).stat(p[1])?.let { fetchDir(it) }
                             "conn" -> connFor(p[1])?.let { fetchDir(XFile(schemeForConn(it), p[2], isDir = true)) }
                             "fav" -> fetchFavoriteById(p[1])
                             else -> null
                         }
                     }.getOrNull()
                 }
-                fetched?.let { applyRestored(it) }
+                fetched?.let {
+                    if (p[0] == "apps" && !it.file.isDir) forcedArchive.add(it.key)
+                    applyRestored(it)
+                }
                 when (p[0]) {
                     "server" -> connecting.remove("s:${p[1]}")
                     "file", "nestedfile" -> loadingKeys.remove(TreeKeys.keyOfDescriptor(p.joinToString("\t"), ::sessionSchemeOf)!!)
@@ -1803,8 +1807,8 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         }.getOrDefault(false)
         when {
             expanded.remove(key) -> {
-                Thumbs.cancelPending(descendantFiles(n.file))
-                SizeProbes.cancelPending(descendantFiles(n.file))
+                Thumbs.cancelPending(descendantFilesByKey(key))
+                SizeProbes.cancelPending(descendantFilesByKey(key))
                 // When collapsing this directory, also remove the search virtual
                 // directory hanging under it (it doesn't naturally disappear from
                 // rows — its render ignores exp, see addFile — so it would sit
@@ -2829,16 +2833,22 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** When collapsing a directory node ([FileNode]), collect its (still-expanded sub-dirs / archives, recursive) cached children and hand them to [Thumbs.cancelPending] to drop not-yet-started thumbnail jobs from the thread pool queue. */
-    private fun descendantFiles(dir: XFile, out: MutableList<XFile> = mutableListOf()): List<XFile> =
-        descendantFilesByKey(fileKey(dir), out)
-
-    /** Same as [descendantFiles], but starting from any node key — server roots / restic repo roots have keys that aren't `fileKey()` style ("s:" / "restic:" prefix), yet children are still cached in the same [children] table. */
-    private fun descendantFilesByKey(rootKey: String, out: MutableList<XFile> = mutableListOf()): List<XFile> {
-        val kids = children[rootKey] ?: return out
-        for (c in kids) {
-            out.add(c)
-            if (expanded.contains(fileKey(c))) descendantFiles(c, out)
+    /** Collect cached descendants for cancellation. Use row keys and visit each cache once:
+     * virtual listings may revisit a file, and a deep tree must not exhaust the call stack. */
+    private fun descendantFilesByKey(rootKey: String): List<XFile> {
+        val out = mutableListOf<XFile>()
+        val pending = ArrayDeque<String>()
+        val visited = HashSet<String>()
+        val prefix = if (rootKey.startsWith(EXTERNAL_KEY_PREFIX)) EXTERNAL_KEY_PREFIX else ""
+        pending.add(rootKey)
+        while (pending.isNotEmpty()) {
+            val key = pending.removeLast()
+            if (!visited.add(key)) continue
+            for (c in children[key].orEmpty()) {
+                out.add(c)
+                val childKey = prefix + fileKey(c)
+                if (expanded.contains(childKey)) pending.add(childKey)
+            }
         }
         return out
     }

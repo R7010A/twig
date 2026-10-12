@@ -60,8 +60,12 @@ class AppsFileSystem(context: Context) : FileSystem {
 
     override fun list(dir: XFile): List<XFile> {
         val segs = segsOf(dir.path)
+        if (!dir.isDir || segs.size > 1) {
+            throw FsException(s(R.string.err_goto_not_dir, dir.path))
+        }
         if (segs.isEmpty()) return listOf(dirOf(USER), dirOf(SYSTEM))
         val cat = segs[0]
+        if (cat != USER && cat != SYSTEM) throw FsException(s(R.string.err_apps_unknown_dir, dir.path))
         val wantSystem = cat == SYSTEM
         // Fetch them all with one getInstalledPackages call, don't getPackageInfo per package —
         // for several hundred apps that would be hundreds of binder round-trips and the

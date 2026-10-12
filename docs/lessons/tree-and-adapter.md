@@ -4,6 +4,24 @@
 > shared conventions are in [AGENTS.md](../../AGENTS.md); the other sections live
 > beside this file in [docs/lessons/](.).
 
+- **Collapsing Apps / Installed crashed after restarting (2026-10-12)**: an app APK
+  explicitly opened as an archive was saved as an `apps` expansion descriptor. Restore
+  fabricated `isDir = true` for every such descriptor, and `AppsFileSystem.list` treated
+  any non-root path as a category listing. The APK's cached children therefore included
+  itself. Its archive row looked closed because the explicit archive flag was not
+  restored, but its key remained expanded; collapsing Installed recursively collected
+  that hidden cycle until `StackOverflowError`. Switching to another tree removed the
+  orphaned expanded key and temporarily concealed the problem.
+  - Restore Apps entries through `stat`, preserving the actual file type and restoring
+    the explicit archive flag for successfully mounted APKs. Do not infer directories
+    from saved paths.
+  - Apps listings accept only the root and the two category directories, rejecting
+    package paths even if a caller fabricates a directory flag.
+  - Cancellation walks cached children iteratively, visiting each row key once and
+    retaining external-mount prefixes. A cyclic or deep cache must not overflow the stack.
+  - `AppsRestoreTest` follows open-as-archive → save → restore → collapse, and separately
+    covers cyclic caches, 10,000 levels, and external-mount keys.
+
 - **Two rows with the same key = one of them expands to nothing (★ 2026-08-17,
   `FileNode.keyPrefix`)**: a row's key (`f:<scheme>:<path>`) is the **only** thing DiffUtil uses to
   identify rows in `submitList`, so a duplicate makes it pick the wrong row. The worst collision:
@@ -147,4 +165,3 @@
     a SAF grant is one folder browsed by tapping, and an "Apps" row is a package name. The
     predicate sits outside `PaneFragment` so `GotoTargetTest` can pin the exclusions; a menu
     item quietly coming back is not something a device walkthrough catches.
-

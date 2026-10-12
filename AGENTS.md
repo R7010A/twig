@@ -540,7 +540,8 @@ add its symptom here.
   `isWritableDir()` at six entry points; selection changes use payloads, never
   `notifyDataSetChanged`.
   *Explains*: the same archive empty in one place, a directory that closes itself, a
-  spinner that never stops, the whole list flickering when you tick a box.
+  spinner that never stops, the whole list flickering when you tick a box, collapsing
+  Apps / Installed crashing after an app APK was opened as an archive and restored.
 - **[Text handling and editing](docs/lessons/text-handling.md)** — one decoding entry
   point (`TextCodec`), where order is priority; write back in the encoding the file was
   read with and never silently substitute `?`.
