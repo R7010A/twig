@@ -174,7 +174,7 @@ class SettingsActivity : AppCompatActivity() {
         // to build() ourselves.
         choiceRow(
             getString(R.string.action_language),
-            LanguagePref.labels(this),
+            LanguagePref.displayLabels(this),
             get = { LanguagePref.current() },
             set = { LanguagePref.apply(it) },
         )
@@ -489,7 +489,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun addRow(
         title: String,
-        subtitle: String?,
+        subtitle: CharSequence?,
         end: View? = null,
         onClick: (() -> Unit)? = null,
     ): Pair<LinearLayout, TextView> {
@@ -545,7 +545,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun choiceRow(
         title: String,
-        options: Array<String>,
+        options: Array<out CharSequence>,
         get: () -> Int,
         set: (Int) -> Unit,
     ): View {

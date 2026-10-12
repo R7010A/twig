@@ -153,9 +153,6 @@
     <string name="action_theme">Тема</string>
     <string name="action_language">Язык</string>
     <string name="language_system">Как в системе</string>
-    <string name="language_zh">中文</string>
-    <string name="language_en">English</string>
-    <string name="language_ru">Русский</string>
     <string name="action_settings">Настройки</string>
     <string name="action_view_mode">Режим просмотра</string>
     <string name="action_thumbs">Миниатюры</string>

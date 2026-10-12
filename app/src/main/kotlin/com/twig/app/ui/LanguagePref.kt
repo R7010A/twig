@@ -1,12 +1,18 @@
 package com.twig.app.ui
 
 import android.content.Context
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.core.os.LocaleListCompat
 import com.twig.app.R
+import java.util.Locale
 
 /**
- * App language (follow system / Chinese / English / Russian). The top-bar menu and the settings page share this single
+ * App language. Language pickers share this single
  * candidate list and read/write logic — duplicating them in two places inevitably diverges (a one-off ordering
  * difference makes the radio button select a different language).
  *
@@ -17,23 +23,59 @@ import com.twig.app.R
  */
 object LanguagePref {
 
-    /** One-to-one with [labels]; empty string = follow system. */
-    private val TAGS = arrayOf("", "zh", "en", "ru")
+    /** Native names with English translations live only in default resources, keeping every picker readable. */
+    private val choices = listOf(
+        "" to R.string.language_system,
+        "ar" to R.string.language_ar,
+        "de" to R.string.language_de,
+        "en" to R.string.language_en,
+        "es" to R.string.language_es,
+        "fr" to R.string.language_fr,
+        "hi" to R.string.language_hi,
+        "id" to R.string.language_id,
+        "it" to R.string.language_it,
+        "ja" to R.string.language_ja,
+        "ko" to R.string.language_ko,
+        "pt-BR" to R.string.language_pt_br,
+        "ru" to R.string.language_ru,
+        "tr" to R.string.language_tr,
+        "vi" to R.string.language_vi,
+        "zh" to R.string.language_zh,
+        "zh-Hant" to R.string.language_zh_hant,
+    ).sortedBy { it.first } // Stable tag order across UI languages; the empty system tag stays first.
 
-    fun labels(ctx: Context): Array<String> = arrayOf(
-        ctx.getString(R.string.language_system),
-        ctx.getString(R.string.language_zh),
-        ctx.getString(R.string.language_en),
-        ctx.getString(R.string.language_ru),
-    )
+    fun labels(ctx: Context): Array<String> = choices.map { ctx.getString(it.second) }.toTypedArray()
 
-    /** Index of the current selection; if a different language is stored (or none was ever selected), it all counts as "follow system". */
-    fun current(): Int =
-        TAGS.indexOf(AppCompatDelegate.getApplicationLocales().toLanguageTags().substringBefore('-'))
-            .coerceAtLeast(0)
+    /** Keep English available as a quieter annotation in the language dialog. */
+    fun displayLabels(ctx: Context): Array<CharSequence> = labels(ctx).map { label ->
+        val start = label.lastIndexOf(" (")
+        if (start < 0) label else SpannableString(label).apply {
+            setSpan(RelativeSizeSpan(0.85f), start, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            setSpan(ForegroundColorSpan(ContextCompat.getColor(ctx, R.color.text_secondary)),
+                start, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+    }.toTypedArray()
+
+    fun current(): Int = indexOf(AppCompatDelegate.getApplicationLocales()[0])
+
+    /** Preserve script and region before falling back to a supported language. */
+    internal fun indexOf(locale: Locale?): Int {
+        if (locale == null) return 0
+        val exact = choices.indexOfFirst { it.first.equals(locale.toLanguageTag(), ignoreCase = true) }
+        if (exact >= 0) return exact
+        val tag = when (locale.language) {
+            "zh" -> if (locale.script == "Hant" ||
+                (locale.script.isEmpty() && locale.country in setOf("TW", "HK", "MO"))) "zh-Hant" else "zh"
+            // Older Android releases expose Indonesian as the legacy ISO code "in".
+            "in" -> "id"
+            "pt" -> if (locale.country == "BR") "pt-BR" else "pt"
+            else -> locale.language
+        }
+        return choices.indexOfFirst { it.first == tag }.coerceAtLeast(0)
+    }
 
     fun apply(index: Int) {
-        val tag = TAGS[index]
+        val tag = choices[index].first
         AppCompatDelegate.setApplicationLocales(
             if (tag.isEmpty()) LocaleListCompat.getEmptyLocaleList()
             else LocaleListCompat.forLanguageTags(tag),

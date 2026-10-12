@@ -361,8 +361,12 @@ each write `= null`.
   `app/proguard-rules.pro`. Read that file before changing how those libraries are called.
 - **User-facing text lives in two places**; before adding a string, work out which layer
   you are in:
-  - Inside `:app` everything goes through `strings.xml` (zh and en, with identical `name`
-    sets). `FileInfo`, `GitVfs`, `SafFileSystem` and friends have a Context even though
+  - Inside `:app` everything goes through `strings.xml` (default English plus all supported
+    locale directories, with identical translatable `name` sets). Native + English language labels
+    (`language_zh`, `language_en`, etc.) are `translatable="false"` and live **only** in
+    the default `values/strings.xml`; only `language_system` is translated. Keep new
+    languages in `LanguagePref` and `xml/locales_config.xml` in sync.
+    `FileInfo`, `GitVfs`, `SafFileSystem` and friends have a Context even though
     they are not Activities — there are no exceptions.
   - **Pure JVM modules** (`core-fs` / `fs-*` / `git-lite`, using the `kotlin.jvm` plugin)
     have no Context and no R, so their messages are **always English**. Their exception
