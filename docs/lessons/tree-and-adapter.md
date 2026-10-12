@@ -165,3 +165,10 @@
     a SAF grant is one folder browsed by tapping, and an "Apps" row is a package name. The
     predicate sits outside `PaneFragment` so `GotoTargetTest` can pin the exclusions; a menu
     item quietly coming back is not something a device walkthrough catches.
+
+- **Landscape Terminal button disappeared without a session (2026-10-12)**: the
+  portrait toolbar always offered Terminal, but the landscape strip still removed
+  the button when the session list was empty. That rule predates local sessions:
+  Terminal now creates a local shell when no session exists. Keep all four pinned
+  buttons present, ordered Terminal / Panes, then Music / Menu. `IssueOneLayoutTest`
+  checks the empty-session case and the actual two-row geometry.

@@ -492,7 +492,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
 
     /**
      * Top pinned row visibility and state: only appears in landscape after the Toolbar is
-     * hidden; the terminal entry appears only when there are sessions; the pane-swap icon
+     * hidden; the terminal entry is always available; the pane-swap icon
      * flips direction with the active pane (matching the one on the Toolbar).
      */
     /**
@@ -511,11 +511,6 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         s.asTop.visibility = if (land) View.VISIBLE else View.GONE
         s.asTopDivider.visibility = if (land) View.VISIBLE else View.GONE
         if (!land) return
-        // GridLayout reserves a cell for GONE children, so the terminal entry is removed/added in full rather than just set to GONE
-        val wantTerm = TermManager.list().isNotEmpty()
-        val hasTerm = s.asTerm.parent != null
-        if (wantTerm && !hasTerm) s.asTop.addView(s.asTerm, 0)
-        else if (!wantTerm && hasTerm) s.asTop.removeView(s.asTerm)
         s.asSwapIcon.setImageResource(
             if (activeIndex == 0) R.drawable.ic_pane_to_right else R.drawable.ic_pane_to_left,
         )

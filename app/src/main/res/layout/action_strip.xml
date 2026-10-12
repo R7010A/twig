@@ -22,17 +22,17 @@
             <TextView style="@style/StripLabel" android:text="@string/strip_term" />
         </LinearLayout>
 
-        <LinearLayout android:id="@+id/as_music" style="@style/StripItem">
-            <ImageView style="@style/StripIcon" android:src="@drawable/ic_music_note"
-                android:contentDescription="@null" />
-            <TextView style="@style/StripLabel" android:text="@string/music_menu" />
-        </LinearLayout>
-
         <LinearLayout android:id="@+id/as_swap" style="@style/StripItem">
             <ImageView android:id="@+id/as_swap_icon" style="@style/StripIcon"
                 android:src="@drawable/ic_pane_to_right"
                 android:contentDescription="@null" />
             <TextView style="@style/StripLabel" android:text="@string/strip_swap" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/as_music" style="@style/StripItem">
+            <ImageView style="@style/StripIcon" android:src="@drawable/ic_music_note"
+                android:contentDescription="@null" />
+            <TextView style="@style/StripLabel" android:text="@string/music_menu" />
         </LinearLayout>
 
         <LinearLayout android:id="@+id/as_menu" style="@style/StripItem">
