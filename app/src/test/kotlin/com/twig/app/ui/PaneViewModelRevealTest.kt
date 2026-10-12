@@ -255,6 +255,29 @@ class PaneViewModelRevealTest {
         assertFalse(vm.revealHistory(HistoryEntry("dir", "/x", "ftp://nobody@nowhere:21")))
     }
 
+    @Test
+    fun `a recent Git location selects its virtual root on a cold jump`() = runTest(dispatcher) {
+        val repo = File(ext, "history-git-repo").apply { mkdirs() }
+        try {
+            val git = File(repo, ".git").apply { mkdirs() }
+            File(git, "HEAD").writeText("ref: refs/heads/main\n")
+            File(git, "objects").mkdirs()
+            File(git, "refs/heads").mkdirs()
+
+            assertTrue(vm.revealHistory(HistoryEntry("git", repo.path)))
+            advanceUntilIdle()
+
+            val gitRoot = vm.state.value.rows.filterIsInstance<PaneViewModel.FileNode>()
+                .first { it.file.scheme.startsWith("git") && it.file.path == "/" }
+            assertTrue(gitRoot.expanded)
+            assertEquals(gitRoot.key, vm.state.value.currentKey)
+            assertEquals(gitRoot.file.scheme, vm.state.value.currentDir?.scheme)
+            assertEquals("/", vm.state.value.currentDir?.path)
+        } finally {
+            repo.deleteRecursively()
+        }
+    }
+
     // ---- favorites ----
 
     @Test

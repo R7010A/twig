@@ -1587,6 +1587,13 @@ class PaneFragment : Fragment() {
     }
 
     private fun longClickFile(node: PaneViewModel.FileNode) {
+        if (node.file.isDir && node.file.scheme.startsWith("git")) {
+            val actions = ArrayList<MenuAct>()
+            actions.item(getString(R.string.action_refresh), R.drawable.ic_refresh) { viewModel.refreshNode(node) }
+            actions.item(getString(R.string.strip_search), R.drawable.ic_search) { promptSearch(node.file) }
+            showActionMenu(requireContext(), node.file.name, actions)
+            return
+        }
         if (node.label != null) { rootNodeMenu(node); return } // Top-level storage nodes take the "non-mutable directory" path.
         if (SafFileSystem.isTreeRoot(node.file)) { safRootMenu(node); return }
         // Long-press hit one of the already-checked multi-selection items (and not just itself) → batch-specific menu;

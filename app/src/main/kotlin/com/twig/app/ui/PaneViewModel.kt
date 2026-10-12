@@ -1008,8 +1008,8 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
      * [focus] is the file in [target] that should scroll into view ("Go to containing
      * folder" gives one when arriving from the music player / a desktop shortcut);
      * the highlight still frames the directory itself; the list just scrolls to that row.
-     * With [openGit], also expand the Git virtual node inside that directory and
-     * locate it (the "Last position" entry for a git item).
+     * With [openGit], expand and select the Git virtual node inside that directory
+     * (the "Last position" entry for a git item).
      */
     fun revealPath(target: XFile, focus: XFile? = null, openGit: Boolean = false) {
         val request = ++revealSequence
@@ -1033,8 +1033,8 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
             r.fold(
                 { plan ->
                     applyReveal(plan)   // Main-thread table write
-                    currentDir = target
-                    currentKey = fileKey(target)
+                    currentDir = plan.gitKey?.let { keyFile[it] } ?: target
+                    currentKey = plan.gitKey ?: fileKey(target)
                     scrollKey = plan.gitKey ?: focus?.let { fileKey(it) }
                     rebuild()
                 },
@@ -1124,13 +1124,14 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
             keep.add(key)
             if (!children.containsKey(key)) fetched.add(fetchDir(x)) else expand.add(key to x)
         }
-        // Git virtual nodes hang off their host-directory row. While walking up the chain
-        // above, listChildren already calls ensureGit to register them; here we just need
-        // to expand the Git node too — otherwise the user would only see the host
-        // directory and have to tap Git separately.
+        // A freshly fetched repository has not yet been merged into gitInfo (that happens
+        // in applyReveal), so also inspect the listings gathered during this plan.
         var gitKey: String? = null
         if (openGit) {
-            gitInfo[fileKey(target)]?.let { (s, _) ->
+            val hostKey = fileKey(target)
+            val gitScheme = gitInfo[hostKey]?.first
+                ?: fetched.firstNotNullOfOrNull { it.listing.git?.takeIf { g -> g.dirKey == hostKey }?.scheme }
+            gitScheme?.let { s ->
                 val root = XFile(s, "/", isDir = true)
                 val gk = fileKey(root)
                 if (children.containsKey(gk)) expand.add(gk to root) else fetched.add(fetchDir(root))
