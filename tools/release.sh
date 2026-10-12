@@ -93,12 +93,12 @@ rm -rf "$OUT"; mkdir -p "$OUT"
 # Two passes: AGP refuses to have both ndk.abiFilters and splits.abi set, so the
 # combined APK and the per-ABI ones cannot come out of one invocation.
 say "Building the combined APKs"
-JAVA_HOME="$JDK" ./gradlew :app:assembleFullRelease :app:assembleLibreRelease -PdebugSign=false
+JAVA_HOME="$JDK" ./gradlew :app:assembleFullRelease :app:assembleLibreRelease
 cp app/build/outputs/apk/full/release/app-full-release.apk   "$OUT/Twig-$VERSION_NAME-full.apk"
 cp app/build/outputs/apk/libre/release/app-libre-release.apk "$OUT/Twig-$VERSION_NAME-libre.apk"
 
 say "Building the per-ABI APKs"
-JAVA_HOME="$JDK" ./gradlew :app:assembleFullRelease -PabiSplit=true -PdebugSign=false
+JAVA_HOME="$JDK" ./gradlew :app:assembleFullRelease -PabiSplit=true
 for abi in arm64-v8a armeabi-v7a x86_64; do
   cp "app/build/outputs/apk/full/release/app-full-$abi-release.apk" \
      "$OUT/Twig-$VERSION_NAME-full-$abi.apk"

@@ -1,0 +1,3 @@
+New: search, sort and reorder music playlists; export and restore M3U playlists; play music from mounted archives and restic repositories in temporary queues. Long-press the pane switch to pin the current directory on the other side. Recent locations now include file actions and archive expansion. Added 13 languages.
+
+Waveforms appear faster and expand from the center. Fixed fullscreen gaps on cutout screens, numbered episode queues, APK browsing in the Apps tree, and Terminal in landscape.
