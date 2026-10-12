@@ -387,6 +387,15 @@
     <string name="share_confirm">Sao chép vào đây</string>
     <string name="share_no_content">Không nhận được nội dung chia sẻ</string>
     <string name="share_add_server_hint">Hãy thêm kết nối máy chủ loại này ở màn hình chính trước</string>
+    <string name="music_manual_sort">Sắp xếp thủ công (kéo)</string>
+    <string name="music_sort_title">Tiêu đề</string>
+    <string name="music_sort_album">Album</string>
+    <string name="music_sort_artist">Nghệ sĩ</string>
+    <string name="music_sort_artist_album_track">Nghệ sĩ → album → số bài</string>
+    <string name="music_sort_path">Đường dẫn</string>
+    <string name="music_sort_filename">Tên tệp</string>
+    <string name="music_sort_duration">Thời lượng</string>
+    <string name="music_sort_album_track">Album → số bài</string>
     <string name="music_menu">Nhạc</string>
     <string name="music_title">Đang phát</string>
     <string name="music_channel">Đang phát</string>

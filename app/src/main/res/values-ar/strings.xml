@@ -387,6 +387,15 @@
     <string name="share_confirm">نسخ هنا</string>
     <string name="share_no_content">لم يتم استلام محتوى قابل للمشاركة</string>
     <string name="share_add_server_hint">أضف اتصالا من هذا النوع على الشاشة الرئيسية أولا</string>
+    <string name="music_manual_sort">ترتيب يدوي (اسحب)</string>
+    <string name="music_sort_title">العنوان</string>
+    <string name="music_sort_album">الألبوم</string>
+    <string name="music_sort_artist">الفنان</string>
+    <string name="music_sort_artist_album_track">الفنان ← الألبوم ← رقم المقطع</string>
+    <string name="music_sort_path">المسار</string>
+    <string name="music_sort_filename">اسم الملف</string>
+    <string name="music_sort_duration">المدة</string>
+    <string name="music_sort_album_track">الألبوم ← رقم المقطع</string>
     <string name="music_menu">الموسيقى</string>
     <string name="music_title">قيد التشغيل</string>
     <string name="music_channel">قيد التشغيل</string>

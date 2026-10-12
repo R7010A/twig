@@ -29,6 +29,8 @@ data class PlaylistTrack(
     val title: String = "",
     val artist: String = "",
     val album: String = "",
+    val trackNumber: Int = 0,    // 0 = unknown; tags such as "03/12" use the first number
+    val discNumber: Int = 0,     // 0 = old/unchecked, -1 = checked but no tag, >0 = disc number
     val durationMs: Long = 0L,
     val sampleRate: Int = 0,     // Hz; 0 = unknown (used by the list subtitle)
     val bitrate: Int = 0,        // bps; 0 = unknown
@@ -52,14 +54,18 @@ data class PlaylistTrack(
             return if (d <= 0) "" else n.substring(d + 1).lowercase()
         }
 
-    fun withMeta(t: String, a: String, al: String, d: Long, sr: Int = sampleRate, br: Int = bitrate) =
-        copy(title = t, artist = a, album = al, durationMs = d, sampleRate = sr, bitrate = br)
+    fun withMeta(t: String, a: String, al: String, d: Long, sr: Int = sampleRate, br: Int = bitrate,
+                 number: Int = trackNumber, disc: Int = discNumber) =
+        copy(title = t, artist = a, album = al, durationMs = d, sampleRate = sr, bitrate = br,
+            trackNumber = number, discNumber = disc)
 
     fun toJson(): JSONObject = JSONObject().apply {
         check(!temporary)
         put("kind", kind); put("path", path); put("connLabel", connLabel); put("size", size)
         put("lastModified", lastModified)
         put("title", title); put("artist", artist); put("album", album); put("durationMs", durationMs)
+        put("trackNumber", trackNumber)
+        put("discNumber", discNumber)
         put("sampleRate", sampleRate); put("bitrate", bitrate)
         if (displayName.isNotEmpty()) put("displayName", displayName)
     }
@@ -82,6 +88,8 @@ data class PlaylistTrack(
             title = o.optString("title", ""),
             artist = o.optString("artist", ""),
             album = o.optString("album", ""),
+            trackNumber = o.optInt("trackNumber", 0),
+            discNumber = o.optInt("discNumber", 0),
             durationMs = o.optLong("durationMs", 0L),
             sampleRate = o.optInt("sampleRate", 0),
             bitrate = o.optInt("bitrate", 0),

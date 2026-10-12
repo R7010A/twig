@@ -3,7 +3,10 @@ package com.twig.app.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
@@ -11,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.media3.common.util.UnstableApi
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.twig.app.Playlist
 import com.twig.app.PlaylistStore
@@ -39,6 +43,13 @@ class PlaylistActivity : AppCompatActivity() {
     private var rowAccent = 0 // accent color extracted from the cover, used to color the currently playing row (0 = use default accent)
     private var bgTone = 0 // the background color text actually sits on (blurred average color + scrim); 0 = cover not yet ready
     private var tint = MusicTint.of(android.graphics.Color.parseColor("#1A1A1A")) // foreground layer color
+    private var query = ""
+    private var manualSort = false
+    private var activeSort = -1
+    private lateinit var dragHelper: ItemTouchHelper
+    private lateinit var searchItem: MenuItem
+    private var manualSortItem: MenuItem? = null
+    private val attemptedTrackNumbers = HashSet<String>()
 
     /** When the list page is open, the queue auto-advances: highlight / blur / scroll position all
      *  follow along (previously only refreshed once in onResume, so if you stayed on the page and
@@ -65,6 +76,47 @@ class PlaylistActivity : AppCompatActivity() {
         adapter = TrackAdapter()
         b.list.layoutManager = LinearLayoutManager(this)
         b.list.adapter = adapter
+        dragHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0,
+        ) {
+            override fun isLongPressDragEnabled() = false
+            override fun onMove(rv: RecyclerView, source: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+                if (!manualSort || query.isNotEmpty()) return false
+                adapter.move(source.bindingAdapterPosition, target.bindingAdapterPosition)
+                return true
+            }
+            override fun onSwiped(holder: RecyclerView.ViewHolder, direction: Int) = Unit
+            override fun clearView(rv: RecyclerView, holder: RecyclerView.ViewHolder) {
+                super.clearView(rv, holder)
+                if (manualSort) commitOrder(adapter.allItems())
+            }
+        }).also { it.attachToRecyclerView(b.list) }
+        searchItem = b.toolbar.menu.add(R.string.viewer_search).apply {
+            setIcon(R.drawable.ic_search)
+            setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+            setOnMenuItemClickListener { toggleSearch(); true }
+        }
+        b.toolbar.menu.add(R.string.sort_by).setOnMenuItemClickListener { showSortDialog(); true }
+        manualSortItem = b.toolbar.menu.add(R.string.music_manual_sort).apply {
+            isCheckable = true
+            setOnMenuItemClickListener {
+                if (!manualSort && b.searchInput.visibility == View.VISIBLE) toggleSearch()
+                manualSort = !manualSort
+                if (manualSort) activeSort = -1
+                isChecked = manualSort
+                adapter.notifyDataSetChanged()
+                true
+            }
+        }
+        b.searchInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                query = s?.toString()?.trim().orEmpty()
+                adapter.submit(playlist?.tracks.orEmpty())
+                updateEmpty()
+            }
+            override fun afterTextChanged(s: Editable?) = Unit
+        })
         // Metadata / cover / accent come back from the background one by one, triggering notifyItemChanged
         // along the way. The default ItemAnimator does a fade-in/out change animation for each
         // notifyItemChanged — that's the real source of the "list updates flash" glitch. Previously
@@ -161,6 +213,9 @@ class PlaylistActivity : AppCompatActivity() {
         b.plCount.setTextColor(tint.secondary)
         b.empty.setTextColor(tint.secondary)
         b.toolbar.navigationIcon = b.toolbar.navigationIcon?.mutate()?.apply { setTint(tint.secondary) }
+        searchItem.icon = searchItem.icon?.mutate()?.apply { setTint(tint.primary) }
+        b.toolbar.overflowIcon = androidx.appcompat.content.res.AppCompatResources
+            .getDrawable(this, R.drawable.ic_more_vert)?.mutate()?.apply { setTint(tint.primary) }
         // Light/dark of status/nav bar icons follows the background: now that the blur is no longer
         // darkened, white icons disappear on light covers
         val light = MusicTint.isLight(if (bgTone != 0) bgTone else fallbackBg())
@@ -224,7 +279,93 @@ class PlaylistActivity : AppCompatActivity() {
     private fun currentPos(): Int? {
         if (MusicEngine.queueId != playlistId || !MusicEngine.hasQueue()) return null
         val id = MusicEngine.currentTrack()?.id ?: return null
-        return playlist?.tracks?.indexOfFirst { it.id == id }?.takeIf { it >= 0 }
+        return adapter.positionOf(id).takeIf { it >= 0 }
+    }
+
+    private fun toggleSearch() {
+        val opening = b.searchInput.visibility != View.VISIBLE
+        b.searchInput.visibility = if (opening) View.VISIBLE else View.GONE
+        if (opening) {
+            manualSort = false
+            manualSortItem?.isChecked = false
+            b.searchInput.requestFocus()
+            (getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager)
+                .showSoftInput(b.searchInput, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+        } else {
+            b.searchInput.text.clear()
+            (getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager)
+                .hideSoftInputFromWindow(b.searchInput.windowToken, 0)
+        }
+        adapter.submit(playlist?.tracks.orEmpty())
+    }
+
+    private fun showSortDialog() {
+        val labels = intArrayOf(R.string.music_sort_title, R.string.music_sort_album,
+            R.string.music_sort_artist, R.string.music_sort_album_track,
+            R.string.music_sort_artist_album_track, R.string.music_sort_path,
+            R.string.music_sort_filename, R.string.music_sort_duration,
+            R.string.sort_reversed)
+        val modes = intArrayOf(0, 1, 2, 7, 3, 4, 5, 6)
+        AlertDialog.Builder(this).setTitle(R.string.sort_by)
+            .setItems(labels.map { getString(it) }.toTypedArray()) { _, selected ->
+                val pl = playlist ?: return@setItems
+                if (selected == labels.lastIndex) {
+                    activeSort = -1
+                    commitOrder(pl.tracks.reversed())
+                    return@setItems
+                }
+                val mode = modes[selected]
+                activeSort = mode
+                sortTracks(pl, mode)
+                if (mode == 3 || mode == 7) fillTrackNumbers(pl.tracks)
+            }.show()
+    }
+
+    private fun sortTracks(pl: Playlist, selected: Int) {
+        val sorted = MusicTrackSort.sorted(pl.tracks, selected)
+        manualSort = false
+        manualSortItem?.isChecked = false
+        commitOrder(sorted)
+    }
+
+    /** Old playlists predate cached track numbers. Fill them only when a track-order sort asks. */
+    private fun fillTrackNumbers(tracks: List<PlaylistTrack>) {
+        io.execute {
+            var changed = false
+            for (t in tracks) {
+                if ((t.trackNumber > 0 && t.discNumber != 0) || !attemptedTrackNumbers.add(t.id)) continue
+                val f = synchronized(files) { files[t.id] } ?: MusicEngine.resolveFile(applicationContext, t) ?: continue
+                val filled = MusicEngine.fetchMeta(applicationContext, f, t) ?: continue
+                if (filled == t) continue
+                PlaylistStore.updateTrackMeta(applicationContext, playlistId, filled)
+                changed = true
+            }
+            if (changed) runOnUiThread {
+                val latest = PlaylistStore.get(this, playlistId) ?: return@runOnUiThread
+                playlist = latest
+                if (activeSort == 3 || activeSort == 7) sortTracks(latest, activeSort)
+                else adapter.submit(latest.tracks)
+            }
+        }
+    }
+
+    private fun commitOrder(tracks: List<PlaylistTrack>) {
+        val pl = playlist ?: return
+        if (tracks.map { it.id } == pl.tracks.map { it.id }) {
+            adapter.submit(pl.tracks)
+            return
+        }
+        val newest = PlaylistStore.get(this, playlistId) ?: pl
+        val metadata = newest.tracks.associateBy { it.id }
+        val next = newest.copy(tracks = tracks.map { metadata[it.id] ?: it })
+        PlaylistStore.save(this, next)
+        playlist = next
+        MusicEngine.reorderQueue(next)
+        adapter.submit(next.tracks)
+    }
+
+    private fun updateEmpty() {
+        b.empty.visibility = if (adapter.itemCount == 0) View.VISIBLE else View.GONE
     }
 
     private fun reload() {
@@ -232,8 +373,8 @@ class PlaylistActivity : AppCompatActivity() {
         playlist = pl
         b.plTitle.text = pl.name
         b.plCount.text = getString(R.string.music_track_count, pl.tracks.size)
-        b.empty.visibility = if (pl.tracks.isEmpty()) View.VISIBLE else View.GONE
         adapter.submit(pl.tracks)
+        updateEmpty()
         resolveFiles(pl.tracks)
         loadBlurBg()
     }
@@ -253,7 +394,8 @@ class PlaylistActivity : AppCompatActivity() {
                     PlaylistStore.updateTrackMeta(applicationContext, playlistId, filled)
                     runOnUiThread {
                         playlist = PlaylistStore.get(this, playlistId)
-                        adapter.updateTrack(filled)
+                        if (query.isEmpty()) adapter.updateTrack(filled)
+                        else { adapter.submit(playlist?.tracks.orEmpty()); updateEmpty() }
                     }
                 }
             }
@@ -344,9 +486,22 @@ class PlaylistActivity : AppCompatActivity() {
         private var playingPos = -1 // index of the currently highlighted row (-1 = this list isn't playing), for incremental refresh on track change
 
         fun submit(list: List<PlaylistTrack>) {
-            items = list
+            items = if (query.isEmpty()) list else list.filter { t ->
+                listOf(t.title, t.artist, t.album, t.name, t.path).any {
+                    it.contains(query, ignoreCase = true)
+                }
+            }
             playingPos = currentPos() ?: -1
             notifyDataSetChanged()
+        }
+
+        fun allItems(): List<PlaylistTrack> = items
+        fun positionOf(id: String) = items.indexOfFirst { it.id == id }
+        fun move(from: Int, to: Int) {
+            if (from !in items.indices || to !in items.indices) return
+            items = items.toMutableList().also { it.add(to, it.removeAt(from)) }
+            notifyItemMoved(from, to)
+            notifyItemRangeChanged(minOf(from, to), kotlin.math.abs(from - to) + 1, PAYLOAD_NUMBER)
         }
 
         fun updateTrack(t: PlaylistTrack) {
@@ -378,7 +533,8 @@ class PlaylistActivity : AppCompatActivity() {
 
         /** Background/accent changed: only update this row's colors, not a full rebind (see [applyTint]). */
         override fun onBindViewHolder(h: TrackVH, position: Int, payloads: MutableList<Any>) {
-            if (payloads.isNotEmpty() && payloads.all { it == PAYLOAD_COLORS }) {
+            if (payloads.isNotEmpty() && payloads.all { it == PAYLOAD_COLORS || it == PAYLOAD_NUMBER }) {
+                h.b.num.text = if (manualSort) "≡" else if (isPlaying(items[position])) "▶" else "${position + 1}"
                 bindColors(h, items[position])
             } else {
                 super.onBindViewHolder(h, position, payloads)
@@ -387,7 +543,7 @@ class PlaylistActivity : AppCompatActivity() {
 
         override fun onBindViewHolder(h: TrackVH, position: Int) {
             val t = items[position]
-            h.b.num.text = if (isPlaying(t)) "▶" else "${position + 1}"
+            h.b.num.text = if (manualSort) "≡" else if (isPlaying(t)) "▶" else "${position + 1}"
             bindColors(h, t)
             val f = synchronized(files) { files[t.id] }
             val title = t.title.ifEmpty { t.name }
@@ -410,8 +566,19 @@ class PlaylistActivity : AppCompatActivity() {
                 h.b.cover.setTag(R.id.cover, t.id)
             }
             if (f != null) Thumbs.bind(h.b.cover, f)
-            h.b.root.setOnClickListener { play(position) }
-            h.b.root.setOnLongClickListener { trackMenu(t); true }
+            h.b.root.setOnClickListener {
+                playlist?.tracks?.indexOfFirst { it.id == t.id }?.takeIf { it >= 0 }?.let { play(it) }
+            }
+            h.b.root.setOnLongClickListener {
+                if (manualSort) dragHelper.startDrag(h) else trackMenu(t)
+                true
+            }
+            h.b.num.setOnTouchListener { _, event ->
+                if (manualSort && event.actionMasked == android.view.MotionEvent.ACTION_DOWN) {
+                    dragHelper.startDrag(h)
+                    true
+                } else false
+            }
             h.b.menu.setOnClickListener { trackMenu(t) }
         }
 
@@ -436,6 +603,7 @@ class PlaylistActivity : AppCompatActivity() {
     companion object {
         private const val EXTRA_ID = "playlist_id"
         private const val PAYLOAD_COLORS = "colors"
+        private const val PAYLOAD_NUMBER = "number"
         /**
          * The extra overlay on top of the blur (@id/scrim). alpha=0 = no overlay: text colors are
          * now derived by MusicTint from the actual background color, not by darkening the background

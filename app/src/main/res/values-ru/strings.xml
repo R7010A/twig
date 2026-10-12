@@ -395,6 +395,15 @@
     <string name="share_add_server_hint">Пожалуйста, сначала добавьте этот тип подключения к серверу на главном экране</string>
 
     <!-- Music player -->
+    <string name="music_manual_sort">Ручной порядок (перетаскивание)</string>
+    <string name="music_sort_title">Название</string>
+    <string name="music_sort_album">Альбом</string>
+    <string name="music_sort_artist">Исполнитель</string>
+    <string name="music_sort_artist_album_track">Исполнитель → альбом → номер</string>
+    <string name="music_sort_path">Путь</string>
+    <string name="music_sort_filename">Имя файла</string>
+    <string name="music_sort_duration">Длительность</string>
+    <string name="music_sort_album_track">Альбом → номер</string>
     <string name="music_menu">Музыка</string>
     <string name="music_title">Сейчас Играет</string>
     <string name="music_channel">Сейчас играет</string>

@@ -387,6 +387,15 @@
     <string name="share_confirm">Salin ke sini</string>
     <string name="share_no_content">Tidak ada konten yang dapat dibagikan diterima</string>
     <string name="share_add_server_hint">Tambahkan jenis koneksi ini di layar utama dahulu</string>
+    <string name="music_manual_sort">Urutan manual (seret)</string>
+    <string name="music_sort_title">Judul</string>
+    <string name="music_sort_album">Album</string>
+    <string name="music_sort_artist">Artis</string>
+    <string name="music_sort_artist_album_track">Artis → album → nomor trek</string>
+    <string name="music_sort_path">Jalur</string>
+    <string name="music_sort_filename">Nama berkas</string>
+    <string name="music_sort_duration">Durasi</string>
+    <string name="music_sort_album_track">Album → nomor trek</string>
     <string name="music_menu">Musik</string>
     <string name="music_title">Sedang diputar</string>
     <string name="music_channel">Sedang diputar</string>

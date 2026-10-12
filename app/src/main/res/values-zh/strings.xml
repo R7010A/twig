@@ -392,6 +392,15 @@
     <string name="share_add_server_hint">请先在主界面添加此类服务器连接</string>
 
     <!-- Music player -->
+    <string name="music_manual_sort">手动排序（拖动曲目）</string>
+    <string name="music_sort_title">标题</string>
+    <string name="music_sort_album">专辑</string>
+    <string name="music_sort_artist">艺术家</string>
+    <string name="music_sort_artist_album_track">艺术家 → 专辑 → 曲目号</string>
+    <string name="music_sort_path">路径</string>
+    <string name="music_sort_filename">文件名</string>
+    <string name="music_sort_duration">时长</string>
+    <string name="music_sort_album_track">专辑 → 曲目号</string>
     <string name="music_menu">音乐</string>
     <string name="music_title">音乐播放</string>
     <string name="music_channel">正在播放</string>

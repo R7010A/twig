@@ -387,6 +387,15 @@
     <string name="share_confirm">複製到此</string>
     <string name="share_no_content">未收到可複製的內容</string>
     <string name="share_add_server_hint">請先在主介面新增此類伺服器連線</string>
+    <string name="music_manual_sort">手動排序（拖動曲目）</string>
+    <string name="music_sort_title">標題</string>
+    <string name="music_sort_album">專輯</string>
+    <string name="music_sort_artist">藝人</string>
+    <string name="music_sort_artist_album_track">藝人 → 專輯 → 曲目編號</string>
+    <string name="music_sort_path">路徑</string>
+    <string name="music_sort_filename">檔名</string>
+    <string name="music_sort_duration">時長</string>
+    <string name="music_sort_album_track">專輯 → 曲目編號</string>
     <string name="music_menu">音樂</string>
     <string name="music_title">音樂播放</string>
     <string name="music_channel">正在播放</string>

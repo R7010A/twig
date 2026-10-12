@@ -1013,6 +1013,8 @@ class JellyfinFileSystem(
             artist = item.optJSONArray("Artists")?.optString(0).orEmpty()
                 .ifEmpty { item.optString("AlbumArtist") },
             album = item.optString("Album"),
+            trackNumber = item.optInt("IndexNumber").coerceAtLeast(0),
+            discNumber = item.optInt("ParentIndexNumber").coerceAtLeast(0),
             streams = out,
         )
     }

@@ -67,6 +67,18 @@
                 </LinearLayout>
             </androidx.appcompat.widget.Toolbar>
 
+            <EditText
+                android:id="@+id/searchInput"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginHorizontal="16dp"
+                android:singleLine="true"
+                android:inputType="text"
+                android:hint="@string/viewer_search"
+                android:textColor="@color/white"
+                android:textColorHint="#B3FFFFFF"
+                android:visibility="gone" />
+
             <TextView
                 android:id="@+id/empty"
                 android:layout_width="match_parent"

@@ -387,6 +387,15 @@
     <string name="share_confirm">Buraya kopyala</string>
     <string name="share_no_content">Paylaşılabilir içerik alınmadı</string>
     <string name="share_add_server_hint">Önce ana ekranda bu tür sunucu bağlantısı ekleyin</string>
+    <string name="music_manual_sort">Elle sıralama (sürükle)</string>
+    <string name="music_sort_title">Başlık</string>
+    <string name="music_sort_album">Albüm</string>
+    <string name="music_sort_artist">Sanatçı</string>
+    <string name="music_sort_artist_album_track">Sanatçı → albüm → parça no</string>
+    <string name="music_sort_path">Yol</string>
+    <string name="music_sort_filename">Dosya adı</string>
+    <string name="music_sort_duration">Süre</string>
+    <string name="music_sort_album_track">Albüm → parça no</string>
     <string name="music_menu">Müzik</string>
     <string name="music_title">Şimdi çalıyor</string>
     <string name="music_channel">Şimdi çalıyor</string>

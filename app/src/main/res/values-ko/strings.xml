@@ -387,6 +387,15 @@
     <string name="share_confirm">여기에 복사</string>
     <string name="share_no_content">공유할 수 있는 내용을 받지 못했습니다</string>
     <string name="share_add_server_hint">먼저 메인 화면에서 이 유형의 서버 연결을 추가하세요</string>
+    <string name="music_manual_sort">수동 정렬 (드래그)</string>
+    <string name="music_sort_title">제목</string>
+    <string name="music_sort_album">앨범</string>
+    <string name="music_sort_artist">아티스트</string>
+    <string name="music_sort_artist_album_track">아티스트 → 앨범 → 트랙 번호</string>
+    <string name="music_sort_path">경로</string>
+    <string name="music_sort_filename">파일 이름</string>
+    <string name="music_sort_duration">재생 시간</string>
+    <string name="music_sort_album_track">앨범 → 트랙 번호</string>
     <string name="music_menu">음악</string>
     <string name="music_title">지금 재생 중</string>
     <string name="music_channel">지금 재생 중</string>

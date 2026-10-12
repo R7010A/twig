@@ -339,6 +339,29 @@ object MusicEngine {
         listeners.forEach { it.onQueueChanged() }
     }
 
+    /** Match the stored list order while preserving the playing item and its position. */
+    fun reorderQueue(playlist: Playlist) {
+        if (queueId != playlist.id) return
+        val p = player ?: return
+        val order = playlist.tracks.map { it.id }.withIndex().associate { it.value to it.index }
+        val ids = tracks.indices.sortedWith(compareBy({ order[tracks[it].id] ?: Int.MAX_VALUE }, { it }))
+        val sortedTracks = ids.map { tracks[it] }
+        if (sortedTracks == tracks) return
+        val sortedFiles = ids.map { files[it] }
+        // Media3 moves existing items without reopening the playing source.
+        val mutable = tracks.toMutableList()
+        for (target in sortedTracks.indices) {
+            val from = mutable.indexOfFirst { it.id == sortedTracks[target].id }
+            if (from != target) {
+                p.moveMediaItem(from, target)
+                mutable.add(target, mutable.removeAt(from))
+            }
+        }
+        tracks = sortedTracks
+        files = sortedFiles
+        listeners.forEach { it.onQueueChanged() }
+    }
+
     /**
      * Save "remember playback position" by track id rather than index — currentIndex() is the
      * post-filter (invalid tracks from m3u8 / old lists have been skipped by [play]) queue index,
@@ -470,6 +493,8 @@ object MusicEngine {
             d.durationMs,
             audio?.sampleRate ?: 0,
             (audio?.bitrate?.takeIf { it > 0 } ?: d.bitrate).toInt(),
+            d.trackNumber.takeIf { it > 0 } ?: track.trackNumber,
+            d.discNumber.takeIf { it > 0 } ?: -1,
         )
     }
 
@@ -487,7 +512,11 @@ object MusicEngine {
             val dur = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
             val bitrate = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)?.toIntOrNull() ?: 0
             val sampleRate = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_SAMPLERATE)?.toIntOrNull() ?: 0
-            track.withMeta(title, artist, album, dur, sampleRate, bitrate)
+            val number = MusicTrackSort.tagNumber(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER))
+                .takeIf { it > 0 } ?: track.trackNumber
+            val disc = MusicTrackSort.tagNumber(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER))
+                .takeIf { it > 0 } ?: -1
+            track.withMeta(title, artist, album, dur, sampleRate, bitrate, number, disc)
         } finally { runCatching { mmr.release() } }
     }.getOrNull()
 }

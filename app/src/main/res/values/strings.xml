@@ -411,6 +411,15 @@
     <string name="share_add_server_hint">Please add this type of server connection on the main screen first</string>
 
     <!-- Music player -->
+    <string name="music_manual_sort">Manual order (drag rows)</string>
+    <string name="music_sort_title">Title</string>
+    <string name="music_sort_album">Album</string>
+    <string name="music_sort_artist">Artist</string>
+    <string name="music_sort_artist_album_track">Artist → album → track</string>
+    <string name="music_sort_path">Path</string>
+    <string name="music_sort_filename">Filename</string>
+    <string name="music_sort_duration">Duration</string>
+    <string name="music_sort_album_track">Album → track</string>
     <string name="music_menu">Music</string>
     <string name="music_title">Now Playing</string>
     <string name="music_channel">Now playing</string>

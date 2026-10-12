@@ -387,6 +387,15 @@
     <string name="share_confirm">यहाँ कॉपी करें</string>
     <string name="share_no_content">साझा करने योग्य सामग्री नहीं मिली</string>
     <string name="share_add_server_hint">पहले मुख्य स्क्रीन पर इस प्रकार का सर्वर कनेक्शन जोड़ें</string>
+    <string name="music_manual_sort">मैन्युअल क्रम (खींचें)</string>
+    <string name="music_sort_title">शीर्षक</string>
+    <string name="music_sort_album">एल्बम</string>
+    <string name="music_sort_artist">कलाकार</string>
+    <string name="music_sort_artist_album_track">कलाकार → एल्बम → ट्रैक नंबर</string>
+    <string name="music_sort_path">पथ</string>
+    <string name="music_sort_filename">फ़ाइल नाम</string>
+    <string name="music_sort_duration">अवधि</string>
+    <string name="music_sort_album_track">एल्बम → ट्रैक नंबर</string>
     <string name="music_menu">संगीत</string>
     <string name="music_title">अभी चल रहा है</string>
     <string name="music_channel">अभी चल रहा है</string>

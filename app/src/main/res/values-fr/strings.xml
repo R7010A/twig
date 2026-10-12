@@ -387,6 +387,15 @@
     <string name="share_confirm">Copier ici</string>
     <string name="share_no_content">Aucun contenu partageable reçu</string>
     <string name="share_add_server_hint">Ajoutez d’abord ce type de connexion sur l’écran principal</string>
+    <string name="music_manual_sort">Ordre manuel (glisser)</string>
+    <string name="music_sort_title">Titre</string>
+    <string name="music_sort_album">Album</string>
+    <string name="music_sort_artist">Artiste</string>
+    <string name="music_sort_artist_album_track">Artiste → album → piste</string>
+    <string name="music_sort_path">Chemin</string>
+    <string name="music_sort_filename">Nom du fichier</string>
+    <string name="music_sort_duration">Durée</string>
+    <string name="music_sort_album_track">Album → piste</string>
     <string name="music_menu">Musique</string>
     <string name="music_title">Lecture en cours</string>
     <string name="music_channel">Lecture en cours</string>

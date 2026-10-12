@@ -387,6 +387,15 @@
     <string name="share_confirm">ここにコピー</string>
     <string name="share_no_content">共有できる内容を受信していません</string>
     <string name="share_add_server_hint">まずメイン画面でこの種類のサーバー接続を追加してください</string>
+    <string name="music_manual_sort">手動で並べ替え（ドラッグ）</string>
+    <string name="music_sort_title">タイトル</string>
+    <string name="music_sort_album">アルバム</string>
+    <string name="music_sort_artist">アーティスト</string>
+    <string name="music_sort_artist_album_track">アーティスト → アルバム → 曲番号</string>
+    <string name="music_sort_path">パス</string>
+    <string name="music_sort_filename">ファイル名</string>
+    <string name="music_sort_duration">長さ</string>
+    <string name="music_sort_album_track">アルバム → 曲番号</string>
     <string name="music_menu">音楽</string>
     <string name="music_title">再生中</string>
     <string name="music_channel">再生中</string>
