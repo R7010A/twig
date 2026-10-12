@@ -481,7 +481,10 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
             Toast.makeText(this, R.string.msg_pick_dir_first, Toast.LENGTH_SHORT).show()
             return
         }
-        paneAt(1 - activeIndex)?.mountPinnedDirectory(dir, Format.pathLabel(dir))
+        val targetIndex = 1 - activeIndex
+        val target = paneAt(targetIndex) ?: return
+        target.mountPinnedDirectory(dir, Format.pathLabel(dir))
+        setActiveIndex(targetIndex)
     }
 
     /** Landscape has no Toolbar; the overflow menu becomes a PopupMenu anchored on the action strip's "menu" button (items and handling both reuse R.menu.main). */
