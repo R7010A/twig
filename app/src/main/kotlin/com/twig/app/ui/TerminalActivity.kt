@@ -28,9 +28,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import com.termux.terminal.KeyHandler
 import com.termux.terminal.TermBridge
 import com.termux.terminal.TerminalEmulator
@@ -221,6 +218,7 @@ object TermManager {
 class TerminalActivity : AppCompatActivity() {
 
     private lateinit var b: ActivityTerminalBinding
+    private lateinit var fullscreenLayout: StatusBarFullscreen
     private val main = Handler(Looper.getMainLooper())
     private val sessionClient = SessionClient()
     private var ctrlPending = false
@@ -235,6 +233,7 @@ class TerminalActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         b = ActivityTerminalBinding.inflate(layoutInflater)
         setContentView(b.root)
+        fullscreenLayout = StatusBarFullscreen(this, b.root)
         applyFullscreen()
         CmdShims.ensureAsync(this) // Command-completion shims for local shells — build/repair symlinks in the background.
         SshHome.ensureAsync(this) // .mkshrc's ssh alias needs -F on this config, so it has to exist first.
@@ -574,14 +573,7 @@ class TerminalActivity : AppCompatActivity() {
 
     /** Follow the main screen's "Fullscreen (hide status bar)" setting. */
     private fun applyFullscreen() {
-        val controller = WindowCompat.getInsetsController(window, window.decorView)
-        if (Prefs.fullscreen(this)) {
-            controller.systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            controller.hide(WindowInsetsCompat.Type.statusBars())
-        } else {
-            controller.show(WindowInsetsCompat.Type.statusBars())
-        }
+        if (::fullscreenLayout.isInitialized) fullscreenLayout.apply(Prefs.fullscreen(this))
     }
 
     /** scheme non-null = an "Open terminal" request from the file manager, always creates a new one; otherwise show the current session. */
