@@ -2,6 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_settings"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_view_mode"
         android:title="@string/action_view_mode"
         app:showAsAction="never" />
@@ -27,10 +31,6 @@
     <item
         android:id="@+id/action_pin_music_shortcut"
         android:title="@string/music_pin_shortcut"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/action_settings"
-        android:title="@string/action_settings"
         app:showAsAction="never" />
     <!-- Lock is only visible when a master password is set (without one, locking serves no purpose); Exit is always present -->
     <item
