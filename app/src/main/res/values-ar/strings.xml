@@ -879,4 +879,7 @@
     <string name="date_format_mdy">MM/DD/YY</string>
     <string name="music_temporary_playlist">قائمة تشغيل مؤقتة</string>
     <string name="smb1_mode">توافق SMB1 (للأجهزة القديمة فقط)</string>
+    <string name="settings_folder_counts">عدد عناصر المجلدات</string>
+    <string name="settings_folder_counts_desc">عرض عدد المجلدات والملفات المباشرة في المجلدات المحلية وSMB. قد يتطلب العد طلبات إضافية إلى SMB.</string>
+    <string name="folder_counts_description">المجلدات: %1$d، الملفات: %2$d</string>
 </resources>

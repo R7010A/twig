@@ -209,6 +209,11 @@ class SettingsActivity : AppCompatActivity() {
             set = { Prefs.setTextSize(this, it) },
         )
         switchRow(
+            getString(R.string.settings_folder_counts), getString(R.string.settings_folder_counts_desc),
+            get = { Prefs.folderCounts(this) },
+            set = { Prefs.setFolderCounts(this, it) },
+        )
+        switchRow(
             getString(R.string.settings_show_hidden), getString(R.string.settings_show_hidden_desc),
             get = { Prefs.showHidden(this) },
             set = { Prefs.setShowHidden(this, it) },

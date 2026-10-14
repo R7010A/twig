@@ -875,4 +875,7 @@
     <string name="date_format_mdy">MM/DD/YY</string>
     <string name="music_temporary_playlist">Playlist temporanea</string>
     <string name="smb1_mode">Compatibilità SMB1 (solo dispositivi meno recenti)</string>
+    <string name="settings_folder_counts">Conteggio elementi delle cartelle</string>
+    <string name="settings_folder_counts_desc">Mostra il numero di sottocartelle e file diretti nelle cartelle locali e SMB. SMB può richiedere ulteriori richieste di elenco.</string>
+    <string name="folder_counts_description">Cartelle: %1$d, file: %2$d</string>
 </resources>

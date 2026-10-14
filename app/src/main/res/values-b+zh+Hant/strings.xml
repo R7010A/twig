@@ -874,4 +874,7 @@
     <string name="date_format_mdy">MM/DD/YY</string>
     <string name="music_temporary_playlist">臨時播放列表</string>
     <string name="smb1_mode">SMB1 相容模式（僅限舊裝置）</string>
+    <string name="settings_folder_counts">目錄項計數</string>
+    <string name="settings_folder_counts_desc">顯示本機和 SMB 目錄內的直接子目錄及檔案數量。SMB 計數可能需要額外讀取目錄。</string>
+    <string name="folder_counts_description">目錄：%1$d，檔案：%2$d</string>
 </resources>

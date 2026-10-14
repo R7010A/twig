@@ -6,4 +6,5 @@
     <!-- Tag on a row's meta TextView: which entry the pending size probe belongs to, so a
          recycled row never gets another row's number written into it (SizeProbes). -->
     <item name="size_probe" type="id" />
+    <item name="directory_count" type="id" />
 </resources>

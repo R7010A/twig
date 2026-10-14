@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.twig.app.FileInfo
+import com.twig.app.Prefs
 import com.twig.app.Format
 import com.twig.app.R
 import com.twig.app.favoriteDisplayName
@@ -234,6 +235,12 @@ class FileAdapter(
             TYPE_CELL -> CellVH(ItemThumbCellBinding.inflate(inflater, parent, false))
             else -> VH(ItemFileBinding.inflate(inflater, parent, false))
         }
+    }
+
+    override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
+        holder.itemView.findViewById<View>(R.id.folderCounts)?.setTag(R.id.directory_count, null)
+        holder.itemView.findViewById<View>(R.id.meta)?.setTag(R.id.size_probe, null)
+        super.onViewRecycled(holder)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -515,6 +522,11 @@ class FileAdapter(
             size(b.icon, iconDp, dpi)
             b.name.setTextSize(TypedValue.COMPLEX_UNIT_SP, nameSp)
             b.meta.setTextSize(TypedValue.COMPLEX_UNIT_SP, metaSp)
+            b.folderCounts.setTextSize(TypedValue.COMPLEX_UNIT_SP, metaSp)
+            b.folderCounts.visibility = View.GONE
+            b.folderCounts.contentDescription = null
+            b.folderCounts.setTag(R.id.directory_count, null)
+            b.meta.setTag(R.id.size_probe, null)
             b.root.setPaddingRelative(
                 ((2 + node.depth * 14) * dpi).toInt(), 0, 0, 0,
             )
@@ -670,6 +682,10 @@ class FileAdapter(
                     else -> fileMeta(file)
                 },
             )
+            if (Prefs.folderCounts(ctx) && DirectoryCounts.supports(file)) {
+                (node.directoryCount ?: DirectoryCounts.known(file, Prefs.showHidden(ctx)))?.let(::setCounts)
+                if (!node.loading) DirectoryCounts.request(b.folderCounts, file, Prefs.showHidden(ctx), ::setCounts)
+            }
             // A source that cannot report a size in its listing (media server photos) is asked
             // for this row's, in the background; the answer rewrites this row's meta line only.
             if (node.capacity == null) {
@@ -862,6 +878,28 @@ class FileAdapter(
             return sb
         }
 
+        private fun setCounts(count: DirectoryCounts.Count) {
+            val text = SpannableStringBuilder()
+            fun appendIcon(res: Int, number: Int) {
+                val drawable = ContextCompat.getDrawable(b.root.context, res)!!.mutate()
+                drawable.setTint(b.folderCounts.currentTextColor)
+                val edge = b.folderCounts.textSize.toInt().coerceAtLeast(1)
+                drawable.setBounds(0, 0, edge, edge)
+                val start = text.length
+                text.append("\uFFFC")
+                text.setSpan(ImageSpan(drawable, ImageSpan.ALIGN_BOTTOM), start, start + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                text.append(" ").append(number.toString())
+            }
+            appendIcon(R.drawable.ic_count_folder, count.directories)
+            text.append("  ")
+            appendIcon(R.drawable.ic_file, count.files)
+            b.folderCounts.text = text
+            b.folderCounts.contentDescription = b.root.context.getString(R.string.folder_counts_description,
+                count.directories, count.files)
+            b.folderCounts.visibility = View.VISIBLE
+            b.metaRow.visibility = View.VISIBLE
+        }
+
         private fun setMeta(text: CharSequence?) {
             if (text.isNullOrBlank()) {
                 b.meta.visibility = View.GONE
@@ -869,6 +907,8 @@ class FileAdapter(
                 b.meta.visibility = View.VISIBLE
                 b.meta.text = text
             }
+            b.metaRow.visibility = if (b.meta.visibility == View.VISIBLE || b.folderCounts.visibility == View.VISIBLE)
+                View.VISIBLE else View.GONE
         }
 
         /** expanded=null hides the chevron (not expandable), otherwise shows ▶/▼. */

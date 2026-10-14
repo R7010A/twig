@@ -107,6 +107,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
          * while its children retain ordinary keys (only one branch stays open).
          */
         val keyPrefix: String = "",
+        val directoryCount: DirectoryCounts.Count? = null,
     ) : Node {
         override val key: String get() = keyPrefix + fileKey(file)
     }
@@ -452,6 +453,11 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
     /** Children are written already in the current sort order; virtual nodes (servers, favorites, ...) are unaffected. */
     private fun putChildren(key: String, list: List<XFile>) {
         children[key] = sortList(key, list)
+        rememberCounts(key, list)
+    }
+
+    private fun rememberCounts(key: String, list: List<XFile>) {
+        if (Prefs.folderCounts(getApplication())) keyFile[key]?.let { DirectoryCounts.remember(it, list) }
     }
 
     /** Change the sort: re-sort all cached children and rebuild. */
@@ -1381,6 +1387,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                 expanded.remove(key)
                 Thumbs.cancelPending(descendantFilesByKey(key))
                 SizeProbes.cancelPending(descendantFilesByKey(key))
+                DirectoryCounts.cancelPending(descendantFilesByKey(key))
                 val conn = serverScheme[key]?.let { schemeToConn[it] }
                 currentKey = conn?.let { "g:${groupIdFor(it)}" }
                 currentDir = null
@@ -1523,6 +1530,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                     // A mutation, explicit refresh or navigation may have replaced this cache meanwhile.
                     if (children[key] !== cached) continue
                     val sorted = sortList(key, applyListing(listing))
+                    rememberCounts(key, sorted)
                     if (cached == sorted) continue
                     children[key] = sorted
                     if (key in expanded) changed = true
@@ -1544,6 +1552,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
      * next expansion re-fetches.
      */
     fun invalidate(dir: XFile) {
+        DirectoryCounts.invalidate(dir)
         keyFile.entries.filter { it.value.scheme == dir.scheme && it.value.path == dir.path }
             .forEach { children.remove(it.key) }
         children.remove(fileKey(dir))
@@ -1875,6 +1884,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
             expanded.remove(key) -> {
                 Thumbs.cancelPending(descendantFilesByKey(key))
                 SizeProbes.cancelPending(descendantFilesByKey(key))
+                DirectoryCounts.cancelPending(descendantFilesByKey(key))
                 // When collapsing this directory, also remove the search virtual
                 // directory hanging under it (it doesn't naturally disappear from
                 // rows — its render ignores exp, see addFile — so it would sit
@@ -1966,6 +1976,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
             expanded.remove(key) -> {
                 Thumbs.cancelPending(descendantFilesByKey(key))
                 SizeProbes.cancelPending(descendantFilesByKey(key))
+                DirectoryCounts.cancelPending(descendantFilesByKey(key))
                 // When collapsing a server, also drop any search results hanging under
                 // it (attached-row rendering ignores expansion state — see
                 // addServer/addAttachments), same as toggleFile for a regular
@@ -2114,6 +2125,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         if (expanded.remove(node.key)) {
             Thumbs.cancelPending(descendantFilesByKey(node.key))
             SizeProbes.cancelPending(descendantFilesByKey(node.key))
+            DirectoryCounts.cancelPending(descendantFilesByKey(node.key))
             rebuild()
         } else {
             accordionExpand(node.key); rebuild()
@@ -2666,6 +2678,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         rows += FileNode(
             file, depth, expandable, exp || searchState.containsKey(key),
             label, capacity, busy(key), rowPrefix,
+            if (Prefs.folderCounts(getApplication())) DirectoryCounts.known(file, showHidden) else null,
         )
         addAttachments(rows, file, depth)
         if (exp) {

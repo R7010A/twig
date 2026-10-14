@@ -875,4 +875,7 @@
     <string name="date_format_mdy">MM/DD/YY</string>
     <string name="music_temporary_playlist">अस्थायी प्लेलिस्ट</string>
     <string name="smb1_mode">SMB1 संगतता (केवल पुराने उपकरण)</string>
+    <string name="settings_folder_counts">फ़ोल्डर की सामग्री की गिनती</string>
+    <string name="settings_folder_counts_desc">स्थानीय और SMB फ़ोल्डरों में सीधे मौजूद फ़ोल्डरों और फ़ाइलों की संख्या दिखाएँ। SMB के लिए अतिरिक्त अनुरोध हो सकते हैं।</string>
+    <string name="folder_counts_description">फ़ोल्डर: %1$d, फ़ाइलें: %2$d</string>
 </resources>

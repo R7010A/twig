@@ -875,4 +875,7 @@
     <string name="date_format_mdy">MM/DD/YY</string>
     <string name="music_temporary_playlist">Geçici çalma listesi</string>
     <string name="smb1_mode">SMB1 uyumluluğu (yalnızca eski cihazlar)</string>
+    <string name="settings_folder_counts">Klasör öğesi sayıları</string>
+    <string name="settings_folder_counts_desc">Yerel ve SMB klasörlerindeki doğrudan alt klasör ve dosya sayılarını göster. SMB için ek dizin istekleri gerekebilir.</string>
+    <string name="folder_counts_description">Klasörler: %1$d, dosyalar: %2$d</string>
 </resources>

@@ -875,4 +875,7 @@
     <string name="date_format_mdy">MM/DD/YY</string>
     <string name="music_temporary_playlist">임시 재생목록</string>
     <string name="smb1_mode">SMB1 호환 모드 (구형 기기 전용)</string>
+    <string name="settings_folder_counts">폴더 항목 수</string>
+    <string name="settings_folder_counts_desc">로컬 및 SMB 폴더의 바로 아래 폴더와 파일 수를 표시합니다. SMB는 추가 폴더 조회가 필요할 수 있습니다.</string>
+    <string name="folder_counts_description">폴더: %1$d, 파일: %2$d</string>
 </resources>

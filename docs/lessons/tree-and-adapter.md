@@ -4,6 +4,21 @@
 > shared conventions are in [AGENTS.md](../../AGENTS.md); the other sections live
 > beside this file in [docs/lessons/](.).
 
+- **Folder counts are optional direct-child counts, limited to local and SMB sources**
+  (`DirectoryCounts`, 2026-10-15). The metadata line starts with monochrome folder/file
+  icons and separate numbers; date/time stays at the end. Counts follow the hidden-file
+  setting. A bound row can request one background listing; ordinary expansion/refresh
+  results populate the same cache and supersede a slower count request. Local probes
+  use `listForSize` with only name/type metadata, retaining its permission fallback;
+  SMB probes use the backend listing. Never recurse, read file contents, or infer zero
+  from failure. One worker, a 32-entry LIFO queue, 512 count-only cache entries and a
+  60-second lifetime bound the extra work. Recycled rows reject old callbacks; collapsing
+  cancels queued descendants. The setting defaults off and participates in `uiSignature`.
+  `DirectoryCountsTest` / `FolderCountsRowTest` cover actual local reads, SMB listing reuse,
+  hidden entries, failure, stale callbacks, rendering and updates after resume. The weighted
+  timestamp TextView must use maxLines/ellipsize: singleLine with end gravity can leave a
+  horizontally scrolling text layout wider than its visible bounds and hide the date.
+
 - **Cached remote directories stayed stale after reopening or returning from another Activity
   (2026-10-14)**: only local directory expansion ran a quiet re-list, and onResume only refreshed
   local directories. All cached directory expansions (including server and favorite roots) now

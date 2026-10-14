@@ -67,16 +67,35 @@
             android:textSize="10sp"
             android:visibility="gone" />
 
-        <!-- Size/time right-aligned. The size segment is re-coloured row_meta by a span in
-             FileAdapter.fileMeta; everything else on this line stays secondary. -->
-        <TextView
-            android:id="@+id/meta"
+        <!-- Counts sit at the start of the metadata line; size/time stays at the end. -->
+        <LinearLayout
+            android:id="@+id/metaRow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:gravity="end"
-            android:textColor="@color/text_secondary"
-            android:textSize="10sp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/folderCounts"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:singleLine="true"
+                android:textColor="@color/text_secondary"
+                android:textSize="10sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/meta"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:textColor="@color/text_secondary"
+                android:textSize="10sp" />
+        </LinearLayout>
     </LinearLayout>
 
     <ProgressBar

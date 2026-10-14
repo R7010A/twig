@@ -875,4 +875,7 @@
     <string name="date_format_mdy">MM/DD/YY</string>
     <string name="music_temporary_playlist">Temporäre Wiedergabeliste</string>
     <string name="smb1_mode">SMB1-Kompatibilität (nur alte Geräte)</string>
+    <string name="settings_folder_counts">Ordnerinhalte zählen</string>
+    <string name="settings_folder_counts_desc">Direkte Unterordner und Dateien in lokalen und SMB-Ordnern zählen. Für SMB können zusätzliche Verzeichnisabfragen nötig sein.</string>
+    <string name="folder_counts_description">Ordner: %1$d, Dateien: %2$d</string>
 </resources>

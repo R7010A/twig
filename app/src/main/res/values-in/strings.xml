@@ -875,4 +875,7 @@
     <string name="date_format_mdy">MM/DD/YY</string>
     <string name="music_temporary_playlist">Daftar putar sementara</string>
     <string name="smb1_mode">Kompatibilitas SMB1 (hanya perangkat lama)</string>
+    <string name="settings_folder_counts">Jumlah isi folder</string>
+    <string name="settings_folder_counts_desc">Tampilkan jumlah subfolder dan file langsung di folder lokal dan SMB. SMB mungkin memerlukan permintaan direktori tambahan.</string>
+    <string name="folder_counts_description">Folder: %1$d, file: %2$d</string>
 </resources>

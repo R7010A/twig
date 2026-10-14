@@ -875,4 +875,7 @@
     <string name="date_format_mdy">MM/DD/YY</string>
     <string name="music_temporary_playlist">一時プレイリスト</string>
     <string name="smb1_mode">SMB1 互換モード（古い機器のみ）</string>
+    <string name="settings_folder_counts">フォルダー内の項目数</string>
+    <string name="settings_folder_counts_desc">ローカルと SMB のフォルダー内にある直下のフォルダーとファイルの数を表示します。SMB では追加の一覧取得が必要な場合があります。</string>
+    <string name="folder_counts_description">フォルダー: %1$d、ファイル: %2$d</string>
 </resources>
