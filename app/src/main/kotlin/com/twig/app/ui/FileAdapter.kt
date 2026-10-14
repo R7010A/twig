@@ -310,7 +310,7 @@ class FileAdapter(
 
     /** Checkbox selected-state colours: solid brand colour when selected, grey and translucent when not
      * (the checkbox in cells has a darker background, give alpha separately). */
-    private fun tintCheck(v: ImageView, on: Boolean, offAlpha: Float = 0.45f) {
+    private fun tintCheck(v: ImageView, on: Boolean, offAlpha: Float = IDLE_CHECK_ALPHA) {
         v.setColorFilter(
             ContextCompat.getColor(v.context, if (on) R.color.accent else R.color.text_secondary),
         )
@@ -525,8 +525,9 @@ class FileAdapter(
             for (count in listOf(b.directoryCount, b.fileCount)) {
                 count.setTextSize(TypedValue.COMPLEX_UNIT_SP, metaSp)
                 // Equal slots stay fixed across rows, including when one count is hidden.
-                count.layoutParams = count.layoutParams.apply { width = (count.textSize * 6).toInt() }
+                count.layoutParams = count.layoutParams.apply { width = (count.textSize * 3.5f).toInt() }
             }
+            b.folderCounts.alpha = IDLE_CHECK_ALPHA
             b.folderCounts.visibility = View.GONE
             b.folderCounts.contentDescription = null
             b.folderCounts.setTag(R.id.directory_count, null)
@@ -948,6 +949,8 @@ class FileAdapter(
         private const val TYPE_ROW = 0
         private const val TYPE_INFO = 1
         private const val TYPE_CELL = 2
+
+        private const val IDLE_CHECK_ALPHA = 0.45f
 
         /** Partial-refresh marker: only the selection state has changed, the rest of the row (especially icon / thumbnail) doesn't need rebinding. */
         private val PAYLOAD_SELECTION = Any()

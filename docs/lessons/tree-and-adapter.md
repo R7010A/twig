@@ -7,7 +7,8 @@
 - **Folder counts are optional direct-child counts, limited to local and SMB sources**
   (`DirectoryCounts`, 2026-10-15). The metadata line starts with monochrome folder/file
   outline icons and separate numbers; date/time stays at the end. Two equal-width text-scaled
-  slots keep the folder/file positions fixed. Zero values use INVISIBLE, preserving their
+  slots keep the folder/file positions fixed; the group uses the idle selection check’s opacity.
+  Zero values use INVISIBLE, preserving their
   slot, and compound drawables center icons beside the numbers. Counts follow the hidden-file
   setting. A bound row can request one background listing; ordinary expansion/refresh
   results populate the same cache and supersede a slower count request. Local probes

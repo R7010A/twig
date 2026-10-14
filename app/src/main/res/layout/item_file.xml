@@ -86,7 +86,7 @@
 
                 <TextView
                     android:id="@+id/directoryCount"
-                    android:layout_width="64dp"
+                    android:layout_width="38dp"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:includeFontPadding="false"
@@ -97,7 +97,7 @@
 
                 <TextView
                     android:id="@+id/fileCount"
-                    android:layout_width="64dp"
+                    android:layout_width="38dp"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:includeFontPadding="false"

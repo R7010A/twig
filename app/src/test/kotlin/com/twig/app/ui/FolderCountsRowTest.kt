@@ -45,7 +45,7 @@ class FolderCountsRowTest {
             (1..5).map { XFile("file", dir.path + "/File$it", false) })
     }
 
-    @Test fun `two count icons sit before the timestamp and share its color`() {
+    @Test fun `count icons sit before the timestamp with the idle selection check color`() {
         Prefs.setFolderCounts(app, true)
         seed()
         val adapter = adapter()
@@ -71,6 +71,7 @@ class FolderCountsRowTest {
         assertTrue("outlined file icon must reserve space before the number", files.compoundPaddingLeft > 0)
         assertEquals(meta.currentTextColor, directories.currentTextColor)
         assertEquals(meta.currentTextColor, files.currentTextColor)
+        assertEquals(row.findViewById<View>(R.id.check).alpha, counts.alpha, 0.001f)
         assertEquals(directories.top + directories.height / 2, files.top + files.height / 2)
         assertTrue("counts align with the start of the directory name", counts.left == 0)
         assertTrue("timestamp stays to the right of both counts", meta.left >= counts.right)
