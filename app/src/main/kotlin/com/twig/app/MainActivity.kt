@@ -470,7 +470,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         s.asMusic.setOnClickListener {
             startActivity(Intent(this, com.twig.app.ui.MusicPlayerActivity::class.java))
         }
-        s.asSwap.setOnClickListener { setActiveIndex(1 - activeIndex) }
+        s.asSwap.setOnClickListener { setActiveIndex(1 - activeIndex, animateSwitch = true) }
         s.asSwap.setOnLongClickListener { showCurrentDirInOtherPane(); true }
         s.asMenu.setOnClickListener { showStripOverflow(it) }
     }
@@ -484,7 +484,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         val targetIndex = 1 - activeIndex
         val target = paneAt(targetIndex) ?: return
         target.mountPinnedDirectory(dir, Format.pathLabel(dir))
-        setActiveIndex(targetIndex)
+        setActiveIndex(targetIndex, animateSwitch = true)
     }
 
     /** Landscape has no Toolbar; the overflow menu becomes a PopupMenu anchored on the action strip's "menu" button (items and handling both reuse R.menu.main). */
@@ -582,7 +582,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
     private fun isLandscape() =
         resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    private fun applyLayoutMode(animateSwipe: Boolean = false) {
+    private fun applyLayoutMode(animateSwitch: Boolean = false) {
         val land = isLandscape()
         b.paneA.visibility = View.VISIBLE
         b.paneB.visibility = View.VISIBLE
@@ -596,7 +596,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
             applyStripColumns(s, land)
             applyStripTop(s, land)
         }
-        b.panes.showPane(activeIndex, animateSwipe && !land)
+        b.panes.showPane(activeIndex, animateSwitch && !land)
         paneAt(0)?.setActive(activeIndex == 0)
         paneAt(1)?.setActive(activeIndex == 1)
         renderClipBar() // active pane changed, the paste target follows
@@ -617,11 +617,11 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         }
     }
 
-    private fun setActiveIndex(i: Int, animateSwipe: Boolean = false) {
+    private fun setActiveIndex(i: Int, animateSwitch: Boolean = false) {
         if (activeIndex != i) {
             activeIndex = i
             Prefs.setActivePane(this, i)
-            applyLayoutMode(animateSwipe && Prefs.swipeAnimation(this))
+            applyLayoutMode(animateSwitch && Prefs.swipeAnimation(this))
             invalidateOptionsMenu() // the swap icon direction follows the active pane (including swipe / touch switch)
             // The two panes can land on sources with different capabilities (one local, one a media server); switching active pane means recomputing the action strip — ★ must happen **after** activeIndex updates, otherwise we still read the previous pane
             syncStripEnabled()
@@ -716,7 +716,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
 
     override fun onPaneSwipe(velocityX: Float) {
         // Swipe left (negative velocity) → show right pane; swipe right → left pane
-        if (!isLandscape()) setActiveIndex(if (velocityX < 0) 1 else 0, animateSwipe = true)
+        if (!isLandscape()) setActiveIndex(if (velocityX < 0) 1 else 0, animateSwitch = true)
     }
 
     override fun onClipTargetChanged() {
@@ -1073,7 +1073,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
                 setImageDrawable(icon)
                 contentDescription = getString(R.string.menu_swap_pane)
                 minimumWidth = (48 * resources.displayMetrics.density).toInt()
-                setOnClickListener { setActiveIndex(1 - activeIndex) }
+                setOnClickListener { setActiveIndex(1 - activeIndex, animateSwitch = true) }
                 setOnLongClickListener { showCurrentDirInOtherPane(); true }
             }
         }
@@ -1089,7 +1089,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
             startActivity(Intent(this, com.twig.app.ui.MusicPlayerActivity::class.java)); true
         }
         MENU_SWAP_PANE -> {
-            setActiveIndex(1 - activeIndex); true
+            setActiveIndex(1 - activeIndex, animateSwitch = true); true
         }
         R.id.action_view_mode -> {
             showViewModeDialog(); true
