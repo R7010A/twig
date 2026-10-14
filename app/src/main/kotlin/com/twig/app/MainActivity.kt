@@ -830,6 +830,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         edit?.let {
             d.etName.setText(it.name); d.etHost.setText(it.host); d.etShare.setText(it.share)
             d.etUser.setText(it.user); d.etPass.setText(it.password); d.etDomain.setText(it.domain)
+            d.smb1.isChecked = it.smb1
         }
         AlertDialog.Builder(this)
             .setTitle(if (edit == null) getString(R.string.action_connect_smb) else getString(R.string.server_edit))
@@ -850,6 +851,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
                         password = d.etPass.text.toString(),
                         domain = d.etDomain.text.toString().trim().ifEmpty { "WORKGROUP" },
                         name = d.etName.text.toString().trim(),
+                        smb1 = d.smb1.isChecked,
                     ),
                     "lan",
                 )

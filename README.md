@@ -206,7 +206,7 @@ and the app can be built in trimmed configurations by dropping modules.
 | **Encrypted archives** | Read zip/7z/rar, **create** AES-256 zip/7z | WinZip AES and legacy ZipCrypto written by hand |
 | **FTP** | Full read/write | Apache Commons Net |
 | **SFTP** | Full read/write | SSHJ (with full Bouncy Castle for X25519) |
-| **SMB / CIFS** | Full read/write | libsmb2 via NDK/JNI |
+| **SMB / CIFS** | Full read/write | SMB2/3 via libsmb2 (NDK/JNI); opt-in SMB1 via jcifs-ng for legacy devices |
 | **WebDAV** | Full read/write | Hand-written PROPFIND/MKCOL/MOVE, no SDK |
 | **S3-compatible** | Full read/write | Hand-written SigV4 + REST — AWS S3, MinIO, R2, OSS, COS, B2 |
 | **restic** | Read-only, decrypted | Written from scratch; repo format v1 and v2 |
@@ -390,7 +390,7 @@ Twig can find it and save it as a connection.
 | `:fs-archive` | `ArchiveFileSystem` + zip (read/write, encryption) / 7z, and `ArchiveWriter` |
 | `:fs-archive-rar` | `RarFileSystem` (RAR4 + RAR5) — a separate module purely so the `libre` build can drop it |
 | `:fs-network` | `FtpFileSystem` / `SftpFileSystem` / `WebDavFileSystem` / `S3FileSystem` / `JellyfinFileSystem` |
-| `:fs-smb` | `SmbFileSystem` — libsmb2 via NDK/JNI |
+| `:fs-smb` | `SmbFileSystem` — libsmb2 via NDK/JNI; `Smb1FileSystem` — opt-in legacy jcifs-ng backend |
 | `:fs-restic` | restic repository reader (pure Kotlin) |
 | `:fs-zstd` | `NativeZstd` — zstd via JNI |
 | `:git-lite` | Miniature git in pure Kotlin |

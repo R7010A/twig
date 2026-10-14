@@ -874,4 +874,5 @@
     <string name="date_format_dmy">DD.MM.YY</string>
     <string name="date_format_mdy">MM/DD/YY</string>
     <string name="music_temporary_playlist">Lista temporal</string>
+    <string name="smb1_mode">Compatibilidad SMB1 (solo dispositivos antiguos)</string>
 </resources>

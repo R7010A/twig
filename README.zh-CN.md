@@ -186,7 +186,7 @@ Bouncy Castle 那一项几乎全是 `picnic` 后量子签名算法的三张查�
 | **加密压缩包** | 读 zip/7z/rar,**创建** AES-256 zip/7z | WinZip AES 与老式 ZipCrypto 全手写 |
 | **FTP** | 读写全功能 | Apache Commons Net |
 | **SFTP** | 读写全功能 | SSHJ(带完整 Bouncy Castle 解决 X25519) |
-| **SMB / CIFS** | 读写全功能 | libsmb2,经 NDK/JNI |
+| **SMB / CIFS** | 读写全功能 | SMB2/3 用 libsmb2,经 NDK/JNI;旧设备可单独开启基于 jcifs-ng 的 SMB1 |
 | **WebDAV** | 读写全功能 | 手写 PROPFIND/MKCOL/MOVE,不引 SDK |
 | **S3 兼容对象存储** | 读写全功能 | 手写 SigV4 + REST——AWS S3、MinIO、R2、OSS、COS、B2 |
 | **restic** | 只读,解密 | 从零实现;仓库格式 v1 与 v2 |
@@ -326,7 +326,7 @@ UDP 探测让另一台 Twig 扫一下就能把它存成连接。
 | `:fs-archive` | `ArchiveFileSystem` + zip(读写、加密)/ 7z / tar / gz·xz·bz2·zst 单文件压缩,以及 `ArchiveWriter` |
 | `:fs-archive-rar` | `RarFileSystem`(RAR4 + RAR5)——单独成模块纯粹是为了让 `libre` 版能整块去掉 |
 | `:fs-network` | `FtpFileSystem` / `SftpFileSystem` / `WebDavFileSystem` / `S3FileSystem` / `JellyfinFileSystem` |
-| `:fs-smb` | `SmbFileSystem`——libsmb2,经 NDK/JNI |
+| `:fs-smb` | `SmbFileSystem`——libsmb2,经 NDK/JNI;`Smb1FileSystem`——按连接开启的 jcifs-ng 旧协议后端 |
 | `:fs-restic` | restic 仓库读取器(纯 Kotlin) |
 | `:fs-zstd` | `NativeZstd`——zstd,经 JNI |
 | `:git-lite` | 纯 Kotlin 迷你 git |

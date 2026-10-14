@@ -98,6 +98,17 @@
 - **SMB refuses `append = true`** rather than silently truncating (2026-09-17 review): the
   native open always truncates, and nothing asks for append today — a future resumable copy
   would otherwise wipe what it meant to extend. WebDAV already refused the same way.
+- **SMB1 is a separate, explicit connection mode** (`Smb1FileSystem`, jcifs-ng): the
+  default stays on libsmb2 (SMB2/3), with no downgrade after authentication or negotiation
+  failure. Each legacy connection owns its CIFSContext, closes it when dropped, and pins
+  both min/max dialects to SMB1. Stream owners live until the stream closes. jCIFS expects
+  literal path names, **not percent-encoded names**: encoding before constructing SmbFile
+  really creates `%E4...` and `%20` files on the server. The live test against an NT1-only
+  Samba checks Unicode, spaces, `#`, `%`, append, seek, share enumeration and subdirectory
+  mounts; it is opt-in via `TWIG_SMB1_TEST_HOST` (optional `_USER` / `_PASSWORD`).
+  The three-argument NtlmPasswordAuthenticator constructor always chooses USER, including
+  for `guest`: explicit passwordless guest access needs AuthenticationType.GUEST. Keep
+  `allowGuestFallback=false` so a named login cannot silently connect as somebody else.
 - **Server XML goes through `SafeXml`** (WebDAV multistatus, S3 listings): DOCTYPE and external
   entities off, each feature set on its own because Android's factory throws on unknown ones.
   On the JVM the old code really did expand `<!ENTITY x SYSTEM "file:…">` into a file name

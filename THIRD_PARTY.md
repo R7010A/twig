@@ -105,13 +105,16 @@ Twig provides read-only RAR extraction and does not implement RAR compression.
 > Apache-2.0), used by Material Files on F-Droid. It would let `libre` have RAR
 > too, at roughly +0.94 MB per ABI and with **no support for encrypted RAR**.
 
-### 2.3 Weak copyleft with an exception
+### 2.3 Weak copyleft components
 
 | Component | Version | License | Used for |
 |---|---|---|---|
+| `eu.agno3.jcifs:jcifs-ng` | 2.1.10 | LGPL-2.1-or-later | Opt-in SMB1 support for legacy servers |
 | `com.android.tools:desugar_jdk_libs` | 2.0.4 | GPL-2.0 **with Classpath Exception** | Java 8+ API desugaring (required by the Jellyfin decoder) |
 
-The Classpath Exception permits linking without the copyleft propagating.
+jCIFS NG source and license: https://github.com/AgNO3/jcifs-ng/tree/jcifs-ng-2.1.10.
+Its SLF4J and Bouncy Castle dependencies are shared with the existing backends.
+The Classpath Exception on `desugar_jdk_libs` permits linking without the copyleft propagating.
 
 ### 2.4 Permissively licensed components
 
@@ -132,7 +135,7 @@ The Classpath Exception permits linking without the copyleft propagating.
 | Apache Commons Compress | 1.26.2 | Apache-2.0 | 7z |
 | SSHJ | 0.38.0 | Apache-2.0 | SFTP / SSH |
 | OkHttp | 4.12.0 | Apache-2.0 | HTTP layer for WebDAV and S3 |
-| SLF4J API | 1.7.36 | MIT | Transitive dependency of junrar (`full` only) |
+| SLF4J API | 1.7.36 | MIT | Logging API for network and archive dependencies |
 | Bouncy Castle (`bcprov-jdk18on`) | 1.75 / 1.78.1 | Bouncy Castle License (MIT-style) | X25519 key exchange, scrypt |
 | XZ for Java (`org.tukaani:xz`) | 1.9 | Public Domain | LZMA/LZMA2 for 7z |
 | Shizuku `api` / `provider` | 13.1.5 | MIT | Privileged access without root |

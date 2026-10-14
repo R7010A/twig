@@ -14,6 +14,7 @@ import com.twig.fs.network.SftpFileSystem
 import com.twig.fs.network.WebDavFileSystem
 import com.twig.fs.smb.SmbConfig
 import com.twig.fs.smb.SmbFileSystem
+import com.twig.fs.smb.Smb1FileSystem
 
 /**
  * Centralised "connection → registered scheme" resolution, so places outside PaneViewModel
@@ -62,6 +63,7 @@ object Connections {
     fun drop(scheme: String) {
         when (val fs = FsRegistry.unregister(scheme)) {
             is SmbFileSystem -> runCatching { fs.disconnect() }
+            is Smb1FileSystem -> runCatching { fs.disconnect() }
             is SftpFileSystem -> runCatching { fs.disconnect() }
             else -> Unit
         }
@@ -102,12 +104,18 @@ object Connections {
         }
         when (conn.type) {
             "smb" -> {
-                val fs = SmbFileSystem(
-                    SmbConfig(conn.host, conn.share, conn.user, conn.password, conn.domain), s,
-                )
-                fs.connect()
-                fs.dialectName()?.let(onInfo)
-                FsRegistry.register(fs)
+                val config = SmbConfig(conn.host, conn.share, conn.user, conn.password, conn.domain)
+                if (conn.smb1) {
+                    val fs = Smb1FileSystem(config, s)
+                    fs.connect()
+                    onInfo("SMB1")
+                    FsRegistry.register(fs)
+                } else {
+                    val fs = SmbFileSystem(config, s)
+                    fs.connect()
+                    fs.dialectName()?.let(onInfo)
+                    FsRegistry.register(fs)
+                }
             }
             "sftp" -> FsRegistry.register(
                 SftpFileSystem(

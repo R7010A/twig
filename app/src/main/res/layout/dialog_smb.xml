@@ -54,4 +54,10 @@
         android:inputType="text"
         android:text="WORKGROUP"
         android:importantForAutofill="no" />
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/smb1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/smb1_mode"
+        android:layout_marginTop="8dp" />
 </LinearLayout>

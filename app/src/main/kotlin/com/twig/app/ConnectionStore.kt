@@ -60,6 +60,8 @@ data class SavedConnection(
     val token: String = "",
     /** Jellyfin / Emby userId resolved on the last login, to skip a `/Users` round-trip. */
     val userId: String = "",
+    /** Explicit legacy SMB1 connection; the default backend remains libsmb2 (SMB2/3). */
+    val smb1: Boolean = false,
 ) {
     /** Whether it is a media server (Jellyfin / Emby): these two types behave identically everywhere, judgement centralised here. */
     fun isMediaServer(): Boolean = type == "jellyfin" || type == "emby"
@@ -111,6 +113,7 @@ data class SavedConnection(
         put("name", name); put("keyPath", keyPath); put("hostKey", hostKey)
         put("region", region); put("pathStyle", pathStyle)
         put("apiKey", apiKey); put("token", token); put("userId", userId)
+        put("smb1", smb1)
     }
 
     companion object {
@@ -130,6 +133,7 @@ data class SavedConnection(
             apiKey = o.optString("apiKey", ""),
             token = o.optString("token", ""),
             userId = o.optString("userId", ""),
+            smb1 = o.optBoolean("smb1", false),
         )
     }
 }

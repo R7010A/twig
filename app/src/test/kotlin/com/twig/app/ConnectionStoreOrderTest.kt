@@ -3,6 +3,7 @@ package com.twig.app
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,6 +29,17 @@ class ConnectionStoreOrderTest {
     private fun conn(host: String) = SavedConnection(type = "jellyfin", host = "http://$host", user = "u")
 
     private fun labels() = ConnectionStore.all(ctx).map { it.host }
+
+    @Test
+    fun `old SMB connections keep the default dialect and legacy mode round trips`() {
+        val smb = SavedConnection(type = "smb", host = "nas", share = "Public")
+        val oldJson = smb.toJson().apply { remove("smb1") }
+        assertFalse(SavedConnection.fromJson(oldJson).smb1)
+        val legacy = smb.copy(smb1 = true)
+        ConnectionStore.save(ctx, legacy)
+        assertEquals(legacy, ConnectionStore.all(ctx).last())
+        assertEquals("dialect changes keep the existing tree and favorite paths", smb.label(), legacy.label())
+    }
 
     @Before
     fun setup() {

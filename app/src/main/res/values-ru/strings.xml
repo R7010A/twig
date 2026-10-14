@@ -910,4 +910,5 @@
     <string name="date_format_dmy">DD.MM.YY</string>
     <string name="date_format_mdy">MM/DD/YY</string>
     <string name="music_temporary_playlist">Временный плейлист</string>
+    <string name="smb1_mode">Совместимость с SMB1 (только старые устройства)</string>
 </resources>

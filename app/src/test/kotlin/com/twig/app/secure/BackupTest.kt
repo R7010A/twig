@@ -59,7 +59,7 @@ class BackupTest {
             SavedConnection(
                 type = "smb", host = "10.0.0.1", share = "public", user = "vale",
                 password = "s3cret-smb", name = "Home NAS",
-                token = "stale-token", hostKey = "SHA256:abcdef",
+                token = "stale-token", hostKey = "SHA256:abcdef", smb1 = true,
             ),
         )
         Prefs.setArchivePassword(ctx, "/sdcard/x.zip", "zip-pw")
@@ -116,6 +116,7 @@ class BackupTest {
         val c = ConnectionStore.all(ctx).single()
         assertEquals("s3cret-smb", c.password)
         assertEquals("Home NAS", c.name)
+        assertTrue("legacy dialect selection survives a backup on another device", c.smb1)
         assertEquals("zip-pw", Prefs.archivePassword(ctx, "/sdcard/x.zip"))
         assertTrue(Prefs.thumbs(ctx))
     }

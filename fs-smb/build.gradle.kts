@@ -42,4 +42,13 @@ android {
 
 dependencies {
     implementation(project(":core-fs"))
+    implementation("eu.agno3.jcifs:jcifs-ng:2.1.10")
+    testImplementation("junit:junit:4.13.2")
+}
+
+tasks.withType<Test>().configureEach {
+    if (!System.getenv("TWIG_SMB1_TEST_HOST").isNullOrBlank()) {
+        outputs.upToDateWhen { false }
+        outputs.doNotCacheIf("SMB1 live tests depend on an external fixture") { true }
+    }
 }
