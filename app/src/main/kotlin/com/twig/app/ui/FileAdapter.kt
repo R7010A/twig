@@ -683,7 +683,7 @@ class FileAdapter(
             if (file.scheme == com.twig.app.AppsFileSystem.SCHEME) bindApp(file)
             setMeta(
                 node.capacity ?: when {
-                    file.isDir -> Format.time(file.lastModified, b.root.context).takeIf { file.lastModified > 0 }
+                    file.isDir -> dateMeta(file)
                     else -> fileMeta(file)
                 },
             )
@@ -856,7 +856,7 @@ class FileAdapter(
 
         /**
          * A file row's "size  time" line, with the **size** coloured [R.color.row_meta] and the
-         * timestamp left at the line's own secondary grey.
+         * timestamp muted to match the idle selection check.
          *
          * ★ The colour is a span rather than the TextView's textColor: `meta` is one view shared by
          * every row kind — a directory's timestamp, a favourite's full path, a server's address,
@@ -870,7 +870,7 @@ class FileAdapter(
             // When size is unknown (media servers don't give byte counts for photos) don't show the whole segment, don't write "0 B"
             val known = if (bytes > 0) file.copy(size = bytes) else file
             val size = Format.sizeOrNull(known)?.takeIf { known.size > 0 || known.lastModified > 0 }
-            val time = Format.time(file.lastModified, b.root.context).takeIf { file.lastModified > 0 }
+            val time = dateMeta(file)
             if (size == null) return time
             val sb = SpannableStringBuilder(size)
             sb.setSpan(
@@ -881,6 +881,16 @@ class FileAdapter(
             )
             if (time != null) sb.append("  ").append(time)
             return sb
+        }
+
+        private fun dateMeta(file: XFile): CharSequence? {
+            if (file.lastModified <= 0) return null
+            val color = b.meta.currentTextColor
+            val muted = androidx.core.graphics.ColorUtils.setAlphaComponent(color,
+                (android.graphics.Color.alpha(color) * IDLE_CHECK_ALPHA + 0.5f).toInt())
+            return SpannableStringBuilder(Format.time(file.lastModified, b.root.context)).apply {
+                setSpan(ForegroundColorSpan(muted), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
         }
 
         private fun setCounts(count: DirectoryCounts.Count) {
