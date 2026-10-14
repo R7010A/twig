@@ -3,8 +3,6 @@ package com.twig.app.ui
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.text.Spanned
-import android.text.style.ImageSpan
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.FrameLayout
@@ -55,16 +53,25 @@ class FolderCountsRowTest {
         val holder = adapter.createViewHolder(parent(), adapter.getItemViewType(0))
         adapter.bindViewHolder(holder, 0)
         val row = holder.itemView
+        row.layoutDirection = View.LAYOUT_DIRECTION_LTR
         val width = (400 * app.resources.displayMetrics.density).toInt()
         row.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
         row.layout(0, 0, width, row.measuredHeight)
-        val counts = row.findViewById<TextView>(R.id.folderCounts)
+        val counts = row.findViewById<View>(R.id.folderCounts)
         val meta = row.findViewById<TextView>(R.id.meta)
         assertEquals(View.VISIBLE, counts.visibility)
-        assertEquals("\uFFFC 2  \uFFFC 5", counts.text.toString())
-        assertEquals(2, (counts.text as Spanned).getSpans(0, counts.length(), ImageSpan::class.java).size)
-        assertEquals(meta.currentTextColor, counts.currentTextColor)
+        val directories = row.findViewById<TextView>(R.id.directoryCount)
+        val files = row.findViewById<TextView>(R.id.fileCount)
+        assertEquals("2", directories.text.toString())
+        assertEquals("5", files.text.toString())
+        assertNotNull(directories.compoundDrawablesRelative[0])
+        assertNotNull(files.compoundDrawablesRelative[0])
+        assertTrue("outlined folder icon must reserve space before the number", directories.compoundPaddingLeft > 0)
+        assertTrue("outlined file icon must reserve space before the number", files.compoundPaddingLeft > 0)
+        assertEquals(meta.currentTextColor, directories.currentTextColor)
+        assertEquals(meta.currentTextColor, files.currentTextColor)
+        assertEquals(directories.top + directories.height / 2, files.top + files.height / 2)
         assertTrue("counts align with the start of the directory name", counts.left == 0)
         assertTrue("timestamp stays to the right of both counts", meta.left >= counts.right)
         assertTrue(meta.text.isNotBlank())
@@ -75,6 +82,36 @@ class FolderCountsRowTest {
         row.draw(Canvas(bitmap))
         File(System.getProperty("java.io.tmpdir"), "twig-folder-counts.png").outputStream().use {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+        }
+    }
+
+    @Test fun `zero counts are hidden without shifting either count slot`() {
+        Prefs.setFolderCounts(app, true)
+        val adapter = adapter()
+        val values = listOf(DirectoryCounts.Count(2, 5), DirectoryCounts.Count(0, 5),
+            DirectoryCounts.Count(9999, 0), DirectoryCounts.Count(0, 0))
+        adapter.submitList(values.mapIndexed { index, value ->
+            val file = dir.copy(path = "/storage/Example$index")
+            DirectoryCounts.remember(file,
+                (1..value.directories).map { XFile("file", file.path + "/Dir$it", true) } +
+                (1..value.files).map { XFile("file", file.path + "/File$it", false) })
+            PaneViewModel.FileNode(file, 1, true, false)
+        })
+        val holder = adapter.createViewHolder(parent(), adapter.getItemViewType(0))
+        val width = (400 * app.resources.displayMetrics.density).toInt()
+        var fileLeft: Int? = null
+        values.forEachIndexed { index, value ->
+            adapter.onBindViewHolder(holder, index)
+            val row = holder.itemView
+            row.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
+            row.layout(0, 0, width, row.measuredHeight)
+            val directories = row.findViewById<TextView>(R.id.directoryCount)
+            val files = row.findViewById<TextView>(R.id.fileCount)
+            assertEquals(if (value.directories == 0) View.INVISIBLE else View.VISIBLE, directories.visibility)
+            assertEquals(if (value.files == 0) View.INVISIBLE else View.VISIBLE, files.visibility)
+            assertEquals(0, directories.left)
+            if (fileLeft == null) fileLeft = files.left else assertEquals(fileLeft, files.left)
         }
     }
 
@@ -90,7 +127,7 @@ class FolderCountsRowTest {
             directoryCount = DirectoryCounts.Count(2, 5))))
         val holder = adapter.createViewHolder(parent(), adapter.getItemViewType(0))
         adapter.bindViewHolder(holder, 0)
-        val counts = holder.itemView.findViewById<TextView>(R.id.folderCounts)
+        val counts = holder.itemView.findViewById<View>(R.id.folderCounts)
         assertEquals(View.GONE, counts.visibility)
         assertNull(counts.getTag(R.id.directory_count))
     }
@@ -103,9 +140,9 @@ class FolderCountsRowTest {
             PaneViewModel.FileNode(XFile("file", "/file.txt", false, size = 4), 1, false, false)))
         val holder = adapter.createViewHolder(parent(), adapter.getItemViewType(0))
         adapter.bindViewHolder(holder, 0)
-        assertEquals(View.VISIBLE, holder.itemView.findViewById<TextView>(R.id.folderCounts).visibility)
+        assertEquals(View.VISIBLE, holder.itemView.findViewById<View>(R.id.folderCounts).visibility)
         adapter.onBindViewHolder(holder, 1)
-        val counts = holder.itemView.findViewById<TextView>(R.id.folderCounts)
+        val counts = holder.itemView.findViewById<View>(R.id.folderCounts)
         assertEquals(View.GONE, counts.visibility)
         assertNull(counts.getTag(R.id.directory_count))
     }

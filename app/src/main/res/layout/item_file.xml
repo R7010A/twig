@@ -75,15 +75,37 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
-            <TextView
+            <LinearLayout
                 android:id="@+id/folderCounts"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                android:singleLine="true"
-                android:textColor="@color/text_secondary"
-                android:textSize="10sp"
-                android:visibility="gone" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/directoryCount"
+                    android:layout_width="64dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:includeFontPadding="false"
+                    android:singleLine="true"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="10sp"
+                    android:importantForAccessibility="no" />
+
+                <TextView
+                    android:id="@+id/fileCount"
+                    android:layout_width="64dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:includeFontPadding="false"
+                    android:singleLine="true"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="10sp"
+                    android:importantForAccessibility="no" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/meta"

@@ -522,7 +522,11 @@ class FileAdapter(
             size(b.icon, iconDp, dpi)
             b.name.setTextSize(TypedValue.COMPLEX_UNIT_SP, nameSp)
             b.meta.setTextSize(TypedValue.COMPLEX_UNIT_SP, metaSp)
-            b.folderCounts.setTextSize(TypedValue.COMPLEX_UNIT_SP, metaSp)
+            for (count in listOf(b.directoryCount, b.fileCount)) {
+                count.setTextSize(TypedValue.COMPLEX_UNIT_SP, metaSp)
+                // Equal slots stay fixed across rows, including when one count is hidden.
+                count.layoutParams = count.layoutParams.apply { width = (count.textSize * 6).toInt() }
+            }
             b.folderCounts.visibility = View.GONE
             b.folderCounts.contentDescription = null
             b.folderCounts.setTag(R.id.directory_count, null)
@@ -879,21 +883,18 @@ class FileAdapter(
         }
 
         private fun setCounts(count: DirectoryCounts.Count) {
-            val text = SpannableStringBuilder()
-            fun appendIcon(res: Int, number: Int) {
+            fun bindCount(view: android.widget.TextView, res: Int, number: Int) {
                 val drawable = ContextCompat.getDrawable(b.root.context, res)!!.mutate()
-                drawable.setTint(b.folderCounts.currentTextColor)
-                val edge = b.folderCounts.textSize.toInt().coerceAtLeast(1)
+                drawable.setTint(b.meta.currentTextColor)
+                val edge = (view.textSize * 1.2f).toInt().coerceAtLeast(1)
                 drawable.setBounds(0, 0, edge, edge)
-                val start = text.length
-                text.append("\uFFFC")
-                text.setSpan(ImageSpan(drawable, ImageSpan.ALIGN_BOTTOM), start, start + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                text.append(" ").append(number.toString())
+                view.setCompoundDrawablesRelative(drawable, null, null, null)
+                view.compoundDrawablePadding = (view.textSize * 0.25f).toInt()
+                view.text = number.toString()
+                view.visibility = if (number == 0) View.INVISIBLE else View.VISIBLE
             }
-            appendIcon(R.drawable.ic_count_folder, count.directories)
-            text.append("  ")
-            appendIcon(R.drawable.ic_file, count.files)
-            b.folderCounts.text = text
+            bindCount(b.directoryCount, R.drawable.ic_count_folder, count.directories)
+            bindCount(b.fileCount, R.drawable.ic_count_file, count.files)
             b.folderCounts.contentDescription = b.root.context.getString(R.string.folder_counts_description,
                 count.directories, count.files)
             b.folderCounts.visibility = View.VISIBLE
