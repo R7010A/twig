@@ -280,14 +280,15 @@ class SlowExpandRaceTest {
         hold.release()
         advanceUntilIdle()
 
-        // click slow again: io is now back to a dispatcher that actually runs, but it should not list again
+        // Cached children appear synchronously; a fresh listing runs behind them.
         val fs = FsRegistry.of(root) as FakeFileSystem
         val before = fs.listed.count { it == "/slow" }
         vm.toggle(row("slow"))
-        advanceUntilIdle()
-
         assertTrue("clicking it again should expand it", row("slow").expanded)
         assertFalse("quick yields and collapses", row("quick").expanded)
-        org.junit.Assert.assertEquals("its children were already cached, should not list again", before, fs.listed.count { it == "/slow" })
+        assertTrue(vm.state.value.rows.filterIsInstance<PaneViewModel.FileNode>().any { it.file.path == "/slow/s.txt" })
+        org.junit.Assert.assertEquals("cached expansion must not wait for IO", before, fs.listed.count { it == "/slow" })
+        advanceUntilIdle()
+        org.junit.Assert.assertEquals("every expansion checks for external changes", before + 1, fs.listed.count { it == "/slow" })
     }
 }

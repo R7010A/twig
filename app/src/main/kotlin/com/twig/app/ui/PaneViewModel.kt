@@ -1477,46 +1477,60 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         (k.startsWith("s:") || k.startsWith("fav:")) && v.scheme == x.scheme && v.path == x.path
     }?.key
 
-    /**
-     * Only re-list expanded local directories (so external apps creating/removing files
-     * stay in sync); network directories are not touched.
-     * If nothing changed, skip rebuilding the tree to avoid a pointless refresh.
-     */
-    fun refreshLocal() {
-        val targets = expandedSnapshot().mapNotNull { k ->
-            keyFile[k]?.takeIf { it.scheme == "file" && it.isDir }?.let { k to it }
-        }
-        if (targets.isEmpty()) return
-        viewModelScope.launch {
-            // IO only reads; the assignment below runs on the main thread anyway
-            // (sortList still reads Prefs, which has to be on the main thread).
-            val fresh = HashMap<String, Listing>()
-            withContext(io) {
-                for ((k, f) in targets) runCatching { fresh[k] = listChildren(f) }
+    /** Re-read watched local directories after filesystem events. */
+    fun refreshLocal() = refreshQuietly(localRefreshTargets())
+
+    /** onResume also checks the current directory on any backend, including server/favorite roots. */
+    fun refreshOnResume() {
+        val targets = localRefreshTargets().toMap(LinkedHashMap())
+        currentDir?.let { dir ->
+            keyFile.forEach { (key, file) ->
+                if (file.scheme == dir.scheme && file.path == dir.path && file.isDir) targets[key] = file
             }
-            var changed = false
-            for ((k, l) in fresh) {
-                val sorted = sortList(k, applyListing(l))
-                if (children[k] != sorted) changed = true
-                children[k] = sorted
-            }
-            if (changed) rebuild()
+            // Archive rows keep the host file in keyFile, while currentDir is the mounted root.
+            currentKey?.takeIf { mountRoots[it] == dir }?.let { key -> targets[key] = dir }
         }
+        refreshQuietly(targets.toList(), expandedOnly = false)
     }
 
-    /**
-     * Re-list [dir] in the background and replace its cached children if they changed, with
-     * no spinner and no scroll/selection side effects — the row is already expanded and
-     * showing the previous listing.
-     */
-    private fun relistQuietly(key: String, dir: XFile) {
+    private fun localRefreshTargets(): List<Pair<String, XFile>> =
+        expandedSnapshot().mapNotNull { key ->
+            keyFile[key]?.takeIf { it.scheme == "file" && it.isDir }?.let { key to it }
+        }
+
+    private val quietRefreshing = HashSet<String>()
+
+    /** Keep cached rows visible while reading; publish only changes and never alter navigation. */
+    private fun relistQuietly(key: String, dir: XFile) = refreshQuietly(listOf(key to dir))
+
+    private fun refreshQuietly(targets: List<Pair<String, XFile>>, expandedOnly: Boolean = true) {
+        val requests = targets.distinctBy { it.first }.mapNotNull { (key, dir) ->
+            val cached = children[key] ?: return@mapNotNull null
+            if (!quietRefreshing.add(key)) return@mapNotNull null
+            Triple(key, dir, cached)
+        }
+        if (requests.isEmpty()) return
         viewModelScope.launch {
-            val fresh = withContext(io) { runCatching { listChildren(dir, key) }.getOrNull() } ?: return@launch
-            if (!expanded.contains(key)) return@launch // collapsed again while we were listing
-            val sorted = sortList(key, applyListing(fresh))
-            if (children[key] == sorted) return@launch
-            children[key] = sorted
-            rebuild()
+            try {
+                val fresh = withContext(io) {
+                    requests.mapNotNull { (key, dir, cached) ->
+                        runCatching { Triple(key, cached, listChildren(dir, key)) }.getOrNull()
+                    }
+                }
+                var changed = false
+                for ((key, cached, listing) in fresh) {
+                    if (expandedOnly && key !in expanded) continue
+                    // A mutation, explicit refresh or navigation may have replaced this cache meanwhile.
+                    if (children[key] !== cached) continue
+                    val sorted = sortList(key, applyListing(listing))
+                    if (cached == sorted) continue
+                    children[key] = sorted
+                    if (key in expanded) changed = true
+                }
+                if (changed) rebuild()
+            } finally {
+                requests.forEach { quietRefreshing.remove(it.first) }
+            }
         }
     }
 
@@ -1890,14 +1904,8 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                     noteChangedIn(XFile(n.file.scheme, n.file.parentPath, isDir = true))
                 }
                 accordionExpand(key); rebuild()
-                // ★ A local directory that has been collapsed is not being watched any more
-                // ([PaneFragment.syncObservers] only watches what is on screen), so whatever
-                // another app — or the shell, or the other pane — did to it since is not in
-                // the cached listing, and re-expanding used to show the stale one until the
-                // user hit refresh. Listing it again is cheap, so do it **behind** the
-                // expansion: the rows appear instantly from the cache and are corrected a
-                // moment later if they differ, instead of paying a spinner every time.
-                if (n.file.scheme == "file") relistQuietly(key, n.file)
+                // Every directory may have changed while collapsed, including remote ones.
+                if (n.file.isDir) relistQuietly(key, n.file)
             }
             // This row is already being fetched (common after "abandon then tap
             // back"): claimExpand above has reclaimed it and the spinner is
@@ -1977,6 +1985,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
             children.containsKey(key) -> {
                 currentDir = keyFile[key] ?: currentDir
                 accordionExpand(key); rebuild()
+                keyFile[key]?.let { relistQuietly(key, it) }
             }
             // Already connecting (common after "abandon then tap back"): claimExpand
             // has already reclaimed it and the spinner is reinstated; no second
@@ -2236,6 +2245,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
             children.containsKey(key) -> {
                 currentDir = keyFile[key] ?: currentDir
                 accordionExpand(key); rebuild(); onResult(true, null)
+                keyFile[key]?.let { relistQuietly(key, it) }
             }
             // Already connecting (common after "abandon then tap back"): claimExpand
             // has already reclaimed it and the spinner is reinstated; no second

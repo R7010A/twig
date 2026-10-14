@@ -255,6 +255,14 @@ class FileAdapter(
         position: Int,
         payloads: MutableList<Any>,
     ) {
+        if (payloads.isNotEmpty() && payloads.all { it === PAYLOAD_APP_ICON }) {
+            val node = getItem(position) as? PaneViewModel.FileNode ?: return
+            when (holder) {
+                is VH -> holder.bindDefaultAppIcon(node)
+                is CellVH -> holder.bindDefaultAppIcon(node)
+            }
+            return
+        }
         if (payloads.isNotEmpty() && payloads.all { it === PAYLOAD_SELECTION }) {
             val node = getItem(position)
             when (holder) {
@@ -284,6 +292,15 @@ class FileAdapter(
         if (itemCount > 0) notifyItemRangeChanged(0, itemCount, PAYLOAD_SELECTION)
     }
 
+    /** Returning from a resolver can change default openers; leave row geometry and thumbnails alone. */
+    fun refreshDefaultAppIcons() {
+        currentList.forEachIndexed { index, node ->
+            val file = (node as? PaneViewModel.FileNode)?.file ?: return@forEachIndexed
+            if (!file.isDir && file.extension.isNotEmpty() && FileIcons.baseIconRes(file) == R.drawable.ic_file &&
+                !(thumbs && Thumbs.canThumb(file))) notifyItemChanged(index, PAYLOAD_APP_ICON)
+        }
+    }
+
     /** Checkbox selected-state colours: solid brand colour when selected, grey and translucent when not
      * (the checkbox in cells has a darker background, give alpha separately). */
     private fun tintCheck(v: ImageView, on: Boolean, offAlpha: Float = 0.45f) {
@@ -295,6 +312,7 @@ class FileAdapter(
 
     /** Grid cell: square thumbnail + corner grey checkbox, file name is toggleable. Indentation is omitted; the parent is the directory row above. */
     inner class CellVH(private val b: ItemThumbCellBinding) : RecyclerView.ViewHolder(b.root) {
+        fun bindDefaultAppIcon(node: PaneViewModel.FileNode) { FileIcons.bind(b.thumb, node.file) }
         fun bind(node: PaneViewModel.FileNode) {
             val ctx = b.root.context
             val dpi = ctx.resources.displayMetrics.density
@@ -487,6 +505,7 @@ class FileAdapter(
     }
 
     inner class VH(private val b: ItemFileBinding) : RecyclerView.ViewHolder(b.root) {
+        fun bindDefaultAppIcon(node: PaneViewModel.FileNode) { FileIcons.bind(b.icon, node.file) }
 
         fun bind(node: PaneViewModel.Node) {
             val ctx = b.root.context
@@ -891,6 +910,7 @@ class FileAdapter(
 
         /** Partial-refresh marker: only the selection state has changed, the rest of the row (especially icon / thumbnail) doesn't need rebinding. */
         private val PAYLOAD_SELECTION = Any()
+        private val PAYLOAD_APP_ICON = Any()
 
         private val DIFF = object : DiffUtil.ItemCallback<PaneViewModel.Node>() {
             override fun areItemsTheSame(a: PaneViewModel.Node, b: PaneViewModel.Node) = a.key == b.key

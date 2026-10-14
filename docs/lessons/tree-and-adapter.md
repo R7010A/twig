@@ -4,6 +4,17 @@
 > shared conventions are in [AGENTS.md](../../AGENTS.md); the other sections live
 > beside this file in [docs/lessons/](.).
 
+- **Cached remote directories stayed stale after reopening or returning from another Activity
+  (2026-10-14)**: only local directory expansion ran a quiet re-list, and onResume only refreshed
+  local directories. All cached directory expansions (including server and favorite roots) now
+  re-read behind the cached rows. Resume also re-reads the current directory on every backend,
+  retaining watched local ancestors. Compare the complete sorted XFile list before rebuilding;
+  errors preserve the old listing, and a result cannot overwrite a cache replaced while IO ran.
+  A collapsed current directory may refresh its cache without reopening. Do not restore the
+  unconditional `adapter.notifyDataSetChanged()` on resume: it rebinds unchanged thumbnail rows
+  and resets their geometry. Default-opener icons use a separate icon-only payload.
+  Covered by `PaneDirectoryRefreshTest`, `ResumeIconRefreshTest` and `SlowExpandRaceTest`.
+
 - **Collapsing Apps / Installed crashed after restarting (2026-10-12)**: an app APK
   explicitly opened as an archive was saved as an `apps` expansion descriptor. Restore
   fabricated `isDir = true` for every such descriptor, and `AppsFileSystem.list` treated
