@@ -444,7 +444,7 @@ add its symptom here.
   stream to be cut back into frames (with a double-sync check), and MPEG-4 arrives in coding
   order, sometimes two VOPs to a chunk, sometimes as 1-byte stuffing; episode queues come from
   the backend first, file names second.
-  *Explains*: an AVI that plays as 300 ms of audio, no sound on a TrueHD Blu-ray, "m2ts
+  *Explains*: properties stuck loading on a damaged MKV, an AVI that plays as 300 ms of audio, no sound on a TrueHD Blu-ray, "m2ts
   seeks slowly", black AVI thumbnails, "half my AVIs open at 13 seconds and then freeze",
   "the picture keeps shaking", "this one plays at two thirds speed", "this one will not open
   at all and has no thumbnail", the next episode not starting, "4K over the network quits

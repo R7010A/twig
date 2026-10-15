@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.media.ExifInterface
 import android.media.MediaMetadataRetriever
+import android.media.MediaDataSource
 import android.os.Build
 import com.twig.core.FsRegistry
 import com.twig.core.MediaDetails
@@ -200,44 +201,63 @@ object FileInfo {
     // ---- Audio & Video ----
 
     private fun media(ctx: Context, file: XFile): Section? {
-        val rows = ArrayList<Pair<String, String>>()
+        val rows = java.util.concurrent.CopyOnWriteArrayList<Pair<String, String>>()
+        val probe = MediaProbe()
+        probe.run { readMedia(ctx, file, probe, rows) }
+        return if (rows.isEmpty()) null else Section(s(ctx, R.string.info_section_media), rows.toList())
+    }
+
+    private fun readMedia(ctx: Context, file: XFile, probe: MediaProbe, rows: MutableList<Pair<String, String>>) {
         // Track details (codec / audio track / subtitle) enumerated via the ExoPlayer parser
         // already in the app — much fuller than MediaMetadataRetriever (MKV subtitle tracks,
         // DTS/TrueHD and other system-unknown tracks are also listed)
-        val tracks = mediaTracks(ctx, file)
+        val tracks = mediaTracks(ctx, file, probe)
+        rows += tracks
+        var summaryEnd = tracks.count { it.first == s(ctx, R.string.info_duration) }
+        fun summary(id: Int, value: String) {
+            val key = s(ctx, id)
+            if (rows.none { it.first == key }) rows.add(summaryEnd++, key to value)
+        }
         val mmr = MediaMetadataRetriever()
         try {
-            mmr.setDataSource(ctx, StreamProvider.uriFor(ctx, file))
-            fun k(key: Int) = mmr.extractMetadata(key)?.takeIf { it.isNotBlank() }
-            k(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull()
-                ?.let { rows += s(ctx, R.string.info_duration) to duration(it) }
-            k(MediaMetadataRetriever.METADATA_KEY_BITRATE)?.toLongOrNull()?.let { bps ->
-                rows += s(ctx, R.string.info_bitrate) to if (bps >= 1_000_000) {
-                    "%.1f Mbps".format(bps / 1_000_000.0)
-                } else "${bps / 1000} kbps"
-            }
-            k(MediaMetadataRetriever.METADATA_KEY_MIMETYPE)?.let { rows += s(ctx, R.string.info_container) to it }
-            if (tracks.isEmpty()) { // fall back to system summary fields only when track enumeration fails
-                val w = k(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
-                val h = k(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
-                if (w != null && h != null) rows += s(ctx, R.string.info_resolution) to "$w × $h"
-                if (Build.VERSION.SDK_INT >= 31) {
-                    k(MediaMetadataRetriever.METADATA_KEY_SAMPLERATE)
-                        ?.let { rows += s(ctx, R.string.info_samplerate) to "$it Hz" }
+            // Avoid StreamProvider: its proxy FD has no per-probe read limit and may materialize a whole archive entry.
+            probe.open(file).use { source ->
+                val data = object : MediaDataSource() {
+                    override fun getSize() = source.length()
+                    override fun readAt(position: Long, buffer: ByteArray, offset: Int, size: Int) =
+                        source.readAt(position, buffer, offset, size)
+                    override fun close() = Unit // owned by use{}
                 }
+                mmr.setDataSource(data)
+                fun k(key: Int) = mmr.extractMetadata(key)?.takeIf { it.isNotBlank() }
+                k(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull()
+                    ?.let { summary(R.string.info_duration, duration(it)) }
+                k(MediaMetadataRetriever.METADATA_KEY_BITRATE)?.toLongOrNull()?.let { bps ->
+                    summary(R.string.info_bitrate, if (bps >= 1_000_000) {
+                        "%.1f Mbps".format(bps / 1_000_000.0)
+                    } else "${bps / 1000} kbps")
+                }
+                k(MediaMetadataRetriever.METADATA_KEY_MIMETYPE)?.let { summary(R.string.info_container, it) }
+                if (tracks.none { it.first != s(ctx, R.string.info_duration) }) { // fall back when track enumeration fails
+                    val w = k(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+                    val h = k(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+                    if (w != null && h != null) summary(R.string.info_resolution, "$w × $h")
+                    if (Build.VERSION.SDK_INT >= 31) {
+                        k(MediaMetadataRetriever.METADATA_KEY_SAMPLERATE)
+                            ?.let { summary(R.string.info_samplerate, "$it Hz") }
+                    }
+                }
+                k(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
+                    ?.takeIf { it != "0" }?.let { summary(R.string.info_rotation, "$it°") }
+                k(MediaMetadataRetriever.METADATA_KEY_TITLE)?.let { rows += s(ctx, R.string.info_title) to it }
+                k(MediaMetadataRetriever.METADATA_KEY_ARTIST)?.let { rows += s(ctx, R.string.info_artist) to it }
+                k(MediaMetadataRetriever.METADATA_KEY_ALBUM)?.let { rows += s(ctx, R.string.info_album) to it }
             }
-            k(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
-                ?.takeIf { it != "0" }?.let { rows += s(ctx, R.string.info_rotation) to "$it°" }
-            rows += tracks
-            k(MediaMetadataRetriever.METADATA_KEY_TITLE)?.let { rows += s(ctx, R.string.info_title) to it }
-            k(MediaMetadataRetriever.METADATA_KEY_ARTIST)?.let { rows += s(ctx, R.string.info_artist) to it }
-            k(MediaMetadataRetriever.METADATA_KEY_ALBUM)?.let { rows += s(ctx, R.string.info_album) to it }
         } catch (e: Exception) {
-            rows += tracks // containers the system can't parse (e.g. some MKV) still get track info
+            // Keep tracks for containers the system can't parse (e.g. some MKV).
         } finally {
             runCatching { mmr.release() }
         }
-        return if (rows.isEmpty()) null else Section(s(ctx, R.string.info_section_media), rows)
     }
 
     /**
@@ -286,48 +306,63 @@ object FileInfo {
 
     /** Enumerate video/audio/subtitle tracks using ExoPlayer's MetadataRetriever (zero new dependencies). */
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-    private fun mediaTracks(ctx: Context, file: XFile): List<Pair<String, String>> = runCatching {
-        val tga = androidx.media3.exoplayer.MetadataRetriever.retrieveMetadata(
-            ctx, androidx.media3.common.MediaItem.fromUri(StreamProvider.uriFor(ctx, file)),
-        ).get(20, java.util.concurrent.TimeUnit.SECONDS)
-        val video = ArrayList<String>()
-        val audio = ArrayList<String>()
-        val subs = ArrayList<String>()
-        for (i in 0 until tga.length) {
-            val f = tga.get(i).getFormat(0)
-            val mime = f.sampleMimeType ?: continue
-            val lang = f.language?.takeIf { it.isNotBlank() && it != "und" }?.let { "[$it]" }
-            val label = f.label?.takeIf { it.isNotBlank() }
-            when {
-                mime.startsWith("video/") -> video += buildList {
-                    add(codecName(mime))
-                    f.codecs?.let { add("($it)") }
-                    if (f.width > 0 && f.height > 0) add("${f.width}×${f.height}")
-                    if (f.frameRate > 0) add("%.4g fps".format(f.frameRate))
-                }.joinToString(" ")
-                mime.startsWith("audio/") -> audio += buildList {
-                    add(codecName(mime))
-                    if (f.channelCount > 0) add(channels(ctx, f.channelCount))
-                    if (f.sampleRate > 0) add("${f.sampleRate} Hz")
-                    lang?.let { add(it) }
-                    label?.let { add(it) }
-                }.joinToString(" ")
-                SUB_MIME.containsKey(mime) || mime.startsWith("text/") -> subs += buildList {
-                    add(codecName(mime))
-                    lang?.let { add(it) }
-                    label?.let { add(it) }
-                }.joinToString(" ")
-                // Other application/* (id3/emsg etc. container metadata tracks) are not displayed
+    private fun mediaTracks(ctx: Context, file: XFile, probe: MediaProbe): List<Pair<String, String>> = runCatching {
+        val factory = androidx.media3.exoplayer.source.ProgressiveMediaSource.Factory(
+            androidx.media3.datasource.DataSource.Factory { com.twig.app.ui.LazyRandomDataSource { probe.open(file) } },
+            // Properties only need headers, not the seek index (which may be missing or damaged).
+            androidx.media3.extractor.DefaultExtractorsFactory().setMatroskaExtractorFlags(
+                androidx.media3.extractor.mkv.MatroskaExtractor.FLAG_DISABLE_SEEK_FOR_CUES),
+        )
+        val retriever = androidx.media3.exoplayer.MetadataRetriever.Builder(ctx,
+            androidx.media3.common.MediaItem.fromUri("twig:///media.${OpenFiles.typeExt(file)}"))
+            .setMediaSourceFactory(factory).build()
+        try {
+            val tracksFuture = retriever.retrieveTrackGroups()
+            val durationFuture = retriever.retrieveDurationUs()
+            val tga = tracksFuture.get(probe.remainingMs(), java.util.concurrent.TimeUnit.MILLISECONDS)
+            val video = ArrayList<String>()
+            val audio = ArrayList<String>()
+            val subs = ArrayList<String>()
+            for (i in 0 until tga.length) {
+                val f = tga.get(i).getFormat(0)
+                val mime = f.sampleMimeType ?: continue
+                val lang = f.language?.takeIf { it.isNotBlank() && it != "und" }?.let { "[$it]" }
+                val label = f.label?.takeIf { it.isNotBlank() }
+                when {
+                    mime.startsWith("video/") -> video += buildList {
+                        add(codecName(mime))
+                        f.codecs?.let { add("($it)") }
+                        if (f.width > 0 && f.height > 0) add("${f.width}×${f.height}")
+                        if (f.frameRate > 0) add("%.4g fps".format(f.frameRate))
+                    }.joinToString(" ")
+                    mime.startsWith("audio/") -> audio += buildList {
+                        add(codecName(mime))
+                        if (f.channelCount > 0) add(channels(ctx, f.channelCount))
+                        if (f.sampleRate > 0) add("${f.sampleRate} Hz")
+                        lang?.let { add(it) }
+                        label?.let { add(it) }
+                    }.joinToString(" ")
+                    SUB_MIME.containsKey(mime) || mime.startsWith("text/") -> subs += buildList {
+                        add(codecName(mime))
+                        lang?.let { add(it) }
+                        label?.let { add(it) }
+                    }.joinToString(" ")
+                    // Other application/* (id3/emsg etc. container metadata tracks) are not displayed
+                }
             }
+            val rows = ArrayList<Pair<String, String>>()
+            runCatching { durationFuture.get(probe.remainingMs(), java.util.concurrent.TimeUnit.MILLISECONDS) }
+                .getOrNull()?.takeIf { it > 0 }?.let { rows += s(ctx, R.string.info_duration) to duration(it / 1000) }
+            fun put(name: String, list: List<String>) = list.forEachIndexed { i, v ->
+                rows += (if (list.size > 1) "$name ${i + 1}" else name) to v
+            }
+            put(s(ctx, R.string.info_track_video), video)
+            put(s(ctx, R.string.info_track_audio), audio)
+            put(s(ctx, R.string.info_track_subtitle), subs)
+            rows
+        } finally {
+            retriever.close() // also cancels preparation on failure/timeout
         }
-        val rows = ArrayList<Pair<String, String>>()
-        fun put(name: String, list: List<String>) = list.forEachIndexed { i, v ->
-            rows += (if (list.size > 1) "$name ${i + 1}" else name) to v
-        }
-        put(s(ctx, R.string.info_track_video), video)
-        put(s(ctx, R.string.info_track_audio), audio)
-        put(s(ctx, R.string.info_track_subtitle), subs)
-        rows
     }.getOrDefault(emptyList())
 
     private val SUB_MIME = mapOf(

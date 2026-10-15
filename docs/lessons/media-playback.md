@@ -4,6 +4,13 @@
 > shared conventions are in [AGENTS.md](../../AGENTS.md); the other sections live
 > beside this file in [docs/lessons/](.).
 
+- **Properties spun forever on an MKV with a zero-filled Cues index (2026-10-15)**:
+  track retrieval timed out without releasing preparation, then system metadata parsing
+  could block indefinitely. `MediaProbe` shares a 16 MiB / 10 s budget across both parsers;
+  system calls run on at most two isolated workers. Properties skip MKV Cues, retain
+  already-read tracks on failure, and close media3 retrieval on every exit. Playback is
+  unaffected. `MediaProbeTest` covers the limits and a generated MKV with corrupt Cues.
+
 - **AVI playback + thumbnails (★ traced and settled 2026-07-22, `media3` 1.3.1 → 1.9.0)**:
   - **Internal media source URIs must carry a real extension**: non-local backends used to
     get a fake URI with no path (e.g. `"twig://media"`, where `media` parses as an authority,
