@@ -18,6 +18,17 @@
             android:layout_height="match_parent"
             android:contentDescription="@null" />
 
+        <ImageButton
+            android:id="@+id/info_toggle"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="top|start"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:padding="0dp"
+            android:background="@drawable/info_button_bg"
+            android:contentDescription="@string/file_info" />
+
         <ImageView
             android:id="@+id/cell_check"
             android:layout_width="30dp"

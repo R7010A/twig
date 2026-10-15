@@ -1,139 +1,157 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/row"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="center_vertical"
-    android:background="@drawable/row_bg"
-    android:paddingEnd="0dp">
-
-    <ImageView
-        android:id="@+id/indicator"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:contentDescription="@null" />
-
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="26dp"
-        android:layout_height="26dp"
-        android:layout_marginStart="2dp"
-        android:contentDescription="@null" />
+    android:background="@drawable/row_bg">
 
     <LinearLayout
-        android:id="@+id/infoBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_marginStart="6dp"
-        android:layout_marginEnd="6dp"
-        android:orientation="vertical">
+        android:id="@+id/row_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-        <!-- Main title row: file name (shown in full, may wrap, no ellipsis) + version number at the right end (app entries only) -->
+        <ImageView
+            android:id="@+id/indicator"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:contentDescription="@null" />
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_marginStart="2dp"
+            android:contentDescription="@null" />
+
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/infoBox"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/name"
-                android:layout_width="0dp"
+            <!-- Main title row: file name (shown in full, may wrap, no ellipsis) + version number at the right end (app entries only) -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="@color/text_primary"
-                android:textSize="13sp" />
+                android:orientation="horizontal">
 
-            <!-- App version number, flush against the right; hidden for other rows -->
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp" />
+
+                <!-- App version number, flush against the right; hidden for other rows -->
+                <TextView
+                    android:id="@+id/appVersion"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:singleLine="true"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="10sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- Subtitle (shows the package name for app entries); hidden for other rows -->
             <TextView
-                android:id="@+id/appVersion"
-                android:layout_width="wrap_content"
+                android:id="@+id/sub"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
                 android:singleLine="true"
+                android:ellipsize="middle"
                 android:textColor="@color/text_secondary"
                 android:textSize="10sp"
                 android:visibility="gone" />
+
+            <!-- Counts sit at the start of the metadata line; size/time stays at the end. -->
+            <LinearLayout
+                android:id="@+id/metaRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:id="@+id/folderCounts"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/directoryCount"
+                        android:layout_width="38dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:includeFontPadding="false"
+                        android:singleLine="true"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="10sp"
+                        android:importantForAccessibility="no" />
+
+                    <TextView
+                        android:id="@+id/fileCount"
+                        android:layout_width="38dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:includeFontPadding="false"
+                        android:singleLine="true"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="10sp"
+                        android:importantForAccessibility="no" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/meta"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:gravity="end"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="10sp" />
+            </LinearLayout>
         </LinearLayout>
 
-        <!-- Subtitle (shows the package name for app entries); hidden for other rows -->
-        <TextView
-            android:id="@+id/sub"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:ellipsize="middle"
-            android:textColor="@color/text_secondary"
-            android:textSize="10sp"
+        <ProgressBar
+            android:id="@+id/progress"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginEnd="8dp"
             android:visibility="gone" />
 
-        <!-- Counts sit at the start of the metadata line; size/time stays at the end. -->
-        <LinearLayout
-            android:id="@+id/metaRow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <LinearLayout
-                android:id="@+id/folderCounts"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:id="@+id/directoryCount"
-                    android:layout_width="38dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:includeFontPadding="false"
-                    android:singleLine="true"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="10sp"
-                    android:importantForAccessibility="no" />
-
-                <TextView
-                    android:id="@+id/fileCount"
-                    android:layout_width="38dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:includeFontPadding="false"
-                    android:singleLine="true"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="10sp"
-                    android:importantForAccessibility="no" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/meta"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:gravity="end"
-                android:textColor="@color/text_secondary"
-                android:textSize="10sp" />
-        </LinearLayout>
+        <ImageView
+            android:id="@+id/check"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_sel_check"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/action_select" />
     </LinearLayout>
 
-    <ProgressBar
-        android:id="@+id/progress"
-        style="?android:attr/progressBarStyleSmall"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
-        android:layout_marginEnd="8dp"
-        android:visibility="gone" />
-
-    <ImageView
-        android:id="@+id/check"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:padding="8dp"
-        android:src="@drawable/ic_sel_check"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/action_select" />
-</LinearLayout>
+    <!-- Fixed to the pane edge: overlays the tree indentation without reserving a column. -->
+    <ImageButton
+        android:id="@+id/info_toggle"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="start|center_vertical"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:padding="0dp"
+        android:background="@drawable/info_button_bg"
+        android:contentDescription="@string/file_info"
+        android:visibility="invisible" />
+</FrameLayout>

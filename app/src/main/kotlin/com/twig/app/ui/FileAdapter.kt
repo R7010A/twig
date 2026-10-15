@@ -63,6 +63,7 @@ class FileAdapter(
     private val gridNames: Boolean = true,
     /** Text size tier (0/1/2), independent of [density]; defaults to follow row height, see `Prefs.textSize`. */
     private val textSize: Int = density,
+    private val onInfo: (PaneViewModel.FileNode) -> Unit = {},
 ) : ListAdapter<PaneViewModel.Node, RecyclerView.ViewHolder>(DIFF) {
 
     private val rowH = intArrayOf(36, 44, 54)[density]
@@ -347,6 +348,7 @@ class FileAdapter(
 
             bindSelection(node)
             b.cellCheck.setOnClickListener { toggleSelection(node) }
+            b.infoToggle.setOnClickListener { onInfo(node) }
             b.root.setOnClickListener { onClick(node) }
             b.root.setOnLongClickListener { onLongClick(node); true }
         }
@@ -668,7 +670,7 @@ class FileAdapter(
             b.folderCounts.contentDescription = null
             b.folderCounts.setTag(R.id.directory_count, null)
             b.meta.setTag(R.id.size_probe, null)
-            b.root.setPaddingRelative(
+            b.rowContent.setPaddingRelative(
                 ((2 + node.depth * 14) * dpi).toInt(), 0, 0, 0,
             )
             // Reset reusable state
@@ -685,6 +687,8 @@ class FileAdapter(
             b.sub.setTextSize(TypedValue.COMPLEX_UNIT_SP, metaSp)
             b.root.isActivated = false
             b.progress.visibility = View.GONE
+            b.infoToggle.visibility = View.INVISIBLE
+            b.infoToggle.setOnClickListener(null)
 
             when (node) {
                 is PaneViewModel.FileNode -> bindFile(node)
@@ -814,6 +818,8 @@ class FileAdapter(
         private fun bindFile(node: PaneViewModel.FileNode) {
             val ctx = b.root.context
             val file = node.file
+            b.infoToggle.visibility = View.VISIBLE
+            b.infoToggle.setOnClickListener { onInfo(node) }
 
             b.name.text = node.label ?: file.name
             if (file.scheme == com.twig.app.AppsFileSystem.SCHEME) bindApp(file)
