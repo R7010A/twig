@@ -113,4 +113,31 @@ class InfoCardSpinnerTest {
 
         assertEquals(View.GONE, vh.itemView.findViewById<View>(R.id.scan_spin).visibility)
     }
+
+    @Test fun `media spinner follows the selected tab and disappears on completion or failure`() {
+        val file = XFile("smb-test", "/clip.mkv", false)
+        val details = FileInfo.Details(listOf(
+            FileInfo.Section("General", listOf("Name" to "clip.mkv")),
+            FileInfo.Section("Media", emptyList(), loading = true)))
+        val adapter = FileAdapter(1, {}, {}, {}, { _, _ -> }, {})
+        adapter.submitList(listOf(PaneViewModel.InfoNode(file, 1, details, tab = 1)))
+        val holder = adapter.createViewHolder(FrameLayout(app), adapter.getItemViewType(0))
+        adapter.bindViewHolder(holder, 0)
+        val infoHolder = holder as FileAdapter.InfoVH
+        val spin = holder.itemView.findViewById<View>(R.id.scan_spin)
+        val body = holder.itemView.findViewById<android.widget.TextView>(R.id.info_body)
+        assertEquals(View.VISIBLE, spin.visibility)
+        assertEquals(app.getString(R.string.info_loading), body.text.toString())
+        infoHolder.bind(PaneViewModel.InfoNode(file, 1, details, tab = 0))
+        assertEquals(View.GONE, spin.visibility)
+        assertTrue(body.text.contains("clip.mkv"))
+        val done = details.copy(sections = details.sections.map { it.copy(loading = false) })
+        infoHolder.bind(PaneViewModel.InfoNode(file, 1, done, tab = 1))
+        assertEquals(View.GONE, spin.visibility)
+        assertEquals(app.getString(R.string.info_failed), body.text.toString())
+        val success = done.copy(sections = listOf(done.sections[0], FileInfo.Section("Media", listOf("Video" to "H.265"))))
+        infoHolder.bind(PaneViewModel.InfoNode(file, 1, success, tab = 1))
+        assertEquals(View.GONE, spin.visibility)
+        assertTrue(body.text.contains("H.265"))
+    }
 }

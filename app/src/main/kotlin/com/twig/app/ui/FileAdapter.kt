@@ -382,12 +382,13 @@ class FileAdapter(
             b.btnHash.visibility = View.GONE
             b.appGroups.visibility = View.GONE
             b.appGroups.removeAllViews()
-            // Directory recursive stats still running: spinner (a persistent View; we only change visibility on refresh, animation continues).
+            // Persistent spinner for directory stats or the currently selected section's metadata.
             // It overlays the bottom-right of the content box; when spinning, give the text a bit of right padding so it doesn't cover the value on the last line
-            b.scanSpin.visibility = if (node.scanning) View.VISIBLE else View.GONE
+            val spinning = node.scanning || node.details?.sections?.getOrNull(node.tab)?.loading == true
+            b.scanSpin.visibility = if (spinning) View.VISIBLE else View.GONE
             b.infoBody.setPaddingRelative(
                 b.infoBody.paddingStart, b.infoBody.paddingTop,
-                ((if (node.scanning) 32 else 10) * dpi).toInt(), b.infoBody.paddingBottom,
+                ((if (spinning) 32 else 10) * dpi).toInt(), b.infoBody.paddingBottom,
             )
 
             val d = node.details
@@ -424,7 +425,12 @@ class FileAdapter(
                 } else {
                     d.sections[cur].rows
                 }
-                b.infoBody.text = renderRows(rows)
+                val section = d.sections[cur]
+                b.infoBody.text = when {
+                    section.loading -> ctx.getString(R.string.info_loading)
+                    rows.isEmpty() && section.appGroups.isEmpty() -> ctx.getString(R.string.info_failed)
+                    else -> renderRows(rows)
+                }
                 if (d.sections[cur].appGroups.isNotEmpty()) renderAppGroups(node, d.sections[cur].appGroups)
             }
         }

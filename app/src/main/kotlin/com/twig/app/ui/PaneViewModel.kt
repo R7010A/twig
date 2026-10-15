@@ -167,7 +167,8 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
      * directly below the corresponding row, with its left edge aligned to the file
      * icon; one tab per information group, plus a "Hashes" tab for files (computed
      * automatically for local files, requires a tap for network ones).
-     * [details] being null means it's still loading. The ✕ button or selecting the
+     * [details] being null means the basic fields are loading; individual sections can
+     * keep loading after those fields appear. The ✕ button or selecting the
      * menu item again closes it; folding the owning directory clears it.
      * Directories also get [dirStat]: recursive file/directory count + total size,
      * refreshed as the scan progresses (a spinner shows during [scanning]).
@@ -402,6 +403,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
     /** File key (fileKey) for which the properties card is open; the card content is cached and dropped when closed/folded. */
     private val infoOpen = LinkedHashSet<String>()
     private val infoCache = HashMap<String, com.twig.app.FileInfo.Details>()
+    private val infoLoads = HashMap<String, kotlinx.coroutines.Job>()
     /** Currently selected tab on the card, already-computed hashes, keys currently computing. */
     private val infoTab = HashMap<String, Int>()
     private val hashCache = HashMap<String, List<Pair<String, String>>>()
@@ -1633,22 +1635,48 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
             infoOpen.add(key)
             if (file.isDir) startDirScan(key, file)
             if (!infoCache.containsKey(key)) {
-                viewModelScope.launch {
-                    val d = withContext(io) {
-                        runCatching { com.twig.app.FileInfo.load(getApplication(), file) }
-                            .getOrElse {
-                                com.twig.app.FileInfo.Details(emptyList(), it.message ?: str(R.string.info_failed))
-                            }
-                    }
-                    if (infoOpen.contains(key)) {
-                        infoCache[key] = d
-                        rebuild()
+                val job = viewModelScope.launch(start = kotlinx.coroutines.CoroutineStart.LAZY) {
+                    try {
+                        val initial = withContext(io) {
+                            runCatching { com.twig.app.FileInfo.initial(getApplication(), file) }
+                                .getOrElse { com.twig.app.FileInfo.Details(emptyList(), it.message ?: str(R.string.info_failed)) }
+                        }
+                        publishInfo(key, initial)
+                        if (initial.sections.isEmpty()) return@launch
+                        val d = try {
+                            kotlinx.coroutines.runInterruptible(io) { com.twig.app.FileInfo.load(getApplication(), file) }
+                        } catch (e: kotlinx.coroutines.CancellationException) {
+                            throw e
+                        } catch (_: Exception) {
+                            // Preserve basic fields and finish any loading placeholder on failure.
+                            initial.copy(sections = initial.sections.map { it.copy(loading = false) })
+                        }
+                        publishInfo(key, d)
+                    } finally {
+                        if (infoLoads[key] === coroutineContext[kotlinx.coroutines.Job]) infoLoads.remove(key)
                     }
                 }
+                infoLoads[key] = job
+                job.start()
             }
         } else {
             stopDirScan(key)
         }
+        rebuild()
+    }
+
+    private fun publishInfo(key: String, details: com.twig.app.FileInfo.Details) {
+        if (key !in infoOpen) return
+        val previous = infoCache[key]
+        val selected = infoTab[key] ?: 0
+        if (previous != null && selected == previous.sections.size) {
+            infoTab[key] = details.sections.size // Keep Hash selected when extra tabs appear.
+        } else if (previous != null) {
+            previous.sections.getOrNull(selected)?.title?.let { title ->
+                infoTab[key] = details.sections.indexOfFirst { it.title == title }.coerceAtLeast(0)
+            }
+        }
+        infoCache[key] = details
         rebuild()
     }
 
@@ -2636,6 +2664,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         val liveInfo = rows.mapNotNullTo(HashSet()) { (it as? InfoNode)?.let { n -> fileKey(n.file) } }
         infoOpen.retainAll(liveInfo)
         infoCache.keys.retainAll(infoOpen)
+        infoLoads.keys.toList().forEach { key -> if (key !in infoOpen) infoLoads.remove(key)?.cancel() }
         infoTab.keys.retainAll(infoOpen)
         hashCache.keys.retainAll(infoOpen)
         // If a card is gone (closed / collapsed), stop scanning its directory.

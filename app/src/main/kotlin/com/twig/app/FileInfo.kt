@@ -32,8 +32,16 @@ object FileInfo {
         val title: String,
         val rows: List<Pair<String, String>>,
         val appGroups: List<AppDetails.Group> = emptyList(),
+        val loading: Boolean = false,
     )
     data class Details(val sections: List<Section>, val error: String? = null)
+
+    /** Listing metadata first; no file reads or directory listings before the card appears. */
+    fun initial(ctx: Context, file: XFile): Details = Details(buildList {
+        add(basic(ctx, file, includeContents = false))
+        if (!file.isDir && (OpenFiles.isVideo(file) || OpenFiles.isAudio(file)))
+            add(Section(s(ctx, R.string.info_section_media), emptyList(), loading = true))
+    })
 
     fun load(ctx: Context, file: XFile): Details {
         val sections = ArrayList<Section>()
@@ -52,7 +60,7 @@ object FileInfo {
                 remote != null -> remoteMedia(ctx, remote)?.let { sections += it }
                 OpenFiles.isImage(file) -> exif(ctx, file)?.let { sections += it }
                 OpenFiles.isVideo(file) || OpenFiles.isAudio(file) ->
-                    media(ctx, file)?.let { sections += it }
+                    sections += media(ctx, file) ?: Section(s(ctx, R.string.info_section_media), emptyList())
                 // Entries in the "Apps" tree: ask PackageManager directly, no need to touch files
                 file.scheme == AppsFileSystem.SCHEME ->
                     installedApp(ctx, file)?.let { sections += it }
@@ -66,7 +74,7 @@ object FileInfo {
 
     // ---- Basic ----
 
-    private fun basic(ctx: Context, file: XFile, remote: MediaDetails? = null): Section {
+    private fun basic(ctx: Context, file: XFile, remote: MediaDetails? = null, includeContents: Boolean = true): Section {
         val rows = ArrayList<Pair<String, String>>()
         rows += s(ctx, R.string.info_name) to file.name
         // Media server paths are GUIDs, useless to show — when the server has a real path, show that
@@ -74,7 +82,7 @@ object FileInfo {
         if (file.scheme != "file") rows += s(ctx, R.string.info_source) to Format.schemeLabel(file.scheme)
         if (file.isDir) {
             rows += s(ctx, R.string.info_type) to s(ctx, R.string.info_folder)
-            runCatching { FsRegistry.of(file).list(file) }.getOrNull()?.let { kids ->
+            if (includeContents) runCatching { FsRegistry.of(file).list(file) }.getOrNull()?.let { kids ->
                 val dirs = kids.count { it.isDir }
                 rows += s(ctx, R.string.info_contains) to
                     s(ctx, R.string.info_contains_value, dirs, kids.size - dirs)
