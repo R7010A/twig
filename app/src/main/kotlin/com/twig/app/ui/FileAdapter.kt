@@ -325,7 +325,7 @@ class FileAdapter(
         v.alpha = if (on) 1f else offAlpha
     }
 
-    /** A gesture starting outside the button must not click the row if it ends inside its square. */
+    /** A gesture starting outside the button must not click the row if it ends inside its touch bounds. */
     @android.annotation.SuppressLint("ClickableViewAccessibility") // Cancels a row click; the button owns normal/accessibility clicks.
     private fun bindInfoToggle(row: ViewGroup, button: View, node: PaneViewModel.FileNode) {
         button.setOnClickListener { onInfo(node) }

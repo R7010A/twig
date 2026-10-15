@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="?android:attr/colorControlHighlight">
-    <item android:id="@android:id/mask">
+    <!-- Feedback stays circular and centered even when the touch target fills a tall row. -->
+    <item android:id="@android:id/mask"
+        android:width="32dp"
+        android:height="32dp"
+        android:gravity="center">
         <shape android:shape="oval">
             <solid android:color="@android:color/white" />
         </shape>

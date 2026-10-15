@@ -21,6 +21,7 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
@@ -63,8 +64,15 @@ class PropertiesButtonTest {
             assertEquals(GradientDrawable.OVAL, mask.shape)
             assertEquals(0, button.left)
             assertEquals((32 * dpi).toInt(), button.width)
-            assertEquals(button.width, button.height)
+            assertEquals(row.height, button.height)
             assertEquals((44 * dpi).toInt(), row.height)
+            button.background.setBounds(0, 0, button.width, button.height)
+            assertEquals(button.width, mask.bounds.width())
+            assertEquals(button.width, mask.bounds.height())
+            assertEquals(button.width / 2f, mask.bounds.exactCenterX(), 1f)
+            assertEquals(button.height / 2f, mask.bounds.exactCenterY(), 1f)
+            assertEquals(content.top + indicator.top + indicator.height / 2f,
+                button.top + mask.bounds.exactCenterY(), 1f)
             assertEquals(((2 + depth * 14) * dpi).toInt(), content.paddingStart)
             assertEquals(content.paddingStart, indicator.left)
             val icon = row.findViewById<View>(R.id.icon)
@@ -155,14 +163,19 @@ class PropertiesButtonTest {
         }
     }
 
-    @Test fun `the whole properties square including corners consumes taps and cancelled drags`() {
-        for (directory in listOf(false, true)) {
+    @Test @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun `the full height of the properties strip consumes taps and cancelled drags`() {
+        for (directory in listOf(false, true)) for (density in 0..2) for (tall in listOf(false, true)) {
             var opens = 0
             var properties = 0
-            val adapter = FileAdapter(1, { opens++ }, {}, {}, { _, _ -> }, {}, onInfo = { properties++ })
-            adapter.submitList(listOf(node(directory)))
+            val adapter = FileAdapter(density, { opens++ }, {}, {}, { _, _ -> }, {}, onInfo = { properties++ })
+            val original = node(directory)
+            val file = if (tall) original.copy(file = original.file.copy(displayName = "long_name_".repeat(100))) else original
+            adapter.submitList(listOf(file))
             val row = holder(adapter).itemView
             val button = row.findViewById<View>(R.id.info_toggle)
+            assertEquals(row.height, button.height)
+            if (tall) assertTrue(row.height > intArrayOf(36, 44, 54)[density] * row.resources.displayMetrics.density)
             fun event(action: Int, x: Float, y: Float) {
                 MotionEvent.obtain(0, 10, action, x, y, 0).also {
                     row.dispatchTouchEvent(it)
@@ -170,7 +183,7 @@ class PropertiesButtonTest {
                 }
             }
             for (x in listOf(button.left + 0.5f, button.right - 0.5f))
-                for (y in listOf(button.top + 0.5f, button.bottom - 0.5f)) {
+                for (y in listOf(0.5f, row.height - 0.5f)) {
                     event(MotionEvent.ACTION_DOWN, x, y)
                     event(MotionEvent.ACTION_UP, x, y)
                     shadowOf(Looper.getMainLooper()).idle()
