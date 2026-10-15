@@ -570,7 +570,16 @@ class FileAdapter(
                 // Keep the value attached to its key; long unbroken values must split on this line.
                 sb.append(k).append("\u00A0\u00A0")
                 sb.setSpan(ForegroundColorSpan(label), s, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                val indent = kotlin.math.ceil(b.infoBody.paint.measureText(sb, s, sb.length)).toInt()
+                // CJK permits a break between any two characters; keep the field name atomic too.
+                if (k.isNotEmpty()) sb.setSpan(object : android.text.style.ReplacementSpan() {
+                    override fun getSize(paint: android.graphics.Paint, text: CharSequence, start: Int, end: Int,
+                        fm: android.graphics.Paint.FontMetricsInt?): Int = kotlin.math.ceil(paint.measureText(k)).toInt()
+                    override fun draw(canvas: android.graphics.Canvas, text: CharSequence, start: Int, end: Int,
+                        x: Float, top: Int, y: Int, bottom: Int, paint: android.graphics.Paint) {
+                        canvas.drawText(k, x, y.toFloat(), paint)
+                    }
+                }, s, s + k.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                val indent = kotlin.math.ceil(android.text.Layout.getDesiredWidth(sb, s, sb.length, b.infoBody.paint).toDouble()).toInt()
                 sb.append(v)
                 if (k in copyable && v.isNotEmpty()) appendCopyIcon(sb, v)
                 // Explicit value newlines need indentation on their first line too.

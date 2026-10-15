@@ -316,6 +316,40 @@ class AppDetailsCardTest {
         }
     }
 
+    @Test @Config(qualifiers = "zh")
+    fun `Chinese property labels stay together before long values`() {
+        val keys = listOf(app.getString(R.string.info_name), app.getString(R.string.info_path), "修改时间")
+        val values = listOf("a.txt", "Make.Zhonghe.Great.Again.2026.2160p.HQ.WEB-DL.H265.HDR.60fps.DTS5.1-CHDWEB.mkv",
+            "a".repeat(120), "长名称".repeat(30))
+        val adapter = adapter()
+        adapter.submitList(listOf(node()))
+        val holder = holder(adapter)
+        for (value in values) {
+            val rows = keys.map { it to value }
+            submitAndAwait(adapter, listOf(node().copy(details = FileInfo.Details(listOf(FileInfo.Section("Basic", rows))))))
+            adapter.bindViewHolder(holder, 0)
+            for (width in listOf(160, 180, 220, 300, 400)) {
+                layout(holder, width)
+                val row = holder.itemView.findViewById<TextView>(R.id.info_body)
+                var from = 0
+                for (key in keys) {
+                    val start = row.text.indexOf(key, from)
+                    val valueStart = row.text.indexOf(value, start + key.length)
+                    val first = row.layout.getLineForOffset(start)
+                    assertEquals("$width dp: $key stays on one line", first,
+                        row.layout.getLineForOffset(start + key.length - 1))
+                    assertEquals("$width dp: $key value starts beside its key", first,
+                        row.layout.getLineForOffset(valueStart))
+                    val x = row.layout.getPrimaryHorizontal(valueStart)
+                    val last = row.layout.getLineForOffset(valueStart + value.length - 1)
+                    for (line in first + 1..last)
+                        assertEquals(x, row.layout.getPrimaryHorizontal(row.layout.getLineStart(line)), 1f)
+                    from = valueStart + value.length
+                }
+            }
+        }
+    }
+
     @Test fun `hash values begin beside their labels even when the digest needs wrapping`() {
         val hashes = listOf("MD5" to "a1b2c3d4".repeat(4), "SHA-1" to "a1b2c3d4".repeat(5),
             "SHA-256" to "a1b2c3d4".repeat(8))
