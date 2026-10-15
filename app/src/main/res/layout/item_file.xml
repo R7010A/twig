@@ -145,7 +145,7 @@
     <!-- Fixed to the pane edge: overlays the tree indentation without reserving a column. -->
     <ImageButton
         android:id="@+id/info_toggle"
-        android:layout_width="32dp"
+        android:layout_width="36dp"
         android:layout_height="match_parent"
         android:layout_gravity="start|center_vertical"
         android:minWidth="0dp"

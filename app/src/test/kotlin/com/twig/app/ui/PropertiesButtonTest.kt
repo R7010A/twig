@@ -63,13 +63,14 @@ class PropertiesButtonTest {
             val mask = (button.background as RippleDrawable).findDrawableByLayerId(android.R.id.mask) as GradientDrawable
             assertEquals(GradientDrawable.OVAL, mask.shape)
             assertEquals(0, button.left)
-            assertEquals((32 * dpi).toInt(), button.width)
+            assertEquals((36 * dpi).toInt(), button.width)
             assertEquals(row.height, button.height)
             assertEquals((44 * dpi).toInt(), row.height)
             button.background.setBounds(0, 0, button.width, button.height)
-            assertEquals(button.width, mask.bounds.width())
-            assertEquals(button.width, mask.bounds.height())
-            assertEquals(button.width / 2f, mask.bounds.exactCenterX(), 1f)
+            assertEquals((32 * dpi).toInt(), mask.bounds.width())
+            assertEquals(mask.bounds.width(), mask.bounds.height())
+            assertEquals((4 * dpi).toInt(), mask.bounds.left)
+            assertEquals(button.width.toFloat(), mask.bounds.right.toFloat(), 1f)
             assertEquals(button.height / 2f, mask.bounds.exactCenterY(), 1f)
             assertEquals(content.top + indicator.top + indicator.height / 2f,
                 button.top + mask.bounds.exactCenterY(), 1f)
