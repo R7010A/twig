@@ -914,4 +914,6 @@
     <string name="settings_folder_counts">Количество элементов папок</string>
     <string name="settings_folder_counts_desc">Показывать число непосредственных подпапок и файлов в локальных и SMB-папках. Для SMB могут потребоваться дополнительные запросы.</string>
     <string name="folder_counts_description">Папок: %1$d, файлов: %2$d</string>
+    <string name="info_activity_failed">Не удалось открыть Activity</string>
+    <string name="info_app_shortcuts_limited">Android ограничивает доступ к динамическим ярлыкам других приложений. Показаны только ярлыки, объявленные приложением.</string>
 </resources>

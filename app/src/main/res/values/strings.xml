@@ -929,4 +929,25 @@
     <string name="settings_folder_counts">Folder item counts</string>
     <string name="settings_folder_counts_desc">Show direct folder and file counts for local and SMB directories. SMB counts may require extra directory requests.</string>
     <string name="folder_counts_description">Folders: %1$d, files: %2$d</string>
+    <string name="info_app_activities" translatable="false">Activities</string>
+    <string name="info_app_services" translatable="false">Services</string>
+    <string name="info_app_shortcuts" translatable="false">Shortcuts</string>
+    <string name="info_app_signature" translatable="false">Signature</string>
+    <string name="info_app_receivers" translatable="false">Receivers</string>
+    <string name="info_app_providers" translatable="false">Providers</string>
+    <string name="info_app_exported" translatable="false">exported</string>
+    <string name="info_app_authority" translatable="false">Authority</string>
+    <string name="info_app_permission" translatable="false">Permission</string>
+    <string name="info_app_read_permission" translatable="false">Read permission</string>
+    <string name="info_app_write_permission" translatable="false">Write permission</string>
+    <string name="info_app_shortcut_failed" translatable="false">Could not open this shortcut</string>
+    <string name="info_app_subject" translatable="false">Subject</string>
+    <string name="info_app_issuer" translatable="false">Issuer</string>
+    <string name="info_app_validity" translatable="false">Validity</string>
+    <string name="info_app_serial_number" translatable="false">Serial number</string>
+    <string name="info_app_signature_algorithm" translatable="false">Signature algorithm</string>
+    <string name="info_app_none" translatable="false">None</string>
+    <string name="info_app_details_unavailable" translatable="false">Some app details could not be read.</string>
+    <string name="info_app_shortcuts_limited">Android restricts access to dynamic shortcuts from other apps. Only declared shortcuts are shown.</string>
+    <string name="info_activity_failed">Could not open this Activity</string>
 </resources>

@@ -24,6 +24,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.twig.app.AppDetails
 import com.twig.app.FileInfo
 import com.twig.app.Prefs
 import com.twig.app.Format
@@ -203,6 +204,8 @@ class FileAdapter(
         onSelectionChanged()
     }
 
+    private val appExpanded = HashMap<String, MutableSet<AppDetails.Kind>>()
+
     /** Drop selected keys that no longer appear in the tree — collapsing a directory removes its (and its
      *  expanded sub-directories') rows from the list without going through [toggleSelection], so without this
      *  the checkbox state would survive a collapse and reappear checked when the directory is re-expanded. */
@@ -211,6 +214,7 @@ class FileAdapter(
         currentList: MutableList<PaneViewModel.Node>,
     ) {
         super.onCurrentListChanged(previousList, currentList)
+        appExpanded.keys.retainAll(currentList.filterIsInstance<PaneViewModel.InfoNode>().mapTo(HashSet()) { it.key })
         if (selected.isEmpty()) return
         val liveKeys = currentList.mapTo(HashSet()) { it.key }
         if (selected.retainAll(liveKeys)) {
@@ -375,6 +379,8 @@ class FileAdapter(
             b.infoBody.setTextSize(TypedValue.COMPLEX_UNIT_SP, metaSp + 1.5f)
             b.infoBody.visibility = View.VISIBLE
             b.btnHash.visibility = View.GONE
+            b.appGroups.visibility = View.GONE
+            b.appGroups.removeAllViews()
             // Directory recursive stats still running: spinner (a persistent View; we only change visibility on refresh, animation continues).
             // It overlays the bottom-right of the content box; when spinning, give the text a bit of right padding so it doesn't cover the value on the last line
             b.scanSpin.visibility = if (node.scanning) View.VISIBLE else View.GONE
@@ -418,6 +424,94 @@ class FileAdapter(
                     d.sections[cur].rows
                 }
                 b.infoBody.text = renderRows(rows)
+                if (d.sections[cur].appGroups.isNotEmpty()) renderAppGroups(node, d.sections[cur].appGroups)
+            }
+        }
+
+        private fun renderAppGroups(node: PaneViewModel.InfoNode, groups: List<AppDetails.Group>) {
+            val ctx = b.root.context
+            val dpi = ctx.resources.displayMetrics.density
+            val expanded = appExpanded.getOrPut(node.key) { HashSet() }
+            val actionColor = ContextCompat.getColor(ctx, R.color.primary)
+            val secondaryColor = ContextCompat.getColor(ctx, R.color.text_secondary)
+            val selectable = TypedValue().also {
+                ctx.theme.resolveAttribute(androidx.appcompat.R.attr.selectableItemBackground, it, true)
+            }.resourceId
+            fun textView(text: CharSequence, actionable: Boolean = false) = android.widget.TextView(ctx).apply {
+                this.text = text
+                setTextSize(TypedValue.COMPLEX_UNIT_PX, b.infoBody.textSize)
+                setTextColor(b.infoBody.textColors)
+                if (actionable) setTextColor(actionColor)
+                setPaddingRelative((30 * dpi).toInt(), (3 * dpi).toInt(), (10 * dpi).toInt(), (3 * dpi).toInt())
+                if (actionable && selectable != 0) setBackgroundResource(selectable)
+            }
+            val visibleGroups = groups.filter {
+                it.kind == AppDetails.Kind.SIGNATURE || it.entries.isNotEmpty()
+            }
+            b.appGroups.visibility = if (visibleGroups.isEmpty()) View.GONE else View.VISIBLE
+            for (group in visibleGroups) {
+                val suffix = if (group.kind == AppDetails.Kind.SIGNATURE)
+                    group.entries.map { it.title }.filter { it.isNotBlank() }.distinct().joinToString(", ")
+                else group.entries.size.toString()
+                val title = ctx.getString(group.kind.title) + if (suffix.isEmpty()) "" else " ($suffix)"
+                val header = textView(title, true).apply {
+                    gravity = android.view.Gravity.CENTER_VERTICAL
+                    minimumHeight = (32 * dpi).toInt()
+                    setPaddingRelative((10 * dpi).toInt(), (4 * dpi).toInt(), (10 * dpi).toInt(), (4 * dpi).toInt())
+                    compoundDrawablePadding = (4 * dpi).toInt()
+                    maxLines = 1
+                    ellipsize = android.text.TextUtils.TruncateAt.END
+                }
+                val content = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL }
+                fun update() {
+                    val open = group.kind in expanded
+                    val arrow = ContextCompat.getDrawable(ctx,
+                        if (open) R.drawable.ic_chevron_down else R.drawable.ic_chevron_right)!!.mutate()
+                    arrow.setBounds(0, 0, (16 * dpi).toInt(), (16 * dpi).toInt())
+                    arrow.setTint(actionColor)
+                    header.setCompoundDrawablesRelative(arrow, null, null, null)
+                    content.visibility = if (open) View.VISIBLE else View.GONE
+                    if (!open || content.childCount > 0) return
+                    if (group.entries.isEmpty() && group.notice == null)
+                        content.addView(textView(ctx.getString(R.string.info_app_none)))
+                    group.notice?.let { content.addView(textView(it)) }
+                    for (entry in group.entries) {
+                        val signature = group.kind == AppDetails.Kind.SIGNATURE
+                        val text = SpannableStringBuilder(if (signature) renderRows(entry.rows) else entry.title)
+                        if (entry.exported && group.kind != AppDetails.Kind.ACTIVITIES) {
+                            val start = text.length
+                            text.append(" · ").append(ctx.getString(R.string.info_app_exported))
+                            text.setSpan(ForegroundColorSpan(secondaryColor), start, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        }
+                        val detailStart = text.length
+                        entry.subtitle?.let { text.append("\n").append(it) }
+                        if (group.kind == AppDetails.Kind.PROVIDERS && entry.rows.isNotEmpty()) text.append("\n").append(renderRows(entry.rows))
+                        if (text.length > detailStart)
+                            text.setSpan(ForegroundColorSpan(secondaryColor), detailStart, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        val row = textView(text, entry.actionable).apply {
+                            if (!entry.enabled) setTextColor(secondaryColor)
+                        }
+                        if (entry.actionable) {
+                            row.setOnClickListener {
+                                runCatching { AppDetails.open(ctx, entry) }.onFailure {
+                                    val message = if (group.kind == AppDetails.Kind.SHORTCUTS)
+                                        R.string.info_app_shortcut_failed else R.string.info_activity_failed
+                                    Toast.makeText(ctx, ctx.getString(message), Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                        content.addView(row, LinearLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                            android.view.ViewGroup.LayoutParams.WRAP_CONTENT))
+                    }
+                }
+                header.setOnClickListener {
+                    if (!expanded.add(group.kind)) expanded.remove(group.kind)
+                    update()
+                }
+                b.appGroups.addView(header, LinearLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT))
+                b.appGroups.addView(content)
+                update()
             }
         }
 
@@ -455,7 +549,7 @@ class FileAdapter(
             )
         }
 
-        /** Labels grey, values normal, one per line; a copy icon hangs at the end of name / path rows. */
+        /** Field names are gray and values use the normal text color. */
         private fun renderRows(rows: List<Pair<String, String>>): CharSequence {
             val ctx = b.root.context
             val label = ContextCompat.getColor(ctx, R.color.text_secondary)

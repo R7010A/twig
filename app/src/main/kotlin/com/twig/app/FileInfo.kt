@@ -27,7 +27,11 @@ object FileInfo {
     /** Fetch the string resource (following AppCompatDelegate's current locale); all copy at this layer goes through resources. */
     private fun s(ctx: Context, id: Int, vararg args: Any): String = ctx.getString(id, *args)
 
-    data class Section(val title: String, val rows: List<Pair<String, String>>)
+    data class Section(
+        val title: String,
+        val rows: List<Pair<String, String>>,
+        val appGroups: List<AppDetails.Group> = emptyList(),
+    )
     data class Details(val sections: List<Section>, val error: String? = null)
 
     fun load(ctx: Context, file: XFile): Details {
@@ -421,7 +425,7 @@ object FileInfo {
     private fun apk(ctx: Context, file: XFile): Section? = runCatching {
         val path = file.path
         val pm = ctx.packageManager
-        val pi = pm.getPackageArchiveInfo(path, 0) ?: return null
+        val pi = pm.getPackageArchiveInfo(path, AppDetails.packageFlags()) ?: return null
         val ai = pi.applicationInfo ?: return null
         ai.sourceDir = path
         ai.publicSourceDir = path
@@ -437,7 +441,7 @@ object FileInfo {
                 ?.let { s(ctx, R.string.info_installed_yes, it.versionName ?: "?") }
                 ?: s(ctx, R.string.info_no)
             )
-        Section(s(ctx, R.string.info_section_app), rows)
+        Section(s(ctx, R.string.info_section_app), rows, appGroups(ctx, pi, installed = false))
     }.getOrNull()
 
     /**
@@ -450,7 +454,7 @@ object FileInfo {
         val fs = runCatching { FsRegistry.of(file) }.getOrNull() as? AppsFileSystem ?: return null
         val pkg = fs.packageOf(file) ?: return null
         val pm = ctx.packageManager
-        val pi = pm.getPackageInfo(pkg, 0)
+        val pi = pm.getPackageInfo(pkg, AppDetails.packageFlags())
         val ai = pi.applicationInfo ?: return null
         val rows = ArrayList<Pair<String, String>>()
         rows += s(ctx, R.string.info_app_name) to pm.getApplicationLabel(ai).toString()
@@ -472,6 +476,12 @@ object FileInfo {
         if (splits > 0) rows += s(ctx, R.string.info_splits) to s(ctx, R.string.info_splits_value, splits)
         rows += s(ctx, R.string.info_apk_path) to (ai.sourceDir ?: "?")
         rows += s(ctx, R.string.info_data_dir) to (ai.dataDir ?: "?")
-        Section(s(ctx, R.string.info_section_app), rows)
+        Section(s(ctx, R.string.info_section_app), rows, appGroups(ctx, pi, installed = true))
     }.getOrNull()
+
+    private fun appGroups(ctx: Context, info: android.content.pm.PackageInfo, installed: Boolean) =
+        runCatching { AppDetails.load(ctx, info, installed) }.getOrElse {
+            listOf(AppDetails.Group(AppDetails.Kind.SIGNATURE, emptyList(), s(ctx, R.string.info_app_details_unavailable)))
+        }
+
 }

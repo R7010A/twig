@@ -1,0 +1,263 @@
+package com.twig.app.ui
+
+import android.app.Activity
+import android.app.Application
+import android.content.ComponentName
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.os.Looper
+import android.view.ContextThemeWrapper
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.RecyclerView
+import androidx.test.core.app.ApplicationProvider
+import com.twig.app.AppDetails
+import com.twig.app.FileInfo
+import com.twig.app.R
+import com.twig.core.XFile
+import org.junit.Assert.*
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.Robolectric
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class AppDetailsCardTest {
+    private val app = ApplicationProvider.getApplicationContext<Application>()
+    private val target = AppDetails.Action.Activity("com.example.inspected", "com.example.inspected.PublicActivity")
+    private fun node(packageName: String = "example", activityTitle: String = "PublicActivity") = PaneViewModel.InfoNode(
+        XFile("apps", "/user/$packageName", false), 2,
+        FileInfo.Details(listOf(FileInfo.Section("App", listOf("Package" to packageName),
+            AppDetails.Kind.values().map { kind -> AppDetails.Group(kind, listOf(AppDetails.Entry(
+                when (kind) {
+                    AppDetails.Kind.ACTIVITIES -> activityTitle
+                    AppDetails.Kind.SIGNATURE -> "Twig Test"
+                    else -> "${kind.name} detail"
+                },
+                if (kind == AppDetails.Kind.SIGNATURE) listOf("Serial number" to "1234AB", "Signature algorithm" to "SHA256withRSA")
+                    else listOf("Value" to "Details"),
+                action = when (kind) {
+                    AppDetails.Kind.ACTIVITIES -> target
+                    AppDetails.Kind.SHORTCUTS -> AppDetails.Action.Intents(listOf(
+                        android.content.Intent(android.content.Intent.ACTION_VIEW)
+                            .setComponent(ComponentName(target.packageName, target.className)).putExtra("shortcut", "chat")))
+                    else -> null
+                },
+                subtitle = when (kind) {
+                    AppDetails.Kind.ACTIVITIES -> "ACTIVITIES detail"
+                    AppDetails.Kind.SHORTCUTS -> "Shortcut label"
+                    else -> null
+                },
+                enabled = kind != AppDetails.Kind.SERVICES,
+                exported = kind == AppDetails.Kind.SERVICES || kind == AppDetails.Kind.PROVIDERS))) }))))
+    private fun adapter() = FileAdapter(1, {}, {}, {}, { _, _ -> }, {})
+    private fun texts(view: View): List<TextView> {
+        if (view.visibility != View.VISIBLE) return emptyList()
+        return when (view) {
+            is TextView -> listOf(view)
+            is ViewGroup -> (0 until view.childCount).flatMap { texts(view.getChildAt(it)) }
+            else -> emptyList()
+        }
+    }
+    private fun assertDetailsGray(view: TextView) {
+        val text = view.text as Spanned
+        val start = text.indexOf('\n') + 1
+        assertTrue(start > 0)
+        val color = ContextCompat.getColor(app, R.color.text_secondary)
+        assertTrue(text.getSpans(start, text.length, ForegroundColorSpan::class.java).any {
+            it.foregroundColor == color && text.getSpanStart(it) <= start && text.getSpanEnd(it) == text.length
+        })
+    }
+    private fun header(holder: RecyclerView.ViewHolder, kind: AppDetails.Kind) = texts(holder.itemView)
+        .single { it.text.toString() == app.getString(kind.title) +
+            if (kind == AppDetails.Kind.SIGNATURE) " (Twig Test)" else " (1)" }
+    private fun layout(holder: RecyclerView.ViewHolder) {
+        val row = holder.itemView
+        val width = (400 * app.resources.displayMetrics.density).toInt()
+        row.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
+        row.layout(0, 0, width, row.measuredHeight)
+    }
+    private fun tapFarEdge(holder: RecyclerView.ViewHolder, view: View) {
+        layout(holder)
+        val x = view.width - 2f
+        val y = view.height / 2f
+        assertTrue(view.width > 0 && view.height > 0)
+        for (action in listOf(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP)) {
+            val event = MotionEvent.obtain(0, 10, action, x, y, 0)
+            view.dispatchTouchEvent(event)
+            event.recycle()
+        }
+        shadowOf(Looper.getMainLooper()).idle()
+    }
+    private fun holder(adapter: FileAdapter): RecyclerView.ViewHolder {
+        val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
+        val parent = FrameLayout(ContextThemeWrapper(activity, R.style.Theme_Twig))
+        activity.setContentView(parent)
+        return adapter.createViewHolder(parent, adapter.getItemViewType(0)).also {
+            parent.addView(it.itemView)
+        }
+    }
+    private fun submitAndAwait(adapter: FileAdapter, nodes: List<PaneViewModel.Node>) {
+        var committed = false
+        adapter.submitList(nodes) { committed = true }
+        val deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(5)
+        while (!committed && System.nanoTime() < deadline) {
+            shadowOf(Looper.getMainLooper()).idle()
+            Thread.sleep(5)
+        }
+        assertTrue("the list diff must land before binding", committed)
+    }
+
+    @Test fun `all six groups start collapsed and toggle at the far edge of the full row`() {
+        val adapter = adapter()
+        adapter.submitList(listOf(node()))
+        val holder = holder(adapter)
+        adapter.bindViewHolder(holder, 0)
+        layout(holder)
+        assertTrue(header(holder, AppDetails.Kind.SIGNATURE).top < header(holder, AppDetails.Kind.ACTIVITIES).top)
+        assertTrue(header(holder, AppDetails.Kind.ACTIVITIES).top < header(holder, AppDetails.Kind.SHORTCUTS).top)
+        assertTrue(header(holder, AppDetails.Kind.SHORTCUTS).top < header(holder, AppDetails.Kind.SERVICES).top)
+        for (kind in AppDetails.Kind.values()) {
+            assertNotNull(header(holder, kind))
+            assertFalse(texts(holder.itemView).any { it.text.startsWith("${kind.name} detail") })
+        }
+        tapFarEdge(holder, header(holder, AppDetails.Kind.ACTIVITIES))
+        assertTrue(texts(holder.itemView).any { it.text.startsWith("PublicActivity") })
+        tapFarEdge(holder, header(holder, AppDetails.Kind.SERVICES))
+        assertTrue(texts(holder.itemView).any { it.text.startsWith("SERVICES detail") })
+        tapFarEdge(holder, header(holder, AppDetails.Kind.ACTIVITIES))
+        assertFalse(texts(holder.itemView).any { it.text.startsWith("PublicActivity") })
+        assertTrue(texts(holder.itemView).any { it.text.startsWith("SERVICES detail") })
+    }
+
+    @Test fun `actionable activities are colored and open directly anywhere on the entry row`() {
+        val adapter = adapter()
+        adapter.submitList(listOf(node("one"), node("two")))
+        val holder = holder(adapter)
+        adapter.bindViewHolder(holder, 0)
+        tapFarEdge(holder, header(holder, AppDetails.Kind.ACTIVITIES))
+        tapFarEdge(holder, header(holder, AppDetails.Kind.SERVICES))
+        val activity = texts(holder.itemView).single { it.text.startsWith("PublicActivity") }
+        val service = texts(holder.itemView).single { it.text.startsWith("SERVICES detail") }
+        assertEquals(ContextCompat.getColor(app, R.color.primary), activity.currentTextColor)
+        assertEquals(ContextCompat.getColor(app, R.color.text_secondary), service.currentTextColor)
+        assertTrue(activity.isClickable)
+        assertFalse(service.isClickable)
+        assertTrue(activity.text.contains("\n"))
+        assertFalse(activity.text.contains("Open"))
+        assertEquals("PublicActivity\nACTIVITIES detail", activity.text.toString())
+        assertDetailsGray(activity)
+        assertEquals("SERVICES detail · exported", service.text.toString())
+        layout(holder)
+        assertEquals("activity label and class occupy separate lines", 2, activity.lineCount)
+        tapFarEdge(holder, activity)
+        assertEquals(ComponentName(target.packageName, target.className), shadowOf(app).nextStartedActivity.component)
+        adapter.onBindViewHolder(holder, 1)
+        assertFalse(texts(holder.itemView).any { it.text.startsWith("PublicActivity") })
+        adapter.onBindViewHolder(holder, 0)
+        assertTrue(texts(holder.itemView).any { it.text.startsWith("PublicActivity") })
+        submitAndAwait(adapter, emptyList())
+        submitAndAwait(adapter, listOf(node("one")))
+        adapter.onBindViewHolder(holder, 0)
+        assertFalse(texts(holder.itemView).any { it.text.startsWith("PublicActivity") })
+    }
+
+    @Test fun `launchable shortcuts use the action color and launch from the far edge of the row`() {
+        val adapter = adapter()
+        adapter.submitList(listOf(node()))
+        val holder = holder(adapter)
+        adapter.bindViewHolder(holder, 0)
+        tapFarEdge(holder, header(holder, AppDetails.Kind.SHORTCUTS))
+        val row = texts(holder.itemView).single { it.text.startsWith("SHORTCUTS detail") }
+        assertEquals(ContextCompat.getColor(app, R.color.primary), row.currentTextColor)
+        assertTrue(row.isClickable)
+        assertEquals("SHORTCUTS detail\nShortcut label", row.text.toString())
+        assertDetailsGray(row)
+        tapFarEdge(holder, row)
+        val intent = shadowOf(app).nextStartedActivity
+        assertEquals(ComponentName(target.packageName, target.className), intent.component)
+        assertEquals("chat", intent.getStringExtra("shortcut"))
+    }
+
+    @Test fun `signature omits certificate heading and uses gray field names with normal values`() {
+        val adapter = adapter()
+        adapter.submitList(listOf(node()))
+        val holder = holder(adapter)
+        adapter.bindViewHolder(holder, 0)
+        tapFarEdge(holder, header(holder, AppDetails.Kind.SIGNATURE))
+        val row = texts(holder.itemView).single { it.text.startsWith("Serial number") }
+        assertEquals("Serial number  1234AB\nSignature algorithm  SHA256withRSA", row.text.toString())
+        val text = row.text as Spanned
+        fun hasColor(start: Int, end: Int, color: Int) = text.getSpans(start, end, ForegroundColorSpan::class.java).any {
+            it.foregroundColor == ContextCompat.getColor(app, color) && text.getSpanStart(it) <= start && text.getSpanEnd(it) >= end
+        }
+        assertTrue(hasColor(0, "Serial number".length, R.color.text_secondary))
+        val value = text.indexOf("1234AB")
+        assertEquals(ContextCompat.getColor(app, R.color.text_primary), row.currentTextColor)
+        assertTrue(text.getSpans(value, value + 6, ForegroundColorSpan::class.java).isEmpty())
+        assertFalse(texts(holder.itemView).any { it.text.contains("SIGNATURE detail") || it.text.contains("Certificate 1") })
+    }
+
+    @Test fun `provider details appear below the name and exported marker without adding a launch action`() {
+        val adapter = adapter()
+        adapter.submitList(listOf(node()))
+        val holder = holder(adapter)
+        adapter.bindViewHolder(holder, 0)
+        tapFarEdge(holder, header(holder, AppDetails.Kind.PROVIDERS))
+        val row = texts(holder.itemView).single { it.text.startsWith("PROVIDERS detail") }
+        assertEquals("PROVIDERS detail · exported\nValue  Details", row.text.toString())
+        assertDetailsGray(row)
+        assertFalse(row.isClickable)
+        tapFarEdge(holder, header(holder, AppDetails.Kind.RECEIVERS))
+        assertEquals("RECEIVERS detail", texts(holder.itemView).single { it.text.startsWith("RECEIVERS detail") }.text.toString())
+    }
+
+    @Test fun `long component names wrap without truncating`() {
+        val name = "ui.settings.verylongnamespace.".repeat(5) + "SettingsActivity"
+        val adapter = adapter()
+        adapter.submitList(listOf(node(activityTitle = name)))
+        val holder = holder(adapter)
+        adapter.bindViewHolder(holder, 0)
+        tapFarEdge(holder, header(holder, AppDetails.Kind.ACTIVITIES))
+        val row = texts(holder.itemView).single { it.text.startsWith(name) }
+        layout(holder)
+        assertTrue(row.lineCount > 1)
+        assertNull(row.ellipsize)
+        assertEquals(row.text.length, row.layout.getLineEnd(row.lineCount - 1))
+    }
+
+    @Test fun `compact App rows render while empty groups including restricted shortcuts are hidden`() {
+        val adapter = adapter()
+        val original = node()
+        val details = original.details!!
+        val section = details.sections.single()
+        val groups = section.appGroups.map {
+            when (it.kind) {
+                AppDetails.Kind.SHORTCUTS -> it.copy(entries = emptyList(), notice = "Restricted")
+                AppDetails.Kind.RECEIVERS -> it.copy(entries = emptyList())
+                else -> it
+            }
+        }
+        adapter.submitList(listOf(original.copy(details = details.copy(sections = listOf(section.copy(appGroups = groups))))))
+        val holder = holder(adapter)
+        adapter.bindViewHolder(holder, 0)
+        assertFalse(texts(holder.itemView).any { it.text.startsWith("Shortcuts") || it.text.startsWith("Receivers") })
+        holder.itemView.layoutDirection = View.LAYOUT_DIRECTION_LTR
+        tapFarEdge(holder, header(holder, AppDetails.Kind.SIGNATURE))
+        tapFarEdge(holder, header(holder, AppDetails.Kind.PROVIDERS))
+        tapFarEdge(holder, header(holder, AppDetails.Kind.ACTIVITIES))
+        tapFarEdge(holder, header(holder, AppDetails.Kind.SERVICES))
+        layout(holder)
+
+    }
+}

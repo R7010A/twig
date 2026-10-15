@@ -878,4 +878,6 @@
     <string name="settings_folder_counts">Contagem de itens das pastas</string>
     <string name="settings_folder_counts_desc">Mostrar a quantidade de subpastas e arquivos diretos nas pastas locais e SMB. O SMB pode exigir consultas adicionais.</string>
     <string name="folder_counts_description">Pastas: %1$d, arquivos: %2$d</string>
+    <string name="info_activity_failed">Não foi possível abrir esta Activity</string>
+    <string name="info_app_shortcuts_limited">O Android restringe o acesso aos atalhos dinâmicos de outros apps. Apenas os atalhos declarados pelo app são exibidos.</string>
 </resources>

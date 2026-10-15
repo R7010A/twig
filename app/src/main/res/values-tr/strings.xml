@@ -878,4 +878,6 @@
     <string name="settings_folder_counts">Klasör öğesi sayıları</string>
     <string name="settings_folder_counts_desc">Yerel ve SMB klasörlerindeki doğrudan alt klasör ve dosya sayılarını göster. SMB için ek dizin istekleri gerekebilir.</string>
     <string name="folder_counts_description">Klasörler: %1$d, dosyalar: %2$d</string>
+    <string name="info_activity_failed">Bu Activity açılamadı</string>
+    <string name="info_app_shortcuts_limited">Android, diğer uygulamaların dinamik kısayollarına erişimi kısıtlar. Yalnızca uygulamada tanımlanan kısayollar gösterilir.</string>
 </resources>
