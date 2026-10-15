@@ -823,7 +823,8 @@ class FileAdapter(
                     else -> fileMeta(file)
                 },
             )
-            if (Prefs.folderCounts(ctx) && DirectoryCounts.supports(file)) {
+            val storageRoot = file.scheme == "file" && node.depth == 0 && node.label != null
+            if (!storageRoot && Prefs.folderCounts(ctx) && DirectoryCounts.supports(file)) {
                 (node.directoryCount ?: DirectoryCounts.known(file, Prefs.showHidden(ctx)))?.let(::setCounts)
                 if (!node.loading) DirectoryCounts.request(b.folderCounts, file, Prefs.showHidden(ctx), ::setCounts)
             }

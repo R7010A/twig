@@ -147,6 +147,26 @@ class FolderCountsRowTest {
         assertEquals(View.GONE, counts.visibility)
         assertNull(counts.getTag(R.id.directory_count))
     }
+
+    @Test fun `storage root rows hide cached counts and do not request probes`() {
+        Prefs.setFolderCounts(app, true)
+        seed()
+        val roots = listOf("/storage/emulated/0" to "Internal storage", "/" to "Root")
+        val adapter = adapter()
+        adapter.submitList(listOf(PaneViewModel.FileNode(dir, 1, true, false)) + roots.map { (path, label) ->
+            PaneViewModel.FileNode(XFile("file", path, true), 0, true, false,
+                label = label, directoryCount = DirectoryCounts.Count(2, 5))
+        })
+        val holder = adapter.createViewHolder(parent(), adapter.getItemViewType(0))
+        for (position in roots.indices.map { it + 1 }) {
+            adapter.onBindViewHolder(holder, 0)
+            assertEquals(View.VISIBLE, holder.itemView.findViewById<View>(R.id.folderCounts).visibility)
+            adapter.onBindViewHolder(holder, position)
+            val counts = holder.itemView.findViewById<View>(R.id.folderCounts)
+            assertEquals(View.GONE, counts.visibility)
+            assertNull(counts.getTag(R.id.directory_count))
+        }
+    }
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test fun `ordinary SMB expansion and resume update counts without a separate probe`() = runTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
