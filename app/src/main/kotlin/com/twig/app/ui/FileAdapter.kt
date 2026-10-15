@@ -561,7 +561,8 @@ class FileAdapter(
             rows.forEachIndexed { i, (k, v) ->
                 if (i > 0) sb.append("\n")
                 val s = sb.length
-                sb.append(k).append("  ")
+                // Keep the value attached to its key; long unbroken values must split on this line.
+                sb.append(k).append("\u00A0\u00A0")
                 sb.setSpan(ForegroundColorSpan(label), s, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                 val indent = kotlin.math.ceil(b.infoBody.paint.measureText(sb, s, sb.length)).toInt()
                 sb.append(v)

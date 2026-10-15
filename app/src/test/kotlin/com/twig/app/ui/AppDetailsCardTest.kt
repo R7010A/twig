@@ -196,7 +196,7 @@ class AppDetailsCardTest {
         adapter.bindViewHolder(holder, 0)
         tapFarEdge(holder, header(holder, AppDetails.Kind.SIGNATURE))
         val row = texts(holder.itemView).single { it.text.startsWith("Serial number") }
-        assertEquals("Serial number  1234AB\nSignature algorithm  SHA256withRSA", row.text.toString())
+        assertEquals("Serial number\u00A0\u00A01234AB\nSignature algorithm\u00A0\u00A0SHA256withRSA", row.text.toString())
         val text = row.text as Spanned
         fun hasColor(start: Int, end: Int, color: Int) = text.getSpans(start, end, ForegroundColorSpan::class.java).any {
             it.foregroundColor == ContextCompat.getColor(app, color) && text.getSpanStart(it) <= start && text.getSpanEnd(it) >= end
@@ -215,7 +215,7 @@ class AppDetailsCardTest {
         adapter.bindViewHolder(holder, 0)
         tapFarEdge(holder, header(holder, AppDetails.Kind.PROVIDERS))
         val row = texts(holder.itemView).single { it.text.startsWith("PROVIDERS detail") }
-        assertEquals("PROVIDERS detail · exported\nValue  Details", row.text.toString())
+        assertEquals("PROVIDERS detail · exported\nValue\u00A0\u00A0Details", row.text.toString())
         assertDetailsGray(row)
         assertFalse(row.isClickable)
         tapFarEdge(holder, header(holder, AppDetails.Kind.RECEIVERS))
@@ -312,6 +312,32 @@ class AppDetailsCardTest {
                     val iconLine = row.layout.getLineForOffset(text.getSpanEnd(icons[index]) - 1)
                     assertEquals("$width dp, ${name.length} characters: copy icon follows the value", valueLine, iconLine)
                 }
+            }
+        }
+    }
+
+    @Test fun `hash values begin beside their labels even when the digest needs wrapping`() {
+        val hashes = listOf("MD5" to "a1b2c3d4".repeat(4), "SHA-1" to "a1b2c3d4".repeat(5),
+            "SHA-256" to "a1b2c3d4".repeat(8))
+        val original = node()
+        val info = original.copy(tab = original.details!!.sections.size, hashRows = hashes)
+        val adapter = adapter()
+        adapter.submitList(listOf(info))
+        val holder = holder(adapter)
+        adapter.bindViewHolder(holder, 0)
+        for (width in listOf(180, 220, 300, 400)) {
+            layout(holder, width)
+            val row = holder.itemView.findViewById<TextView>(R.id.info_body)
+            for ((key, value) in hashes) {
+                val keyStart = row.text.indexOf(key)
+                val valueStart = row.text.indexOf(value)
+                assertEquals("$width dp: $key starts on its label's line",
+                    row.layout.getLineForOffset(keyStart), row.layout.getLineForOffset(valueStart))
+                val first = row.layout.getLineForOffset(valueStart)
+                val last = row.layout.getLineForOffset(valueStart + value.length - 1)
+                for (line in first + 1..last)
+                    assertEquals(row.layout.getPrimaryHorizontal(valueStart),
+                        row.layout.getPrimaryHorizontal(row.layout.getLineStart(line)), 1f)
             }
         }
     }
