@@ -18,8 +18,8 @@ import androidx.appcompat.widget.AppCompatImageView
  * - Double-tap cycles between FIT (centred, no cropping) / CROP (one direction
  *   cropped) / ACTUAL (1:1, draggable to see local details).
  * - Drag pans (when the image exceeds the view); pinch for free zoom.
- * - Single-tap callback ([onTap]); when not zoomed in, a horizontal quick swipe
- *   triggers page-turn ([onPage]).
+ * - Single-tap callback ([onTap]); a quick swipe triggers page-turn ([onPage])
+ *   when the image fits along the swipe axis.
  * - When zoomed in enough that the base bitmap gets interpolated ([scale] > 1),
  *   requests a hi-res region from outside ([onNeedHiRes]) and overlays it on
  *   top of the base bitmap — the base bitmap is decoded down-sampled to save
@@ -117,11 +117,12 @@ class ZoomableImageView @JvmOverloads constructor(
         }
 
         override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
-            // When not zoomed in (no horizontal overflow), a horizontal quick swipe pages through
-            if (imgW * scale <= width + 1f && kotlin.math.abs(vx) > kotlin.math.abs(vy) &&
-                kotlin.math.abs(vx) > 500f
-            ) {
-                onPage?.invoke(if (vx > 0) -1 else 1)
+            // Preserve panning when the image overflows along the swipe axis.
+            val horizontal = kotlin.math.abs(vx) > kotlin.math.abs(vy)
+            val velocity = if (horizontal) vx else vy
+            val fits = if (horizontal) imgW * scale <= width + 1f else imgH * scale <= height + 1f
+            if (fits && kotlin.math.abs(velocity) > 500f) {
+                onPage?.invoke(if (velocity > 0) -1 else 1)
                 return true
             }
             return false
@@ -285,7 +286,8 @@ class ZoomableImageView @JvmOverloads constructor(
         scaleGesture.onTouchEvent(event)
         gesture.onTouchEvent(event)
         // Allow pan after zoom-in, prevent parent interception
-        if (imgW * scale > width + 1f) parent?.requestDisallowInterceptTouchEvent(true)
+        if (imgW * scale > width + 1f || imgH * scale > height + 1f)
+            parent?.requestDisallowInterceptTouchEvent(true)
         return true
     }
 
