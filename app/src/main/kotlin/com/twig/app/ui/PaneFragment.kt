@@ -87,6 +87,16 @@ class PaneFragment : Fragment() {
          *  Only MainActivity has this bar; hosts with embedded panes like the share-target page don't need to react. */
         fun onClipTargetChanged() {}
 
+        /** This pane's checked items (or the treemap's tile selection) changed.
+         *
+         *  ★ The host has to recompute its **write actions** on this: they follow what the
+         *  selection points at, and a check / uncheck does not touch the tree state, so no
+         *  `render` follows it. Without this callback the strip keeps the state of the last
+         *  navigation (symptom: Move / Rename / Delete stay greyed out on a perfectly writable
+         *  source until you switch panes once, which recomputes them as a side effect).
+         */
+        fun onSelectionChanged() {}
+
         /** File-picker mode: if the host takes the click (returns true), don't proceed to open / viewer. */
         fun onPickFile(file: XFile): Boolean = false
 
@@ -147,7 +157,7 @@ class PaneFragment : Fragment() {
                 }
             },
             onLongClick = { node -> onLongClick(node) },
-            onSelectionChanged = { /* Reserved: selection count */ },
+            onSelectionChanged = { host?.onSelectionChanged() },
             onInfoTab = { node, idx -> viewModel.selectInfoTab(node, idx) },
             onInfoHash = { node -> viewModel.computeHash(node) },
             onInfo = { node -> viewModel.toggleInfo(node) },
@@ -743,12 +753,15 @@ class PaneFragment : Fragment() {
     private fun toggleMapSelection(e: TreemapEntry) {
         if (!mapSelected.remove(e)) mapSelected.add(e)
         b.map.selectedKeys = mapSelected.mapTo(HashSet()) { TreemapView.keyOf(it) }
+        // Tile selection is the same input as the tree's checks (see selectionOrCurrent), so the host's write actions follow it too.
+        host?.onSelectionChanged()
     }
 
     private fun clearMapSelection() {
         if (mapSelected.isEmpty()) return
         mapSelected.clear()
         _b?.map?.selectedKeys = emptySet()
+        host?.onSelectionChanged()
     }
 
     /** Tile menu = Select + tree's directory/file long-press menu (shared) + Delete. */

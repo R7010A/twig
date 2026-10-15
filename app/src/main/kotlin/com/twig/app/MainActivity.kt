@@ -725,6 +725,16 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
     }
 
     /**
+     * ★ A check / uncheck changes what Move / Rename / Delete act on without touching the tree,
+     * so no `render` follows it — the strip has to be recomputed here. Missing this left the
+     * buttons greyed out on writable sources until the next pane switch recomputed them by accident
+     * (only [setActiveIndex] and [onClipTargetChanged] used to call [syncStripEnabled]).
+     */
+    override fun onSelectionChanged() {
+        syncStripEnabled()
+    }
+
+    /**
      * The action strip's **write** entries follow the active pane's capability toggles.
      *
      * On read-only sources (media servers, restic, 7z/RAR, the git view, "Apps"), create /
@@ -732,9 +742,10 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
      * Copy / compress / share are **pure read source**, always available on any source.
      *
      * All three action strips (landscape middle + portrait left/right) need refreshing,
-     * same as [syncShareIcon]. The trigger is [onClipTargetChanged] — PaneFragment.render
+     * same as [syncShareIcon]. Two triggers: [onClipTargetChanged] — PaneFragment.render
      * calls it on every state refresh, so directory switches, ticks, pane switches all
-     * update it as a side effect.
+     * update it as a side effect — and [onSelectionChanged], because checking a file changes
+     * what the write actions act on without any tree state moving at all.
      */
     private fun syncStripEnabled() {
         // ★ Don't ask the pane before it's ready: the two panes' views come up one at a time,
