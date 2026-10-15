@@ -556,12 +556,12 @@ class FileAdapter(
             val label = ContextCompat.getColor(ctx, R.color.text_secondary)
             val copyable = setOf(ctx.getString(R.string.info_name), ctx.getString(R.string.info_path))
             val sb = SpannableStringBuilder()
-            val indent = (16 * ctx.resources.displayMetrics.density).toInt()
             rows.forEachIndexed { i, (k, v) ->
                 if (i > 0) sb.append("\n")
                 val s = sb.length
                 sb.append(k).append("  ")
                 sb.setSpan(ForegroundColorSpan(label), s, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                val indent = if (indentWrapped) kotlin.math.ceil(b.infoBody.paint.measureText(sb, s, sb.length)).toInt() else 0
                 sb.append(v)
                 if (k in copyable && v.isNotEmpty()) appendCopyIcon(sb, v)
                 if (indentWrapped) {

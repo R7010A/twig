@@ -222,7 +222,7 @@ class AppDetailsCardTest {
         assertEquals("RECEIVERS detail", texts(holder.itemView).single { it.text.startsWith("RECEIVERS detail") }.text.toString())
     }
 
-    @Test fun `wrapped app signature and provider values use a small continuation indent`() {
+    @Test fun `wrapped app signature and provider values align with the start of each value`() {
         val longValue = "1234567890ABCDEF:".repeat(15) + "\n" + "FEDCBA0987654321:".repeat(8)
         val original = node(packageName = longValue)
         val section = original.details!!.sections.single()
@@ -238,7 +238,6 @@ class AppDetailsCardTest {
         adapter.bindViewHolder(holder, 0)
         tapFarEdge(holder, header(holder, AppDetails.Kind.SIGNATURE))
         tapFarEdge(holder, header(holder, AppDetails.Kind.PROVIDERS))
-        val indent = (16 * app.resources.displayMetrics.density).toInt().toFloat()
         for (width in listOf(180, 400)) {
             layout(holder, width)
             val rows = texts(holder.itemView).filter { it.text.contains(longValue) }
@@ -248,9 +247,10 @@ class AppDetailsCardTest {
                 val first = row.layout.getLineForOffset(start)
                 val last = row.layout.getLineForOffset(start + longValue.length - 1)
                 assertTrue(last > first)
+                val valueX = row.layout.getPrimaryHorizontal(start)
                 for (line in first + 1..last)
-                    assertEquals("${row.text.take(20)} at width $width, line $line", indent,
-                        row.layout.getPrimaryHorizontal(row.layout.getLineStart(line)), 0.01f)
+                    assertEquals("${row.text.take(20)} at width $width, line $line", valueX,
+                        row.layout.getPrimaryHorizontal(row.layout.getLineStart(line)), 1f)
                 assertTrue(row.text.toString().contains(longValue))
             }
         }
