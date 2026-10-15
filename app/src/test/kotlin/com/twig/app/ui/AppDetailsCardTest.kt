@@ -80,9 +80,9 @@ class AppDetailsCardTest {
     private fun header(holder: RecyclerView.ViewHolder, kind: AppDetails.Kind) = texts(holder.itemView)
         .single { it.text.toString() == app.getString(kind.title) +
             if (kind == AppDetails.Kind.SIGNATURE) " (Twig Test)" else " (1)" }
-    private fun layout(holder: RecyclerView.ViewHolder) {
+    private fun layout(holder: RecyclerView.ViewHolder, widthDp: Int = 400) {
         val row = holder.itemView
-        val width = (400 * app.resources.displayMetrics.density).toInt()
+        val width = (widthDp * app.resources.displayMetrics.density).toInt()
         row.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
         row.layout(0, 0, width, row.measuredHeight)
@@ -220,6 +220,40 @@ class AppDetailsCardTest {
         assertFalse(row.isClickable)
         tapFarEdge(holder, header(holder, AppDetails.Kind.RECEIVERS))
         assertEquals("RECEIVERS detail", texts(holder.itemView).single { it.text.startsWith("RECEIVERS detail") }.text.toString())
+    }
+
+    @Test fun `wrapped app signature and provider values use a small continuation indent`() {
+        val longValue = "1234567890ABCDEF:".repeat(15) + "\n" + "FEDCBA0987654321:".repeat(8)
+        val original = node(packageName = longValue)
+        val section = original.details!!.sections.single()
+        val groups = section.appGroups.map { group ->
+            if (group.kind == AppDetails.Kind.SIGNATURE || group.kind == AppDetails.Kind.PROVIDERS)
+                group.copy(entries = group.entries.map { it.copy(rows = listOf(
+                    (if (group.kind == AppDetails.Kind.SIGNATURE) "SHA-256" else "Authority") to longValue)) })
+            else group
+        }
+        val adapter = adapter()
+        adapter.submitList(listOf(original.copy(details = FileInfo.Details(listOf(section.copy(appGroups = groups))))))
+        val holder = holder(adapter)
+        adapter.bindViewHolder(holder, 0)
+        tapFarEdge(holder, header(holder, AppDetails.Kind.SIGNATURE))
+        tapFarEdge(holder, header(holder, AppDetails.Kind.PROVIDERS))
+        val indent = (16 * app.resources.displayMetrics.density).toInt().toFloat()
+        for (width in listOf(180, 400)) {
+            layout(holder, width)
+            val rows = texts(holder.itemView).filter { it.text.contains(longValue) }
+            assertEquals(3, rows.size)
+            for (row in rows) {
+                val start = row.text.indexOf(longValue)
+                val first = row.layout.getLineForOffset(start)
+                val last = row.layout.getLineForOffset(start + longValue.length - 1)
+                assertTrue(last > first)
+                for (line in first + 1..last)
+                    assertEquals("${row.text.take(20)} at width $width, line $line", indent,
+                        row.layout.getPrimaryHorizontal(row.layout.getLineStart(line)), 0.01f)
+                assertTrue(row.text.toString().contains(longValue))
+            }
+        }
     }
 
     @Test fun `long component names wrap without truncating`() {

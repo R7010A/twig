@@ -12,6 +12,7 @@ import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.ImageSpan
+import android.text.style.LeadingMarginSpan
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.content.res.ColorStateList
@@ -423,7 +424,7 @@ class FileAdapter(
                 } else {
                     d.sections[cur].rows
                 }
-                b.infoBody.text = renderRows(rows)
+                b.infoBody.text = renderRows(rows, indentWrapped = d.sections[cur].appGroups.isNotEmpty())
                 if (d.sections[cur].appGroups.isNotEmpty()) renderAppGroups(node, d.sections[cur].appGroups)
             }
         }
@@ -477,7 +478,7 @@ class FileAdapter(
                     group.notice?.let { content.addView(textView(it)) }
                     for (entry in group.entries) {
                         val signature = group.kind == AppDetails.Kind.SIGNATURE
-                        val text = SpannableStringBuilder(if (signature) renderRows(entry.rows) else entry.title)
+                        val text = SpannableStringBuilder(if (signature) renderRows(entry.rows, indentWrapped = true) else entry.title)
                         if (entry.exported && group.kind != AppDetails.Kind.ACTIVITIES) {
                             val start = text.length
                             text.append(" · ").append(ctx.getString(R.string.info_app_exported))
@@ -485,7 +486,7 @@ class FileAdapter(
                         }
                         val detailStart = text.length
                         entry.subtitle?.let { text.append("\n").append(it) }
-                        if (group.kind == AppDetails.Kind.PROVIDERS && entry.rows.isNotEmpty()) text.append("\n").append(renderRows(entry.rows))
+                        if (group.kind == AppDetails.Kind.PROVIDERS && entry.rows.isNotEmpty()) text.append("\n").append(renderRows(entry.rows, indentWrapped = true))
                         if (text.length > detailStart)
                             text.setSpan(ForegroundColorSpan(secondaryColor), detailStart, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                         val row = textView(text, entry.actionable).apply {
@@ -550,11 +551,12 @@ class FileAdapter(
         }
 
         /** Field names are gray and values use the normal text color. */
-        private fun renderRows(rows: List<Pair<String, String>>): CharSequence {
+        private fun renderRows(rows: List<Pair<String, String>>, indentWrapped: Boolean = false): CharSequence {
             val ctx = b.root.context
             val label = ContextCompat.getColor(ctx, R.color.text_secondary)
             val copyable = setOf(ctx.getString(R.string.info_name), ctx.getString(R.string.info_path))
             val sb = SpannableStringBuilder()
+            val indent = (16 * ctx.resources.displayMetrics.density).toInt()
             rows.forEachIndexed { i, (k, v) ->
                 if (i > 0) sb.append("\n")
                 val s = sb.length
@@ -562,6 +564,17 @@ class FileAdapter(
                 sb.setSpan(ForegroundColorSpan(label), s, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                 sb.append(v)
                 if (k in copyable && v.isNotEmpty()) appendCopyIcon(sb, v)
+                if (indentWrapped) {
+                    // Explicit value newlines need indentation on their first line too.
+                    var start = s
+                    while (start < sb.length) {
+                        val newline = sb.indexOf("\n", start)
+                        val end = if (newline < 0) sb.length else newline + 1
+                        sb.setSpan(LeadingMarginSpan.Standard(if (start == s) 0 else indent, indent),
+                            start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        start = end
+                    }
+                }
             }
             return sb
         }
