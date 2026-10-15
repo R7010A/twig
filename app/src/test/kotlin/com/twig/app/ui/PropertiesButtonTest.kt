@@ -1,12 +1,14 @@
 package com.twig.app.ui
 
 import android.app.Activity
+import android.graphics.Rect
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.os.Looper
 import android.view.ContextThemeWrapper
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import androidx.recyclerview.widget.RecyclerView
@@ -119,6 +121,78 @@ class PropertiesButtonTest {
         val button = row.itemView.findViewById<View>(R.id.info_toggle)
         assertEquals(View.INVISIBLE, button.visibility)
         assertFalse(button.hasOnClickListeners())
+    }
+
+    @Test fun `a press ending in the properties square never clicks the underlying node`() {
+        for (grid in listOf(0, 2)) {
+            var opens = 0
+            var properties = 0
+            val adapter = FileAdapter(1, { opens++ }, {}, {}, { _, _ -> }, {}, gridMode = grid, onInfo = { properties++ })
+            adapter.submitList(listOf(node(false)))
+            val row = holder(adapter).itemView
+            val button = row.findViewById<View>(R.id.info_toggle)
+            val bounds = Rect()
+            button.getDrawingRect(bounds)
+            (row as ViewGroup).offsetDescendantRectToMyCoords(button, bounds)
+            val y = bounds.exactCenterY()
+            fun event(action: Int, x: Float) {
+                MotionEvent.obtain(0, 10, action, x, y, 0).also {
+                    row.dispatchTouchEvent(it)
+                    it.recycle()
+                }
+            }
+            // A small finger drift across the boundary must not become a directory expand/collapse.
+            event(MotionEvent.ACTION_DOWN, bounds.right + 1f)
+            event(MotionEvent.ACTION_UP, bounds.right - 1f)
+            shadowOf(Looper.getMainLooper()).idle()
+            assertEquals(0, opens)
+            assertEquals(0, properties)
+            assertFalse(row.isPressed)
+            event(MotionEvent.ACTION_DOWN, bounds.right + 20f)
+            event(MotionEvent.ACTION_UP, bounds.right + 20f)
+            shadowOf(Looper.getMainLooper()).idle()
+            assertEquals(1, opens)
+        }
+    }
+
+    @Test fun `the whole properties square including corners consumes taps and cancelled drags`() {
+        for (directory in listOf(false, true)) {
+            var opens = 0
+            var properties = 0
+            val adapter = FileAdapter(1, { opens++ }, {}, {}, { _, _ -> }, {}, onInfo = { properties++ })
+            adapter.submitList(listOf(node(directory)))
+            val row = holder(adapter).itemView
+            val button = row.findViewById<View>(R.id.info_toggle)
+            fun event(action: Int, x: Float, y: Float) {
+                MotionEvent.obtain(0, 10, action, x, y, 0).also {
+                    row.dispatchTouchEvent(it)
+                    it.recycle()
+                }
+            }
+            for (x in listOf(button.left + 0.5f, button.right - 0.5f))
+                for (y in listOf(button.top + 0.5f, button.bottom - 0.5f)) {
+                    event(MotionEvent.ACTION_DOWN, x, y)
+                    event(MotionEvent.ACTION_UP, x, y)
+                    shadowOf(Looper.getMainLooper()).idle()
+                }
+            assertEquals(4, properties)
+            assertEquals(0, opens)
+            val x = button.left + button.width / 2f
+            val y = button.top + button.height / 2f
+            val outside = button.right + 100f
+            event(MotionEvent.ACTION_DOWN, x, y)
+            event(MotionEvent.ACTION_MOVE, outside, y)
+            event(MotionEvent.ACTION_UP, outside, y)
+            shadowOf(Looper.getMainLooper()).idle()
+            assertEquals(4, properties)
+            assertEquals(0, opens)
+            event(MotionEvent.ACTION_DOWN, x, y)
+            event(MotionEvent.ACTION_CANCEL, x, y)
+            shadowOf(Looper.getMainLooper()).idle()
+            assertEquals(4, properties)
+            assertEquals(0, opens)
+            assertFalse(button.isPressed)
+        }
     }
 
     @Test fun `grid files have the same blank properties button`() {

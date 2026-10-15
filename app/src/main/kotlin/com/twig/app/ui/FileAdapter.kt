@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Typeface
+import android.graphics.Rect
 import android.os.Build
 import android.text.SpannableStringBuilder
 import android.text.Spanned
@@ -15,6 +16,7 @@ import android.text.style.ImageSpan
 import android.text.style.LeadingMarginSpan
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.content.res.ColorStateList
 import android.view.View
 import android.view.ViewGroup
@@ -323,6 +325,23 @@ class FileAdapter(
         v.alpha = if (on) 1f else offAlpha
     }
 
+    /** A gesture starting outside the button must not click the row if it ends inside its square. */
+    @android.annotation.SuppressLint("ClickableViewAccessibility") // Cancels a row click; the button owns normal/accessibility clicks.
+    private fun bindInfoToggle(row: ViewGroup, button: View, node: PaneViewModel.FileNode) {
+        button.setOnClickListener { onInfo(node) }
+        val bounds = Rect()
+        row.setOnTouchListener { view, event ->
+            button.getDrawingRect(bounds)
+            row.offsetDescendantRectToMyCoords(button, bounds)
+            if (event.actionMasked == MotionEvent.ACTION_UP &&
+                bounds.contains(event.x.toInt(), event.y.toInt())) {
+                val cancel = MotionEvent.obtain(event).apply { action = MotionEvent.ACTION_CANCEL }
+                try { view.onTouchEvent(cancel) } finally { cancel.recycle() }
+                true
+            } else false
+        }
+    }
+
     /** Grid cell: square thumbnail + corner grey checkbox, file name is toggleable. Indentation is omitted; the parent is the directory row above. */
     inner class CellVH(private val b: ItemThumbCellBinding) : RecyclerView.ViewHolder(b.root) {
         fun bindDefaultAppIcon(node: PaneViewModel.FileNode) { FileIcons.bind(b.thumb, node.file) }
@@ -348,7 +367,7 @@ class FileAdapter(
 
             bindSelection(node)
             b.cellCheck.setOnClickListener { toggleSelection(node) }
-            b.infoToggle.setOnClickListener { onInfo(node) }
+            bindInfoToggle(b.root, b.infoToggle, node)
             b.root.setOnClickListener { onClick(node) }
             b.root.setOnLongClickListener { onLongClick(node); true }
         }
@@ -689,6 +708,7 @@ class FileAdapter(
             b.progress.visibility = View.GONE
             b.infoToggle.visibility = View.INVISIBLE
             b.infoToggle.setOnClickListener(null)
+            b.root.setOnTouchListener(null)
 
             when (node) {
                 is PaneViewModel.FileNode -> bindFile(node)
@@ -819,7 +839,7 @@ class FileAdapter(
             val ctx = b.root.context
             val file = node.file
             b.infoToggle.visibility = View.VISIBLE
-            b.infoToggle.setOnClickListener { onInfo(node) }
+            bindInfoToggle(b.root, b.infoToggle, node)
 
             b.name.text = node.label ?: file.name
             if (file.scheme == com.twig.app.AppsFileSystem.SCHEME) bindApp(file)
