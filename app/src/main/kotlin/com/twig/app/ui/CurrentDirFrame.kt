@@ -12,8 +12,8 @@ import com.twig.app.R
  * Highlight frame around the currently selected node: encloses "the most recently
  * selected node row (directory / server / group / favorite — any kind) **plus its
  * directly-expanded children**". Only down to direct children (bottom edge on the last
- * direct child), not recursively wrapping deeper grandchildren — otherwise expanding a
- * root / group (with deeply-expanded servers / directories under it) would pull the
+ * direct child and its attached Properties card), not recursively wrapping deeper
+ * grandchildren — otherwise expanding a root / group (with deeply-expanded servers / directories under it) would pull the
  * frame all the way down the tree, making it too tall. When focus moves into a specific
  * child, the frame follows currentKey to that level. If the frame's top / bottom edges
  * fall outside the visible area, that edge is pushed off-screen and only the side is drawn.
@@ -40,7 +40,10 @@ class CurrentDirFrame(context: Context) : RecyclerView.ItemDecoration() {
         var end = start
         var i = start + 1
         while (i < list.size && list[i].depth > depth) {
-            if (list[i].depth == depth + 1) end = i
+            val node = list[i]
+            // Properties belong to their owner row even though the card is indented one level deeper.
+            if (node.depth == depth + 1 ||
+                (node is PaneViewModel.InfoNode && node.depth == depth + 2 && i == end + 1)) end = i
             i++
         }
 
