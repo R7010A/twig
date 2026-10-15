@@ -48,6 +48,8 @@
                     android:paddingTop="8dp"
                     android:paddingBottom="8dp"
                     android:lineSpacingExtra="2dp"
+                    android:breakStrategy="simple"
+                    android:hyphenationFrequency="none"
                     android:textColor="@color/text_primary"
                     android:textSize="12sp" />
 

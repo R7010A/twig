@@ -288,6 +288,53 @@ class AppDetailsCardTest {
         }
     }
 
+    @Test fun `wrapped names and paths keep the copy icon beside the final value character`() {
+        val adapter = adapter()
+        adapter.submitList(listOf(node()))
+        val holder = holder(adapter)
+        val names = listOf(20, 31, 45, 64, 93).map { "abcdefghijklmnopqrstuvwxyz".repeat(4).take(it) + ".txt" } +
+            listOf("长文件名称".repeat(8) + "👍🏽", "long_file_name_".repeat(4) + "👩‍💻")
+        for (name in names) {
+            val path = "/storage/emulated/0/Download/$name"
+            val info = node().copy(details = FileInfo.Details(listOf(FileInfo.Section("Basic", listOf(
+                app.getString(R.string.info_name) to name, app.getString(R.string.info_path) to path)))))
+            submitAndAwait(adapter, listOf(info))
+            adapter.bindViewHolder(holder, 0)
+            for (width in listOf(180, 220, 300, 400)) {
+                layout(holder, width)
+                val row = holder.itemView.findViewById<TextView>(R.id.info_body)
+                val text = row.text as Spanned
+                val icons = text.getSpans(0, text.length, android.text.style.ImageSpan::class.java)
+                assertEquals(2, icons.size)
+                for ((index, value) in listOf(name, path).withIndex()) {
+                    val valueStart = text.indexOf(value, if (index == 0) 0 else text.indexOf('\n') + 1)
+                    val valueLine = row.layout.getLineForOffset(valueStart + value.length - 1)
+                    val iconLine = row.layout.getLineForOffset(text.getSpanEnd(icons[index]) - 1)
+                    assertEquals("$width dp, ${name.length} characters: copy icon follows the value", valueLine, iconLine)
+                }
+            }
+        }
+    }
+
+    @Test fun `property first lines fill the available space before wrapping words`() {
+        val value = "alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron pi rho sigma tau"
+        val info = node().copy(details = FileInfo.Details(listOf(FileInfo.Section("Media", listOf("Note" to value)))))
+        val adapter = adapter()
+        adapter.submitList(listOf(info))
+        val holder = holder(adapter)
+        adapter.bindViewHolder(holder, 0)
+        for (width in listOf(180, 220, 300, 400)) {
+            layout(holder, width)
+            val row = holder.itemView.findViewById<TextView>(R.id.info_body)
+            assertTrue(row.lineCount > 1)
+            val end = row.layout.getLineEnd(0)
+            val first = row.text.subSequence(0, end).toString().trimEnd()
+            val nextWord = row.text.subSequence(end, row.text.length).toString().trimStart().substringBefore(' ')
+            assertTrue("$width dp: first line could still fit $nextWord",
+                row.paint.measureText("$first $nextWord") > row.layout.width)
+        }
+    }
+
     @Test fun `long component names wrap without truncating`() {
         val name = "ui.settings.verylongnamespace.".repeat(5) + "SettingsActivity"
         val adapter = adapter()

@@ -442,6 +442,8 @@ class FileAdapter(
                 this.text = text
                 setTextSize(TypedValue.COMPLEX_UNIT_PX, b.infoBody.textSize)
                 setTextColor(b.infoBody.textColors)
+                breakStrategy = b.infoBody.breakStrategy
+                hyphenationFrequency = b.infoBody.hyphenationFrequency
                 if (actionable) setTextColor(actionColor)
                 setPaddingRelative((30 * dpi).toInt(), (3 * dpi).toInt(), (10 * dpi).toInt(), (3 * dpi).toInt())
                 if (actionable && selectable != 0) setBackgroundResource(selectable)
@@ -579,7 +581,7 @@ class FileAdapter(
 
         /**
          * Append a "copy" icon after the value: `ImageSpan` draws the icon + `ClickableSpan` catches clicks.
-         * The icon itself is only a dozen dp, so include the preceding space in the click range to make it easier to hit.
+         * It shares a span and touch target with the final grapheme so it cannot wrap onto a line by itself.
          */
         private fun appendCopyIcon(sb: SpannableStringBuilder, value: String) {
             val ctx = b.root.context
@@ -587,12 +589,25 @@ class FileAdapter(
             val size = (b.infoBody.textSize * 1.15f).toInt()
             icon.setBounds(0, 0, size, size)
             icon.setTint(ContextCompat.getColor(ctx, R.color.primary))
-            val start = sb.length
-            sb.append("  \u200B") // the trailing placeholder character is wholly replaced by the ImageSpan with the icon
-            sb.setSpan(
-                ImageSpan(icon, ImageSpan.ALIGN_BOTTOM),
-                sb.length - 1, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
-            )
+            val valueEnd = sb.length
+            val tailStart = if (value.endsWith("\n")) valueEnd else {
+                val boundary = android.icu.text.BreakIterator.getCharacterInstance().apply { setText(value) }
+                valueEnd - (value.length - boundary.preceding(value.length))
+            }
+            val tail = value.takeLast(valueEnd - tailStart)
+            sb.append("  \uFFFC")
+            // Keep the final grapheme and icon in one replacement span, including during forced word breaks.
+            sb.setSpan(object : ImageSpan(icon, ImageSpan.ALIGN_BOTTOM) {
+                private fun textWidth(paint: android.graphics.Paint) = paint.measureText(tail) + paint.measureText("  ")
+                override fun getSize(paint: android.graphics.Paint, text: CharSequence, start: Int, end: Int,
+                    fm: android.graphics.Paint.FontMetricsInt?): Int =
+                    kotlin.math.ceil(textWidth(paint) + super.getSize(paint, text, start, end, fm)).toInt()
+                override fun draw(canvas: android.graphics.Canvas, text: CharSequence, start: Int, end: Int,
+                    x: Float, top: Int, y: Int, bottom: Int, paint: android.graphics.Paint) {
+                    canvas.drawText(tail, x, y.toFloat(), paint)
+                    super.draw(canvas, text, start, end, x + textWidth(paint), top, y, bottom, paint)
+                }
+            }, tailStart, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             sb.setSpan(
                 object : ClickableSpan() {
                     override fun onClick(widget: View) = copyValue(value)
@@ -601,7 +616,7 @@ class FileAdapter(
                         ds.isUnderlineText = false
                     }
                 },
-                start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+                tailStart, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
             )
         }
 
