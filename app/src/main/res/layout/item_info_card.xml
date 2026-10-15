@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Property card: the tab title bar is a small strip indented with the tree (aligned with the file row icon, like a tree node), and the content box fills left and right -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.twig.app.ui.InfoCardLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -19,6 +19,7 @@
         android:background="@drawable/info_tab_bg" />
 
     <LinearLayout
+        android:id="@+id/info_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -90,4 +91,4 @@
             android:text="@string/info_hash_compute"
             android:visibility="gone" />
     </LinearLayout>
-</LinearLayout>
+</com.twig.app.ui.InfoCardLayout>

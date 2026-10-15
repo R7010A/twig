@@ -246,6 +246,7 @@ class FileAdapter(
     }
 
     override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
+        (holder.itemView as? InfoCardLayout)?.resetPage()
         holder.itemView.findViewById<View>(R.id.folderCounts)?.setTag(R.id.directory_count, null)
         holder.itemView.findViewById<View>(R.id.meta)?.setTag(R.id.size_probe, null)
         super.onViewRecycled(holder)
@@ -394,6 +395,20 @@ class FileAdapter(
         }
 
         fun bind(node: PaneViewModel.InfoNode) {
+            val sections = node.details?.sections.orEmpty()
+            val count = sections.size + if (node.file.isDir || sections.isEmpty()) 0 else 1
+            val tab = node.tab.coerceIn(0, (count - 1).coerceAtLeast(0))
+            b.root.swipeEnabled = count > 1
+            b.root.onSwipe = { step ->
+                val target = tab + step
+                if (target in 0 until count) onInfoTab(node, target)
+            }
+            val page = sections.getOrNull(tab)?.title
+                ?: if (count > 0 && !node.file.isDir) b.root.context.getString(R.string.info_tab_hash) else null
+            b.root.showPage(node.key, page, tab, b.infoContent) { bindContent(node) }
+        }
+
+        private fun bindContent(node: PaneViewModel.InfoNode) {
             val ctx = b.root.context
             val dpi = ctx.resources.displayMetrics.density
             (b.tabBar.layoutParams as LinearLayout.LayoutParams).marginStart =

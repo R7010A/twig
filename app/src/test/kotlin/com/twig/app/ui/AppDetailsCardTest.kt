@@ -395,6 +395,44 @@ class AppDetailsCardTest {
         }
     }
 
+    @Test fun `property swipes select adjacent tabs including Hash and stop at both ends`() {
+        val requests = mutableListOf<Int>()
+        val adapter = FileAdapter(1, {}, {}, {}, { _, tab -> requests += tab }, {})
+        val original = node().copy(details = FileInfo.Details(listOf(
+            FileInfo.Section("General", listOf("Name" to "clip.mkv")),
+            FileInfo.Section("Media", listOf("Video" to "H.265")))))
+        adapter.submitList(listOf(original))
+        val holder = holder(adapter)
+        adapter.bindViewHolder(holder, 0)
+        layout(holder)
+        fun swipe(left: Boolean) {
+            val row = holder.itemView
+            val start = if (left) row.width * 0.8f else row.width * 0.2f
+            val end = if (left) row.width * 0.2f else row.width * 0.8f
+            val y = row.height / 2f
+            for ((action, x) in listOf(MotionEvent.ACTION_DOWN to start, MotionEvent.ACTION_MOVE to end,
+                MotionEvent.ACTION_UP to end)) {
+                MotionEvent.obtain(0, 10, action, x, y, 0).also { row.dispatchTouchEvent(it); it.recycle() }
+            }
+        }
+        swipe(false)
+        assertTrue(requests.isEmpty())
+        swipe(true)
+        assertEquals(listOf(1), requests)
+        (holder as FileAdapter.InfoVH).bind(original.copy(tab = 1))
+        layout(holder)
+        swipe(true)
+        assertEquals(listOf(1, 2), requests)
+        holder.bind(original.copy(tab = 2))
+        layout(holder)
+        swipe(true)
+        assertEquals(listOf(1, 2), requests)
+        swipe(false)
+        assertEquals(listOf(1, 2, 1), requests)
+        adapter.onViewRecycled(holder)
+        assertNull((holder.itemView as InfoCardLayout).onSwipe)
+    }
+
     @Test fun `long component names wrap without truncating`() {
         val name = "ui.settings.verylongnamespace.".repeat(5) + "SettingsActivity"
         val adapter = adapter()

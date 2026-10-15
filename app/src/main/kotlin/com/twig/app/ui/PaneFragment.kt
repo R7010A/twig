@@ -233,6 +233,7 @@ class PaneFragment : Fragment() {
         var downX = 0f
         var downY = 0f
         var swiped = false
+        var propertiesTouch = false
         b.list.addOnItemTouchListener(object : RecyclerView.SimpleOnItemTouchListener() {
             override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
                 when (e.actionMasked) {
@@ -242,9 +243,10 @@ class PaneFragment : Fragment() {
                         // give control back — don't keep yanking the list to the previous position while they're scrolling / expanding.
                         pendingScrollToCurrent = false
                         downX = e.x; downY = e.y; swiped = false
+                        propertiesTouch = rv.findChildViewUnder(e.x, e.y) is InfoCardLayout
                     }
                     MotionEvent.ACTION_MOVE -> {
-                        if (!swiped) {
+                        if (!swiped && !propertiesTouch) {
                             val dx = e.x - downX
                             val dy = e.y - downY
                             if (abs(dx) > threshold && abs(dx) > abs(dy)) {
