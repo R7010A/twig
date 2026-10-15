@@ -256,6 +256,38 @@ class AppDetailsCardTest {
         }
     }
 
+    @Test fun `basic EXIF media and hash tabs share wrapped-value alignment and keep copy actions`() {
+        val longValue = "1234567890ABCDEF:".repeat(15) + "\n" + "FEDCBA0987654321:".repeat(8)
+        val original = node().copy(details = FileInfo.Details(listOf(
+            FileInfo.Section("Basic", listOf(app.getString(R.string.info_name) to longValue)),
+            FileInfo.Section("EXIF", listOf("Camera" to longValue)),
+            FileInfo.Section("Media", listOf("Track" to longValue)))), hashRows = listOf("SHA-256" to longValue))
+        val adapter = adapter()
+        adapter.submitList(listOf(original))
+        val holder = holder(adapter)
+        for (tab in 0..3) {
+            submitAndAwait(adapter, listOf(original.copy(tab = tab)))
+            adapter.bindViewHolder(holder, 0)
+            layout(holder, 180)
+            val row = holder.itemView.findViewById<TextView>(R.id.info_body)
+            val start = row.text.indexOf(longValue)
+            assertTrue(start >= 0)
+            val first = row.layout.getLineForOffset(start)
+            val last = row.layout.getLineForOffset(start + longValue.length - 1)
+            val valueX = row.layout.getPrimaryHorizontal(start)
+            assertTrue(last > first)
+            for (line in first + 1..last)
+                assertEquals("tab $tab continuation aligns with value", valueX,
+                    row.layout.getPrimaryHorizontal(row.layout.getLineStart(line)), 1f)
+            if (tab == 0) {
+                val copy = (row.text as Spanned).getSpans(0, row.text.length, android.text.style.ClickableSpan::class.java).single()
+                copy.onClick(row)
+                val clipboard = app.getSystemService(android.content.ClipboardManager::class.java)
+                assertEquals(longValue, clipboard.primaryClip!!.getItemAt(0).text.toString())
+            }
+        }
+    }
+
     @Test fun `long component names wrap without truncating`() {
         val name = "ui.settings.verylongnamespace.".repeat(5) + "SettingsActivity"
         val adapter = adapter()
