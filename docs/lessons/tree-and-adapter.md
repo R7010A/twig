@@ -11,6 +11,8 @@
   intent/cancellation helpers live in `SwipeGesture`; the pane and card tests cover both.
   Treemaps also cancel their tap detector on swipes/pinches and inspect release displacement;
   `TreemapSwipeTest` covers taps, missing MOVE, cancellation and zoomed panning.
+  Directory comparison uses `FlingSwipeListener`: keep its fling-speed threshold, but use
+  release displacement/time when no MOVE crossed slop. Its tests share the pane's list fixture.
 
 - **Properties ripple disappeared on the first tap, especially with folder counts (2026-10-16)**:
   a row rebind briefly hid its button, ending the ripple. Set final visibility directly;

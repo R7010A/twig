@@ -5,10 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MenuItem
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
@@ -34,7 +32,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.math.abs
 
 /**
  * Directory comparison (Beyond Compare-style): rows aligned line-for-line across the two
@@ -1178,60 +1175,10 @@ class CompareActivity : AppCompatActivity() {
         b.toolbar.subtitle = base + selText
     }
 
-    /**
-     * In portrait, horizontal swipe switches the displayed side.
-     *
-     * ★ Once recognized as a horizontal swipe, subsequent events must be **intercepted**
-     * (return true from `onInterceptTouchEvent`); you cannot just glance at it and let
-     * it pass. If you let it pass, ACTION_UP is still delivered to the row, so a single
-     // swipe accidentally opens that row's compare; worse, the row click would set the
-     // active side to **the side before the swipe**, resulting in "left is shown, but
-     // left is dimmed as inactive". So the swipe is recognized at MOVE time using
-     // touchSlop, and the entire event sequence is taken over.
-     */
+    /** Portrait side-switch flings own the touch sequence so release cannot also open a row. */
     private fun installSwipe(rv: RecyclerView) {
-        val slop = android.view.ViewConfiguration.get(this).scaledTouchSlop
-        var swiping = false
-        var downX = 0f
-        var downY = 0f
-        val gd = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
-            override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
-                if (isLandscape || abs(vx) <= abs(vy) || abs(vx) < 600) return false
-                switchSide(if (vx < 0) 1 else 0)
-                return true
-            }
-        })
-        rv.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
-            override fun onInterceptTouchEvent(view: RecyclerView, e: MotionEvent): Boolean {
-                gd.onTouchEvent(e)
-                when (e.actionMasked) {
-                    MotionEvent.ACTION_DOWN -> {
-                        swiping = false
-                        downX = e.x
-                        downY = e.y
-                    }
-                    MotionEvent.ACTION_MOVE -> if (!swiping && !isLandscape) {
-                        val dx = abs(e.x - downX)
-                        val dy = abs(e.y - downY)
-                        // Only take over when the intent is clearly horizontal: horizontal
-                        // motion exceeds slop and is more than 1.5x the vertical motion,
-                        // otherwise normal vertical scrolling would be misread as a side switch
-                        if (dx > slop && dx > dy * 1.5f) swiping = true
-                    }
-                }
-                return swiping
-            }
-
-            override fun onTouchEvent(view: RecyclerView, e: MotionEvent) {
-                gd.onTouchEvent(e) // after taking over, fling still has to be fed to it for detection
-                if (e.actionMasked == MotionEvent.ACTION_UP ||
-                    e.actionMasked == MotionEvent.ACTION_CANCEL
-                ) {
-                    swiping = false
-                }
-            }
-
-            override fun onRequestDisallowInterceptTouchEvent(disallow: Boolean) = Unit
+        rv.addOnItemTouchListener(FlingSwipeListener(this, { !isLandscape }) { direction ->
+            switchSide(if (direction < 0) 1 else 0)
         })
     }
 

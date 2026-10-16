@@ -1,6 +1,7 @@
 package com.twig.app.ui
 
 import android.app.Activity
+import android.content.Context
 import android.os.Looper
 import android.view.MotionEvent
 import android.view.View
@@ -19,7 +20,10 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class PaneSwipeListenerTest {
-    private class Screen(properties: Boolean = false) {
+    internal class Screen(
+        properties: Boolean = false,
+        listenerFactory: ((Context, (Float) -> Unit) -> RecyclerView.OnItemTouchListener)? = null,
+    ) {
         var clicks = 0
         var cancels = 0
         val swipes = mutableListOf<Float>()
@@ -45,7 +49,9 @@ class PaneSwipeListenerTest {
                     object : RecyclerView.ViewHolder(row) {}
                 override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {}
             }
-            list.addOnItemTouchListener(PaneSwipeListener(48f, {}, { swipes += it }))
+            val onSwipe: (Float) -> Unit = { swipes += it }
+            list.addOnItemTouchListener(listenerFactory?.invoke(activity, onSwipe)
+                ?: PaneSwipeListener(48f, {}, onSwipe))
             activity.setContentView(FrameLayout(activity).apply { addView(list) })
             shadowOf(Looper.getMainLooper()).idle()
             list.measure(View.MeasureSpec.makeMeasureSpec(600, View.MeasureSpec.EXACTLY),
