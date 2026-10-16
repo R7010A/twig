@@ -264,6 +264,7 @@
         <!-- Standalone website tasks, shared by tree bookmarks and desktop shortcuts. -->
         <activity
             android:name=".ui.WebsiteActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="false"
             android:taskAffinity="${applicationId}.website"
             android:documentLaunchMode="intoExisting"

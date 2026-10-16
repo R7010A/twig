@@ -4,6 +4,16 @@
 > shared conventions are in [AGENTS.md](../../AGENTS.md); the other sections live
 > beside this file in [docs/lessons/](.).
 
+- **Website video fullscreen buttons did nothing (2026-10-16)**: WebView does not host
+  fullscreen content automatically. `WebsiteActivity` handles the engine's
+  `onShowCustomView` / `onHideCustomView` callbacks in a black overlay, temporarily hiding
+  the ordinary page and system bars. Back exits the overlay before navigating history;
+  exit restores the bookmark's independent bar settings without reloading the page.
+  Keep the Activity across orientation/size changes so rotation retains the engine view.
+  Clear ownership before notifying the callback (it may reenter), and detach the view and
+  release keep-screen-on on exit or destruction. `WebsiteFullscreenTest` covers these
+  transitions, duplicate requests, rotation and navigating to an edited bookmark URL.
+
 - **Website pull-to-refresh fired midway through content below a fixed header (2026-10-16)**:
   `WebView.canScrollVertically(-1)` only sees the outer document, whose offset stays zero
   when a nested element owns scrolling. The start-of-gesture DOM probe checks the touched

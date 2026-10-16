@@ -4,10 +4,13 @@ import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.CookieManager
 import android.webkit.ValueCallback
@@ -15,6 +18,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -36,6 +40,8 @@ class WebsiteActivity : AppCompatActivity() {
     private lateinit var b: ActivityWebsiteBinding
     private lateinit var site: Website
     private var mobileUserAgent = ""
+    private var fullscreenLayer: FrameLayout? = null
+    private var fullscreenCallback: WebChromeClient.CustomViewCallback? = null
     private var upload: ValueCallback<Array<Uri>>? = null
     private val picker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         upload?.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(result.resultCode, result.data))
@@ -122,6 +128,12 @@ class WebsiteActivity : AppCompatActivity() {
             }
         }
         b.web.webChromeClient = object : WebChromeClient() {
+            override fun onShowCustomView(view: View, callback: CustomViewCallback) {
+                showPageFullscreen(view, callback)
+            }
+
+            override fun onHideCustomView() = hidePageFullscreen()
+
             override fun onProgressChanged(view: WebView, progress: Int) {
                 b.progress.progress = progress
                 b.progress.visibility = if (progress < 100) View.VISIBLE else View.GONE
@@ -164,6 +176,7 @@ class WebsiteActivity : AppCompatActivity() {
         val changedUrl = saved.url != site.url
         val changedDesktop = saved.desktopSite != site.desktopSite
         site = saved
+        if (changedUrl || changedDesktop) hidePageFullscreen()
         applyWebsiteOptions()
         when {
             changedUrl -> b.web.loadUrl(site.url)
@@ -173,7 +186,57 @@ class WebsiteActivity : AppCompatActivity() {
     }
 
     private fun back() {
+        if (fullscreenLayer != null) {
+            hidePageFullscreen()
+            return
+        }
         if (b.web.canGoBack()) b.web.goBack() else finish()
+    }
+
+    /** Chromium supplies this view for HTML video and the page Fullscreen API. */
+    private fun showPageFullscreen(view: View, callback: WebChromeClient.CustomViewCallback) {
+        if (fullscreenLayer != null || view.parent != null) {
+            callback.onCustomViewHidden()
+            return
+        }
+        val layer = FrameLayout(this).apply {
+            setBackgroundColor(Color.BLACK)
+            keepScreenOn = true
+            addView(view, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT))
+        }
+        fullscreenLayer = layer
+        fullscreenCallback = callback
+        ViewCompat.setOnApplyWindowInsetsListener(layer) { container, insets ->
+            val safe = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
+            container.setPadding(safe.left, safe.top, safe.right, safe.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
+        (window.decorView as ViewGroup).addView(layer, ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        b.root.visibility = View.GONE
+        WindowCompat.getInsetsController(window, window.decorView).hide(WindowInsetsCompat.Type.ime())
+        applySystemBars()
+        ViewCompat.requestApplyInsets(layer)
+        view.requestFocus()
+    }
+
+    private fun hidePageFullscreen(restorePage: Boolean = true) {
+        val layer = fullscreenLayer ?: return
+        val callback = fullscreenCallback
+        // Clear first: Chromium may call onHideCustomView again from the callback.
+        fullscreenLayer = null
+        fullscreenCallback = null
+        layer.keepScreenOn = false
+        layer.removeAllViews()
+        (layer.parent as? ViewGroup)?.removeView(layer)
+        if (restorePage) {
+            b.root.visibility = View.VISIBLE
+            applySystemBars()
+            ViewCompat.requestApplyInsets(b.root)
+            b.web.requestFocus()
+        }
+        callback?.onCustomViewHidden()
     }
 
     private fun applyWebsiteOptions() {
@@ -188,24 +251,27 @@ class WebsiteActivity : AppCompatActivity() {
             useWideViewPort = true
             loadWithOverviewMode = site.desktopSite
         }
-        NavBarTint.surface(this)
         applySystemBars()
         ViewCompat.requestApplyInsets(b.root)
     }
 
     private fun applySystemBars() {
         if (!::site.isInitialized) return
-        WindowCompat.setDecorFitsSystemWindows(window, !site.hideStatusBar && !site.hideNavigationBar)
+        val pageFullscreen = fullscreenLayer != null
+        val hideStatus = pageFullscreen || site.hideStatusBar
+        val hideNavigation = pageFullscreen || site.hideNavigationBar
+        if (pageFullscreen) NavBarTint.apply(this, Color.BLACK) else NavBarTint.surface(this)
+        WindowCompat.setDecorFitsSystemWindows(window, !hideStatus && !hideNavigation)
         if (Build.VERSION.SDK_INT >= 28) window.attributes = window.attributes.apply {
-            layoutInDisplayCutoutMode = if (site.hideStatusBar)
+            layoutInDisplayCutoutMode = if (hideStatus)
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
             else WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
         }
         WindowCompat.getInsetsController(window, window.decorView).apply {
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            if (site.hideStatusBar) hide(WindowInsetsCompat.Type.statusBars())
+            if (hideStatus) hide(WindowInsetsCompat.Type.statusBars())
             else show(WindowInsetsCompat.Type.statusBars())
-            if (site.hideNavigationBar) hide(WindowInsetsCompat.Type.navigationBars())
+            if (hideNavigation) hide(WindowInsetsCompat.Type.navigationBars())
             else show(WindowInsetsCompat.Type.navigationBars())
         }
     }
@@ -246,6 +312,12 @@ class WebsiteActivity : AppCompatActivity() {
         """.trimIndent(), null)
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        applySystemBars()
+        ViewCompat.requestApplyInsets(fullscreenLayer ?: b.root)
+    }
+
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) applySystemBars()
@@ -275,6 +347,7 @@ class WebsiteActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        hidePageFullscreen(restorePage = false)
         upload?.onReceiveValue(null)
         upload = null
         b.web.stopLoading()
