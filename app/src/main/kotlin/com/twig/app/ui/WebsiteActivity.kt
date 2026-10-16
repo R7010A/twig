@@ -11,8 +11,10 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.MenuItem
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.webkit.CookieManager
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -25,6 +27,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.widget.doAfterTextChanged
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -71,6 +74,21 @@ class WebsiteActivity : AppCompatActivity() {
         title = site.name
         b.toolbar.title = site.name
         b.toolbar.setNavigationOnClickListener { back() }
+        b.toolbar.menu.add(R.string.viewer_search).apply {
+            setIcon(R.drawable.ic_search)
+            setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+            setOnMenuItemClickListener { toggleSearch(true); true }
+        }
+        b.searchInput.doAfterTextChanged { searchPage() }
+        b.searchInput.setOnEditorActionListener { _, _, _ -> b.web.findNext(true); true }
+        b.searchPrev.setOnClickListener { b.web.findNext(false) }
+        b.searchNext.setOnClickListener { b.web.findNext(true) }
+        b.searchClose.setOnClickListener { toggleSearch(false) }
+        b.web.setFindListener { active, count, done ->
+            if (done && b.searchBar.visibility == View.VISIBLE && !b.searchInput.text.isNullOrEmpty()) {
+                b.searchCount.text = if (count == 0) "0" else "${active + 1}/$count"
+            }
+        }
         b.toolbar.menu.add(R.string.website_enter_fullscreen).setOnMenuItemClickListener {
             immersiveFullscreen = true
             fullscreenFromToolbar = true
@@ -135,6 +153,7 @@ class WebsiteActivity : AppCompatActivity() {
 
             override fun onPageFinished(view: WebView, url: String) {
                 applyPageOptions()
+                if (b.searchBar.visibility == View.VISIBLE) searchPage()
                 b.toolbar.subtitle = Uri.parse(url).host
                 persistCookies()
             }
@@ -210,6 +229,10 @@ class WebsiteActivity : AppCompatActivity() {
             hidePageFullscreen()
             return
         }
+        if (b.searchBar.visibility == View.VISIBLE) {
+            toggleSearch(false)
+            return
+        }
         if (immersiveFullscreen && fullscreenFromToolbar) {
             immersiveFullscreen = false
             fullscreenFromToolbar = false
@@ -221,6 +244,28 @@ class WebsiteActivity : AppCompatActivity() {
         // System navigation already handles revealing hidden bars. A bookmark's
         // display mode must not add another Back stage before history/finish.
         if (b.web.canGoBack()) b.web.goBack() else finish()
+    }
+
+    private fun toggleSearch(show: Boolean) {
+        b.searchBar.visibility = if (show) View.VISIBLE else View.GONE
+        val keyboard = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        if (show) {
+            b.searchInput.requestFocus()
+            keyboard.showSoftInput(b.searchInput, 0)
+        } else {
+            keyboard.hideSoftInputFromWindow(b.searchInput.windowToken, 0)
+            b.searchInput.setText("")
+            b.web.clearMatches()
+            b.web.requestFocus()
+        }
+    }
+
+    /** Match HTML preview: use WebView's native find-in-page, including highlighting and scrolling. */
+    private fun searchPage() {
+        b.web.clearMatches()
+        b.searchCount.text = ""
+        val query = b.searchInput.text.toString()
+        if (query.isNotEmpty() && b.searchBar.visibility == View.VISIBLE) b.web.findAllAsync(query)
     }
 
     /** Chromium supplies this view for HTML video and the page Fullscreen API. */
