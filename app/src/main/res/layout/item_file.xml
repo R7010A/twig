@@ -135,10 +135,12 @@
         <ImageView
             android:id="@+id/check"
             android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_height="match_parent"
             android:padding="8dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
             android:src="@drawable/ic_sel_check"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/selection_button_bg"
             android:contentDescription="@string/action_select" />
     </LinearLayout>
 

@@ -328,14 +328,18 @@ class FileAdapter(
 
     /** A gesture starting outside the button must not click the row if it ends inside its touch bounds. */
     @android.annotation.SuppressLint("ClickableViewAccessibility") // Cancels a row click; the button owns normal/accessibility clicks.
-    private fun bindInfoToggle(row: ViewGroup, button: View, node: PaneViewModel.FileNode) {
-        button.setOnClickListener { onInfo(node) }
+    private fun guardButtonClicks(row: ViewGroup, vararg buttons: View) {
         val bounds = Rect()
         row.setOnTouchListener { view, event ->
-            button.getDrawingRect(bounds)
-            row.offsetDescendantRectToMyCoords(button, bounds)
-            if (event.actionMasked == MotionEvent.ACTION_UP &&
-                bounds.contains(event.x.toInt(), event.y.toInt())) {
+            if (event.actionMasked != MotionEvent.ACTION_UP) return@setOnTouchListener false
+            val inside = buttons.any { button ->
+                if (button.visibility != View.VISIBLE) false else {
+                    button.getDrawingRect(bounds)
+                    row.offsetDescendantRectToMyCoords(button, bounds)
+                    bounds.contains(event.x.toInt(), event.y.toInt())
+                }
+            }
+            if (inside) {
                 val cancel = MotionEvent.obtain(event).apply { action = MotionEvent.ACTION_CANCEL }
                 try { view.onTouchEvent(cancel) } finally { cancel.recycle() }
                 true
@@ -368,7 +372,8 @@ class FileAdapter(
 
             bindSelection(node)
             b.cellCheck.setOnClickListener { toggleSelection(node) }
-            bindInfoToggle(b.root, b.infoToggle, node)
+            b.infoToggle.setOnClickListener { onInfo(node) }
+            guardButtonClicks(b.root, b.infoToggle, b.cellCheck)
             b.root.setOnClickListener { onClick(node) }
             b.root.setOnLongClickListener { onLongClick(node); true }
         }
@@ -736,6 +741,7 @@ class FileAdapter(
                 is PaneViewModel.SearchNode -> bindSearch(node)
                 is PaneViewModel.InfoNode -> Unit // routes to InfoVH, never reaches here
             }
+            guardButtonClicks(b.root, b.infoToggle, b.check)
         }
 
         /**
@@ -854,7 +860,7 @@ class FileAdapter(
             val ctx = b.root.context
             val file = node.file
             b.infoToggle.visibility = View.VISIBLE
-            bindInfoToggle(b.root, b.infoToggle, node)
+            b.infoToggle.setOnClickListener { onInfo(node) }
 
             b.name.text = node.label ?: file.name
             if (file.scheme == com.twig.app.AppsFileSystem.SCHEME) bindApp(file)

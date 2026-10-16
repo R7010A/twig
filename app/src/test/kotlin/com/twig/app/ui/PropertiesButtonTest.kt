@@ -223,4 +223,42 @@ class PropertiesButtonTest {
         button.performClick()
         assertEquals(1, clicks)
     }
+
+    @Test @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun `selection strip fills the row without enlarging it and isolates row clicks`() {
+        for (density in 0..2) {
+            var opens = 0
+            var selections = 0
+            val adapter = FileAdapter(density, { opens++ }, {}, { selections++ }, { _, _ -> }, {})
+            adapter.submitList(listOf(node(false)))
+            val row = holder(adapter).itemView
+            shadowOf(Looper.getMainLooper()).idle()
+            val check = row.findViewById<android.widget.ImageView>(R.id.check)
+            val bounds = Rect()
+            check.getDrawingRect(bounds)
+            (row as ViewGroup).offsetDescendantRectToMyCoords(check, bounds)
+            assertEquals((intArrayOf(36, 44, 54)[density] * row.resources.displayMetrics.density).toInt(), row.height)
+            assertEquals(row.height, check.height)
+            assertNotNull(check.drawable)
+            assertTrue(check.background is RippleDrawable)
+            fun event(action: Int, x: Float, y: Float) {
+                MotionEvent.obtain(0, 10, action, x, y, 0).also {
+                    row.dispatchTouchEvent(it)
+                    it.recycle()
+                }
+            }
+            for (y in listOf(0.5f, row.height - 0.5f)) {
+                event(MotionEvent.ACTION_DOWN, bounds.exactCenterX(), y)
+                event(MotionEvent.ACTION_UP, bounds.exactCenterX(), y)
+                shadowOf(Looper.getMainLooper()).idle()
+            }
+            assertEquals(2, selections)
+            assertEquals(0, opens)
+            event(MotionEvent.ACTION_DOWN, bounds.left - 1f, bounds.exactCenterY())
+            event(MotionEvent.ACTION_UP, bounds.left + 1f, bounds.exactCenterY())
+            shadowOf(Looper.getMainLooper()).idle()
+            assertEquals(2, selections)
+            assertEquals(0, opens)
+        }
+    }
 }
