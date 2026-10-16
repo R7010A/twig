@@ -617,7 +617,14 @@ class FileAdapter(
                         fm: android.graphics.Paint.FontMetricsInt?): Int = kotlin.math.ceil(paint.measureText(k)).toInt()
                     override fun draw(canvas: android.graphics.Canvas, text: CharSequence, start: Int, end: Int,
                         x: Float, top: Int, y: Int, bottom: Int, paint: android.graphics.Paint) {
-                        canvas.drawText(k, x, y.toFloat(), paint)
+                        // ReplacementSpan bypasses ForegroundColorSpan; apply the label color here.
+                        val previousColor = paint.color
+                        paint.color = label
+                        try {
+                            canvas.drawText(k, x, y.toFloat(), paint)
+                        } finally {
+                            paint.color = previousColor
+                        }
                     }
                 }, s, s + k.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                 val indent = kotlin.math.ceil(android.text.Layout.getDesiredWidth(sb, s, sb.length, b.infoBody.paint).toDouble()).toInt()
