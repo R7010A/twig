@@ -4,6 +4,10 @@
 > shared conventions are in [AGENTS.md](../../AGENTS.md); the other sections live
 > beside this file in [docs/lessons/](.).
 
+- **Fast pane swipes also clicked a node (2026-10-16)**: the gesture listener switched
+  panes but returned false, leaving the row's click active. Intercept recognized swipes
+  through release; check UP too when no MOVE arrives. `PaneSwipeListenerTest` covers both.
+
 - **Properties ripple disappeared on the first tap, especially with folder counts (2026-10-16)**:
   a row rebind briefly hid its button, ending the ripple. Set final visibility directly;
   do not hide then show during reset. Press-delay changes did not fix this.

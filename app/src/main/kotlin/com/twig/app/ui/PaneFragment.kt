@@ -63,7 +63,6 @@ import com.twig.core.isWritableDir
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.math.abs
 
 /**
  * A single pane: path bar + the whole tree. The action buttons live in MainActivity's side action
@@ -225,40 +224,19 @@ class PaneFragment : Fragment() {
 
     /**
      * Touch reports the active pane; horizontal drag switches panes — judged by the net horizontal
-     * displacement at lift; slow / diagonal motions also work (low threshold, only requires horizontal
-     * > vertical), without breaking the list's vertical scrolling and tap.
+     * displacement; recognized swipes cancel the row's click and consume the rest of the gesture.
+     * Vertical scrolling and property-card gestures keep their usual handling.
      */
     private fun installGestures() {
-        val threshold = (48 * resources.displayMetrics.density) // 48dp
-        var downX = 0f
-        var downY = 0f
-        var swiped = false
-        var propertiesTouch = false
-        b.list.addOnItemTouchListener(object : RecyclerView.SimpleOnItemTouchListener() {
-            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
-                when (e.actionMasked) {
-                    MotionEvent.ACTION_DOWN -> {
-                        host?.onPaneTouched(this@PaneFragment)
-                        // While restoring (a network location might take seconds to connect) the moment the user touches the list,
-                        // give control back — don't keep yanking the list to the previous position while they're scrolling / expanding.
-                        pendingScrollToCurrent = false
-                        downX = e.x; downY = e.y; swiped = false
-                        propertiesTouch = rv.findChildViewUnder(e.x, e.y) is InfoCardLayout
-                    }
-                    MotionEvent.ACTION_MOVE -> {
-                        if (!swiped && !propertiesTouch) {
-                            val dx = e.x - downX
-                            val dy = e.y - downY
-                            if (abs(dx) > threshold && abs(dx) > abs(dy)) {
-                                swiped = true
-                                host?.onPaneSwipe(dx) // dx>0 swipe right → left pane; dx<0 swipe left → right pane.
-                            }
-                        }
-                    }
-                }
-                return false
-            }
-        })
+        b.list.addOnItemTouchListener(PaneSwipeListener(
+            threshold = 48 * resources.displayMetrics.density,
+            onDown = {
+                host?.onPaneTouched(this@PaneFragment)
+                // User input takes priority over restoring the old scroll position.
+                pendingScrollToCurrent = false
+            },
+            onSwipe = { dx -> host?.onPaneSwipe(dx) },
+        ))
     }
 
     override fun onResume() {
