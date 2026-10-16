@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -142,6 +143,10 @@ class WebsiteActivity : AppCompatActivity() {
             }
         }
         b.web.webChromeClient = object : WebChromeClient() {
+            override fun onReceivedIcon(view: WebView, icon: Bitmap) {
+                WebsiteIcons.received(this@WebsiteActivity, site, view.url, icon)
+            }
+
             override fun onShowCustomView(view: View, callback: CustomViewCallback) {
                 showPageFullscreen(view, callback)
             }

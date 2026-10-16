@@ -1019,7 +1019,7 @@ class FileAdapter(
         private fun bindWebsite(node: PaneViewModel.WebsiteNode) {
             b.name.text = node.site.name
             setMeta(node.site.url)
-            b.icon.setImageResource(R.drawable.ic_website)
+            WebsiteIcons.bind(b.icon, node.site)
             setIndicator(null)
             b.check.visibility = View.GONE
             b.root.setOnClickListener { onClick(node) }

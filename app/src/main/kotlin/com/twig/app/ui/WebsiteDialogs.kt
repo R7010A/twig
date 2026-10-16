@@ -1,6 +1,8 @@
 package com.twig.app.ui
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.util.Log
 import android.text.InputType
 import android.widget.CheckBox
 import android.widget.EditText
@@ -70,7 +72,8 @@ object WebsiteDialogs {
                     lockScrollAxis = scrollAxis.isChecked, desktopSite = desktop.isChecked,
                 )
                 WebsiteStore.save(ctx, saved)
-                ShortcutManagerCompat.updateShortcuts(ctx, listOf(shortcut(ctx, saved)))
+                if (site != null && site.url != saved.url) WebsiteIcons.forget(ctx, site)
+                updateShortcut(ctx, saved)
                 dialog.dismiss()
             }
         }
@@ -89,6 +92,7 @@ object WebsiteDialogs {
                     .setNegativeButton(R.string.dialog_cancel, null)
                     .setPositiveButton(R.string.dialog_ok) { _, _ ->
                         WebsiteStore.remove(ctx, site.id)
+                        WebsiteIcons.forget(ctx, site)
                         ShortcutManagerCompat.disableShortcuts(ctx, listOf("website_${site.id}"),
                             ctx.getString(R.string.website_missing))
                     }.show()
@@ -96,19 +100,37 @@ object WebsiteDialogs {
         }.show()
     }
 
-    fun shortcut(ctx: Context, site: Website): ShortcutInfoCompat =
+    fun shortcut(ctx: Context, site: Website, icon: Bitmap? = WebsiteIcons.cached(site)): ShortcutInfoCompat =
         ShortcutInfoCompat.Builder(ctx, "website_${site.id}")
             .setShortLabel(site.name)
             .setLongLabel(site.name)
-            .setIcon(ShortcutIcons.of(ctx, R.drawable.ic_website))
+            .setIcon(if (icon != null) ShortcutIcons.of(ctx, icon) else ShortcutIcons.of(ctx, R.drawable.ic_website))
             .setIntent(WebsiteActivity.intent(ctx, site.id))
             .build()
+
+    /** Use the cache on a fresh process too, so editing a label keeps its real icon. */
+    fun updateShortcut(ctx: Context, site: Website) {
+        val app = ctx.applicationContext
+        WebsiteIcons.load(app, site) { icon ->
+            val saved = WebsiteStore.all(app).firstOrNull { it.id == site.id && it.url == site.url }
+                ?: return@load
+            try {
+                ShortcutManagerCompat.updateShortcuts(app, listOf(shortcut(app, saved, icon)))
+            } catch (e: Exception) {
+                Log.w("WebsiteIcons", "Could not update website shortcut", e)
+            }
+        }
+    }
 
     fun pin(ctx: Context, site: Website) {
         if (!ShortcutManagerCompat.isRequestPinShortcutSupported(ctx)) {
             Toast.makeText(ctx, R.string.pin_shortcut_unsupported, Toast.LENGTH_SHORT).show()
             return
         }
-        ShortcutManagerCompat.requestPinShortcut(ctx, shortcut(ctx, site), null)
+        WebsiteIcons.load(ctx, site) { icon ->
+            val saved = WebsiteStore.all(ctx).firstOrNull { it.id == site.id && it.url == site.url }
+                ?: return@load
+            ShortcutManagerCompat.requestPinShortcut(ctx, shortcut(ctx, saved, icon), null)
+        }
     }
 }
