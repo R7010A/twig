@@ -148,12 +148,8 @@ class WebsiteFeatureTest {
             assertEquals(saved.lockScrollAxis, web.lockScrollAxis)
             assertEquals(if (saved.fullscreen) View.GONE else View.VISIBLE,
                 activity.findViewById<Toolbar>(R.id.toolbar).visibility)
-            shadowOf(web).setHitTestResult(org.robolectric.shadows.ShadowWebView.createHitTestResult(
-                WebView.HitTestResult.UNKNOWN_TYPE, null))
-            assertEquals(saved.disableTextSelection, shadowOf(web).onLongClickListener.onLongClick(web))
-            shadowOf(web).setHitTestResult(org.robolectric.shadows.ShadowWebView.createHitTestResult(
-                WebView.HitTestResult.EDIT_TEXT_TYPE, null))
-            assertFalse("Editable fields must remain usable", shadowOf(web).onLongClickListener.onLongClick(web))
+            assertNull("Text selection settings must not consume page long presses",
+                shadowOf(web).onLongClickListener)
         }
         controller.pause().stop().destroy()
     }

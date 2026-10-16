@@ -112,9 +112,6 @@ class WebsiteActivity : AppCompatActivity() {
             b.pullIndicator.translationY = 32 * resources.displayMetrics.density * fraction
         }
         b.web.onRefresh = { b.web.reload() }
-        b.web.setOnLongClickListener {
-            site.disableTextSelection && b.web.hitTestResult.type == WebView.HitTestResult.UNKNOWN_TYPE
-        }
         applyWebsiteOptions()
         CookieManager.getInstance().setAcceptCookie(true)
         b.web.webViewClient = object : WebViewClient() {
