@@ -950,11 +950,18 @@ class PaneFragment : Fragment() {
     fun isReady(): Boolean = view != null && ::adapter.isInitialized
 
     /** Checked items (in treemap mode, prefer the selected tiles on the map); when nothing is checked, fall back to the green-highlighted current node. */
-    private fun selectionOrCurrent(): List<XFile> = when {
-        mapMode && mapSelected.isNotEmpty() -> mapSelected.map { it.file }
-        // When the view isn't built yet we can only ask the VM — the check state lives in the adapter, and there can't be any checks at that point.
-        !::adapter.isInitialized -> listOfNotNull(viewModel.currentSelection())
-        else -> adapter.selectedItems().ifEmpty { listOfNotNull(viewModel.currentSelection()) }
+    private fun selectionOrCurrent(readOnly: Boolean = false): List<XFile> {
+        // Reading may include a favorite or storage root; mutation keeps the VM's root protections.
+        val current = viewModel.currentSelection() ?: viewModel.currentDir.takeIf { readOnly }?.let {
+            // A filesystem root is readable, but '/' is not a valid destination entry name.
+            if (it.name == "/") it.copy(displayName = "root") else it
+        }
+        return when {
+            mapMode && mapSelected.isNotEmpty() -> mapSelected.map { it.file }
+            // When the view isn't built yet we can only ask the VM — the check state lives in the adapter, and there can't be any checks at that point.
+            !::adapter.isInitialized -> listOfNotNull(current)
+            else -> adapter.selectedItems().ifEmpty { listOfNotNull(current) }
+        }
     }
 
     data class StripActions(
@@ -971,12 +978,12 @@ class PaneFragment : Fragment() {
     fun stripActions(): StripActions {
         val sources = selectionOrCurrent()
         val modify = sources.isNotEmpty() && sources.all { it.isMutable() }
-        val transfer = sources.isNotEmpty()
+        val transfer = selectionOrCurrent(readOnly = true).isNotEmpty()
         val target = viewModel.currentSelection() ?: viewModel.currentDir
         return StripActions(
             create = canCreateHere(),
             copy = transfer,
-            move = transfer && sources.all { it.isMovableSource() },
+            move = sources.isNotEmpty() && sources.all { it.isMovableSource() },
             rename = sources.size == 1 && modify,
             delete = modify,
             treemap = mapMode || target?.let { it.isDir || com.twig.fs.archive.Archives.isArchive(it) } == true,
@@ -1162,19 +1169,19 @@ class PaneFragment : Fragment() {
 
     /** Copy/move the checked items (or the green-highlighted current node when nothing is checked) to the other pane's current directory. */
     fun actionCopy(move: Boolean) {
-        val sel = selectionOrCurrent()
+        val sel = selectionOrCurrent(readOnly = !move)
         if (sel.isEmpty()) {
             toast(getString(R.string.msg_no_selection)); return
         }
         noteSourceDirs(sel)
-        performCopy(sel, move)
+        performCopy(sel, move, allowMove = selectionOrCurrent().containsAll(sel))
     }
 
-    private fun performCopy(sel: List<XFile>, move: Boolean) {
+    private fun performCopy(sel: List<XFile>, move: Boolean, allowMove: Boolean = true) {
         // Move = copy + delete source. Apps can't be deleted (uninstall is a different thing), and the document tree root
         // can't be deleted (it's a grant, see [isMovableSource]); the action bar's "Move" and batch-after-check bypass the menu,
         // so we catch the failure here rather than failing after the copy completes.
-        val movable = sel.all { it.isMovableSource() }
+        val movable = allowMove && sel.all { it.isMovableSource() }
         if (move && !movable) {
             toast(
                 getString(
@@ -1316,12 +1323,12 @@ class PaneFragment : Fragment() {
 
     /** Action bar "Compress": pack the checked items (or the green-highlighted current node when nothing is checked) into the other pane's current directory. */
     fun actionCompress() {
-        val sel = selectionOrCurrent()
+        val sel = selectionOrCurrent(readOnly = true)
         if (sel.isEmpty()) {
             toast(getString(R.string.msg_no_selection)); return
         }
         noteSourceDirs(sel)
-        performCompress(sel)
+        performCompress(sel, allowMove = selectionOrCurrent().containsAll(sel))
     }
 
     /**
@@ -1331,7 +1338,7 @@ class PaneFragment : Fragment() {
      * Default name: with a single item (the case when the file/directory menu enters) use that item's name — files strip the extension;
      * for multiple items use their containing directory's name. The extension follows the format and is rewritten whenever the format changes.
      */
-    private fun performCompress(sel: List<XFile>) {
+    private fun performCompress(sel: List<XFile>, allowMove: Boolean = true) {
         val sibling = host?.siblingOf(this)
         val dest = sibling?.viewModel?.currentDir
         if (dest == null) {
@@ -1340,7 +1347,9 @@ class PaneFragment : Fragment() {
         if (!dest.isWritableDir()) {
             toast(getString(R.string.msg_dest_not_writable)); return
         }
+        val movable = allowMove && sel.all { it.isMovableSource() }
         val cb = DialogCompressBinding.inflate(layoutInflater)
+        cb.cbMove.visibility = if (movable) View.VISIBLE else View.GONE
         cb.tvSrc.text = if (sel.size == 1) sel[0].name else getString(R.string.copy_items, sel.size)
         cb.tvDest.text = pathLabel(dest)
         cb.ivDest.setImageResource(pathIcon(dest))
@@ -1375,7 +1384,7 @@ class PaneFragment : Fragment() {
                 if (name.isEmpty()) return@setPositiveButton
                 startCompress(
                     sel, dest, name, formatOf(cb.rgFormat.checkedRadioButtonId),
-                    cb.cbMove.isChecked, plan, cb.etPassword.text.toString(),
+                    movable && cb.cbMove.isChecked, plan, cb.etPassword.text.toString(),
                 )
             }
             .create()

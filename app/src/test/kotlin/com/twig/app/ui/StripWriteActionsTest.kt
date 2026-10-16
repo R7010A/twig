@@ -191,4 +191,37 @@ class StripWriteActionsTest {
         assertStrip(R.id.as_move, true)
     }
 
+    @Test
+    fun `favorite and storage roots can be read without enabling mutation`() {
+        val pane = pane0()
+        val adapter = adapterOf(pane)
+        adapter.submitList(emptyList())
+        awaitList(adapter, 0)
+        pane1().viewModel.currentDir = null
+        val targets = listOf(
+            "fav:test" to XFile("file", "/favorite", isDir = true),
+            "file:/" to XFile("file", "/", isDir = true),
+            "file:internal" to XFile("file", android.os.Environment.getExternalStorageDirectory().absolutePath, isDir = true),
+        )
+        for ((key, dir) in targets) {
+            ReflectionHelpers.setField(pane.viewModel, "currentKey", key)
+            pane.viewModel.currentDir = dir
+            activity.onClipTargetChanged()
+            assertStrip(R.id.as_copy, true)
+            assertStrip(R.id.as_compress, true)
+            assertAllWriteActions(false, "a read source must not enable mutation of $key")
+            // No target: both handlers must reach destination validation rather than reject the source.
+            pane.actionCopy(move = false)
+            assertEquals(activity.getString(R.string.msg_pick_other_dir_first),
+                org.robolectric.shadows.ShadowToast.getTextOfLatestToast())
+            pane.actionCompress()
+            assertEquals(activity.getString(R.string.msg_pick_other_dir_first),
+                org.robolectric.shadows.ShadowToast.getTextOfLatestToast())
+        }
+        pane.viewModel.toggle(PaneViewModel.GroupNode("fav", "Favorites", expanded = false))
+        activity.onClipTargetChanged()
+        assertStrip(R.id.as_copy, false)
+        assertStrip(R.id.as_compress, false)
+    }
+
 }
