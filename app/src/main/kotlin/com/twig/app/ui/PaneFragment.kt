@@ -957,17 +957,32 @@ class PaneFragment : Fragment() {
         else -> adapter.selectedItems().ifEmpty { listOfNotNull(viewModel.currentSelection()) }
     }
 
-    /**
-     * Whether the action bar's **write actions** should be tappable — on read-only sources (media servers, restic, 7z/RAR,
-     * git view, "Apps") they're all greyed out, instead of letting a tap hit them and pop up an error.
-     *
-     * Two questions, matching [com.twig.core.isMutable] / [isWritableDir] one-to-one:
-     * - [canModify]: whether the rename/move/delete **sources** are all mutable
-     * - [canCreateHere]: whether the **target directory** for new folder / new text file / paste is writable
-     *
-     * Copy / compress / share are pure read-source operations, never disabled on any source.
-     */
-    fun canModify(): Boolean = selectionOrCurrent().let { it.isNotEmpty() && it.all { f -> f.isMutable() } }
+    data class StripActions(
+        val create: Boolean = false,
+        val copy: Boolean = false,
+        val move: Boolean = false,
+        val rename: Boolean = false,
+        val delete: Boolean = false,
+        val treemap: Boolean = false,
+        val search: Boolean = false,
+    )
+
+    /** Use the same sources and directory targets as the action handlers, without doing IO. */
+    fun stripActions(destination: XFile?): StripActions {
+        val sources = selectionOrCurrent()
+        val modify = sources.isNotEmpty() && sources.all { it.isMutable() }
+        val transfer = sources.isNotEmpty() && destination?.isWritableDir() == true
+        val target = viewModel.currentSelection() ?: viewModel.currentDir
+        return StripActions(
+            create = canCreateHere(),
+            copy = transfer,
+            move = transfer && sources.all { it.isMovableSource() },
+            rename = sources.size == 1 && modify,
+            delete = modify,
+            treemap = mapMode || target?.let { it.isDir || com.twig.fs.archive.Archives.isArchive(it) } == true,
+            search = target?.isDir == true,
+        )
+    }
 
     fun canCreateHere(): Boolean = viewModel.currentDir?.isWritableDir() == true
 

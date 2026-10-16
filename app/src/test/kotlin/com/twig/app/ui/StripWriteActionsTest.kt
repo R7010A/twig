@@ -24,7 +24,7 @@ import org.robolectric.util.ReflectionHelpers
  * ★ Checking a file has to re-evaluate the action strip's write entries.
  *
  * The strip's Move / Rename / Delete follow **what the selection points at**
- * (`PaneFragment.canModify` → `selectionOrCurrent`), but checking a row changes no tree
+ * (`PaneFragment.stripActions` → `selectionOrCurrent`), but checking a row changes no tree
  * state at all — no `render`, so no `onClipTargetChanged` either. The callback the adapter
  * fires for exactly this event was an empty placeholder, so the strip kept the answer it
  * had computed at the last navigation and nothing recomputed it:
@@ -79,6 +79,17 @@ class StripWriteActionsTest {
     private fun pane0(): PaneFragment =
         activity.supportFragmentManager.findFragmentByTag("pane0") as PaneFragment
 
+    private fun pane1(): PaneFragment =
+        activity.supportFragmentManager.findFragmentByTag("pane1") as PaneFragment
+
+    private fun assertStrip(id: Int, enabled: Boolean) {
+        for (strip in listOf(R.id.strip_left, R.id.strip_mid, R.id.strip_right)) {
+            val button = activity.findViewById<View>(strip).findViewById<View>(id)
+            assertEquals("enabled state for $id in $strip", enabled, button.isEnabled)
+            assertEquals(if (enabled) 1f else 0.35f, button.alpha, 0.01f)
+        }
+    }
+
     private fun adapterOf(pane: PaneFragment): FileAdapter =
         ReflectionHelpers.getField<FileAdapter>(pane, "adapter")
 
@@ -97,6 +108,7 @@ class StripWriteActionsTest {
         val pane = pane0()
         assertTrue("the pane's view is not built, nothing to assert", pane.isReady())
         val adapter = adapterOf(pane)
+        pane1().viewModel.currentDir = XFile("file", "/destination", isDir = true)
 
         // Nothing checked, and the freshly bootstrapped tree has no green-highlighted file to
         // fall back on: this is the state the user was looking at when the buttons were dead.
@@ -126,4 +138,52 @@ class StripWriteActionsTest {
         adapter.clearSelection()
         assertAllWriteActions(false, "and unchecking greys them out again")
     }
+    @Test
+    fun `virtual groups disable directory actions while checks and opposite destination control transfers`() {
+        val pane = pane0()
+        val adapter = adapterOf(pane)
+        val dir = XFile("file", "/destination", isDir = true)
+        pane1().viewModel.currentDir = dir
+        pane.viewModel.toggle(PaneViewModel.GroupNode("fav", "Favorites", expanded = false))
+        idle()
+        activity.onClipTargetChanged()
+        for (id in listOf(R.id.as_copy, R.id.as_compress, R.id.as_compare, R.id.as_map, R.id.as_search)) {
+            assertStrip(id, false)
+        }
+
+        ReflectionHelpers.setField(pane, "mapMode", true)
+        activity.onClipTargetChanged()
+        assertStrip(R.id.as_map, true) // The same button exits the map, even without a directory target.
+        ReflectionHelpers.setField(pane, "mapMode", false)
+        activity.onClipTargetChanged()
+        assertStrip(R.id.as_map, false)
+
+        val files = listOf("a.txt", "b.txt").map { XFile("file", "/source/$it", isDir = false) }
+        adapter.submitList(files.map { PaneViewModel.FileNode(it, 1, false, false) })
+        awaitList(adapter, 2)
+        adapter.setSelection(files)
+        assertStrip(R.id.as_copy, true)
+        assertStrip(R.id.as_compress, true)
+        assertStrip(R.id.as_move, true)
+        assertStrip(R.id.as_delete, true)
+        assertStrip(R.id.as_rename, false)
+        assertStrip(R.id.as_search, false)
+
+        pane1().viewModel.currentDir = dir.copy(canWrite = false)
+        activity.onClipTargetChanged()
+        assertStrip(R.id.as_copy, false)
+        assertStrip(R.id.as_compress, false)
+        assertStrip(R.id.as_move, false)
+        assertStrip(R.id.as_delete, true)
+
+        pane.viewModel.currentDir = XFile("file", "/source", isDir = true)
+        activity.onClipTargetChanged()
+        assertStrip(R.id.as_compare, true)
+        assertStrip(R.id.as_map, true)
+        assertStrip(R.id.as_search, true)
+        pane1().viewModel.currentDir = null
+        activity.onClipTargetChanged()
+        assertStrip(R.id.as_compare, false)
+    }
+
 }

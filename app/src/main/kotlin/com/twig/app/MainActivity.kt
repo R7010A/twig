@@ -43,6 +43,7 @@ import com.twig.app.ui.TerminalActivity
 import com.twig.app.ui.sizeIconsLikeRows
 import com.twig.core.FsRegistry
 import com.twig.core.XFile
+import com.twig.core.isWritableDir
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -555,7 +556,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
             target == null -> getString(R.string.clip_dest_none)
             else -> getString(R.string.clip_dest, activePane()?.clipTargetLabel().orEmpty())
         }
-        val canPaste = target != null && block == null
+        val canPaste = target?.isWritableDir() == true && block == null
         b.btnPaste.isEnabled = canPaste
         b.btnPaste.alpha = if (canPaste) 1f else 0.4f
         // Don't write back when the value is the same; avoids bouncing with setOnCheckedChangeListener
@@ -734,34 +735,25 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         syncStripEnabled()
     }
 
-    /**
-     * The action strip's **write** entries follow the active pane's capability toggles.
-     *
-     * On read-only sources (media servers, restic, 7z/RAR, the git view, "Apps"), create /
-     * move / rename / delete are all greyed out — not "tap and get an error toast".
-     * Copy / compress / share are **pure read source**, always available on any source.
-     *
-     * All three action strips (landscape middle + portrait left/right) need refreshing,
-     * same as [syncShareIcon]. Two triggers: [onClipTargetChanged] — PaneFragment.render
-     * calls it on every state refresh, so directory switches, ticks, pane switches all
-     * update it as a side effect — and [onSelectionChanged], because checking a file changes
-     * what the write actions act on without any tree state moving at all.
-     */
+    /** Refresh all strip instances when either pane, the selection or map mode changes. */
     private fun syncStripEnabled() {
-        // ★ Don't ask the pane before it's ready: the two panes' views come up one at a time,
-        // and the first one to come up may fire its first frame before the other has reached
-        // onViewCreated (see PaneFragment.isReady)
+        // The first pane can render before the other pane's adapter is initialized.
         val pane = activePane()?.takeIf { it.isReady() }
-        val modify = pane?.canModify() ?: false
-        val create = pane?.canCreateHere() ?: false
+        val other = paneAt(1 - activeIndex)?.takeIf { it.isReady() }
+        val actions = pane?.stripActions(other?.viewModel?.currentDir) ?: PaneFragment.StripActions()
+        val compare = pane?.viewModel?.currentDir?.isDir == true &&
+            other?.viewModel?.currentDir?.isDir == true
         for (s in listOf(b.stripMid, b.stripLeft, b.stripRight)) {
-            setStripEnabled(s.asNewFolder, create)
-            setStripEnabled(s.asMove, modify)
-            setStripEnabled(s.asRename, modify)
-            setStripEnabled(s.asDelete, modify)
+            setStripEnabled(s.asNewFolder, actions.create)
+            setStripEnabled(s.asCopy, actions.copy)
+            setStripEnabled(s.asCompress, actions.copy)
+            setStripEnabled(s.asMove, actions.move)
+            setStripEnabled(s.asRename, actions.rename)
+            setStripEnabled(s.asDelete, actions.delete)
+            setStripEnabled(s.asCompare, compare)
+            setStripEnabled(s.asMap, actions.treemap)
+            setStripEnabled(s.asSearch, actions.search)
         }
-        b.btnPaste.isEnabled = create
-        b.btnPaste.alpha = if (create) 1f else DISABLED_ALPHA
     }
 
     /**
