@@ -6,7 +6,9 @@
 
 - **Fast pane swipes also clicked a node (2026-10-16)**: the gesture listener switched
   panes but returned false, leaving the row's click active. Intercept recognized swipes
-  through release; check UP too when no MOVE arrives. `PaneSwipeListenerTest` covers both.
+  through release; check UP too when no MOVE arrives. Property cards also classify UP,
+  cancel child actions and dispatch the tab change after child cancellation. Shared
+  intent/cancellation helpers live in `SwipeGesture`; the pane and card tests cover both.
 
 - **Properties ripple disappeared on the first tap, especially with folder counts (2026-10-16)**:
   a row rebind briefly hid its button, ending the ripple. Set final visibility directly;

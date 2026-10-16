@@ -41,12 +41,9 @@ class InfoCardLayout @JvmOverloads constructor(context: Context, attrs: Attribut
                 // Let this card decide the axis before RecyclerView starts a vertical drag.
                 parent?.requestDisallowInterceptTouchEvent(true)
             }
-            MotionEvent.ACTION_MOVE -> if (axis == 0) {
-                val dx = abs(event.x - downX)
-                val dy = abs(event.y - downY)
-                if (dx > slop && dx > dy * 1.5f) axis = 1
-                else if (dy > slop) {
-                    axis = 2
+            MotionEvent.ACTION_MOVE, MotionEvent.ACTION_UP -> if (axis == 0) {
+                axis = SwipeGesture.axis(event.x - downX, event.y - downY, slop.toFloat(), 1.5f)
+                if (axis == 2) {
                     parent?.requestDisallowInterceptTouchEvent(false)
                 }
             }
@@ -55,7 +52,15 @@ class InfoCardLayout @JvmOverloads constructor(context: Context, attrs: Attribut
                 parent?.requestDisallowInterceptTouchEvent(false)
             }
         }
-        return try { super.dispatchTouchEvent(event) } finally {
+        return try {
+            val handled = super.dispatchTouchEvent(event)
+            // Intercepting UP cancels a child without calling this view's onTouchEvent.
+            if (event.actionMasked == MotionEvent.ACTION_UP && axis == 1) {
+                val dx = event.x - downX
+                if (abs(dx) >= 48 * resources.displayMetrics.density) onSwipe?.invoke(if (dx < 0) 1 else -1)
+            }
+            handled
+        } finally {
             if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) {
                 axis = 0
                 parent?.requestDisallowInterceptTouchEvent(false)
@@ -63,15 +68,12 @@ class InfoCardLayout @JvmOverloads constructor(context: Context, attrs: Attribut
         }
     }
 
-    override fun onInterceptTouchEvent(event: MotionEvent): Boolean = swipeEnabled && axis == 1
+    override fun onInterceptTouchEvent(event: MotionEvent): Boolean =
+        swipeEnabled && (axis == 1 || (axis == 2 && event.actionMasked == MotionEvent.ACTION_UP))
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (!swipeEnabled) return super.onTouchEvent(event)
-        if (event.actionMasked == MotionEvent.ACTION_UP) {
-            val dx = event.x - downX
-            if (axis == 1 && abs(dx) >= 48 * resources.displayMetrics.density) onSwipe?.invoke(if (dx < 0) 1 else -1)
-            else if (axis == 0) performClick()
-        }
+        if (event.actionMasked == MotionEvent.ACTION_UP && axis == 0) performClick()
         return true
     }
 

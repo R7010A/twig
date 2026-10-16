@@ -2,7 +2,6 @@ package com.twig.app.ui
 
 import android.view.MotionEvent
 import androidx.recyclerview.widget.RecyclerView
-import kotlin.math.abs
 
 /** Claim a pane swipe so RecyclerView cancels the row's pending click. */
 internal class PaneSwipeListener(
@@ -25,7 +24,7 @@ internal class PaneSwipeListener(
             MotionEvent.ACTION_MOVE, MotionEvent.ACTION_UP -> if (!swiped && !propertiesTouch) {
                 val dx = event.x - downX
                 val dy = event.y - downY
-                if (abs(dx) > threshold && abs(dx) > abs(dy)) {
+                if (SwipeGesture.axis(dx, dy, threshold) == SwipeGesture.HORIZONTAL) {
                     swiped = true
                     onSwipe(dx)
                 }

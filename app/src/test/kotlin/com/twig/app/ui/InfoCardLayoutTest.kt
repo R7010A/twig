@@ -123,6 +123,23 @@ class InfoCardLayoutTest {
         assertEquals(1, clicks)
     }
 
+    @Test fun `release without move switches tabs once and cancels the child click`() {
+        for (vertical in listOf(false, true)) {
+            var clicks = 0
+            val steps = mutableListOf<Int>()
+            val card = InfoCardLayout(app).apply { swipeEnabled = true; onSwipe = { steps += it } }
+            card.addView(TextView(app).apply { setOnClickListener { clicks++ } },
+                LinearLayout.LayoutParams(400, 200))
+            Robolectric.buildActivity(Activity::class.java).setup().get().setContentView(card)
+            measure(card)
+            touch(card, MotionEvent.ACTION_DOWN, 300f, 40f)
+            touch(card, MotionEvent.ACTION_UP, if (vertical) 300f else 100f, if (vertical) 150f else 40f)
+            org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+            assertEquals(0, clicks)
+            assertEquals(if (vertical) emptyList<Int>() else listOf(1), steps)
+        }
+    }
+
     @Test fun `new and old content slide next to each other and release the snapshot`() {
         val card = InfoCardLayout(app).apply { orientation = LinearLayout.VERTICAL }
         val content = TextView(app).apply { text = "General" }
