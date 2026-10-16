@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/surface">
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar" android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize" android:background="@color/toolbar"
+        app:titleTextAppearance="@style/CompactToolbarTitle" app:titleTextColor="@color/white"
+        app:subtitleTextColor="@color/white" app:navigationIcon="@drawable/ic_up" />
+    <ProgressBar android:id="@+id/progress" style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent" android:layout_height="2dp"
+        android:visibility="gone" />
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <com.twig.app.ui.WebsiteWebView android:id="@+id/web" android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <ProgressBar android:id="@+id/pull_indicator" android:layout_width="32dp" android:layout_height="32dp"
+            android:layout_gravity="top|center_horizontal" android:layout_marginTop="12dp"
+            android:visibility="gone" android:importantForAccessibility="no" />
+    </FrameLayout>
+</LinearLayout>

@@ -881,4 +881,22 @@
     <string name="folder_counts_description">Cartelle: %1$d, file: %2$d</string>
     <string name="info_activity_failed">Impossibile aprire questa Activity</string>
     <string name="info_app_shortcuts_limited">Android limita l’accesso alle scorciatoie dinamiche delle altre app. Sono mostrate solo le scorciatoie dichiarate dall’app.</string>
+
+    <!-- Website bookmarks -->
+    <string name="group_websites">Siti web</string>
+    <string name="website_add">Aggiungi sito web…</string>
+    <string name="website_edit">Modifica sito web</string>
+    <string name="website_name">Nome (facoltativo)</string>
+    <string name="website_url">URL del sito web</string>
+    <string name="website_fullscreen">Nascondi barra degli strumenti</string>
+    <string name="website_invalid_url">Inserisci un URL HTTP o HTTPS valido</string>
+    <string name="website_delete_confirm">Eliminare «%1$s»?</string>
+    <string name="website_missing">Questo segnalibro è stato eliminato</string>
+    <string name="website_no_app">Nessuna app può eseguire questa azione</string>
+    <string name="website_pull_to_refresh">Trascina per aggiornare</string>
+    <string name="website_hide_status_bar">Nascondi barra di stato</string>
+    <string name="website_hide_navigation_bar">Nascondi barra di navigazione</string>
+    <string name="website_disable_text_selection">Disabilita selezione del testo</string>
+    <string name="website_lock_scroll_axis">Blocca direzione di scorrimento</string>
+    <string name="website_desktop_site">Sito desktop</string>
 </resources>

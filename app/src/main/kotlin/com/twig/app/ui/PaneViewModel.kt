@@ -129,6 +129,11 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         override val key: String get() = "s:${conn.label()}"
     }
 
+    data class WebsiteNode(val site: com.twig.app.Website) : Node {
+        override val depth: Int get() = 1
+        override val key: String get() = "website:${site.id}"
+    }
+
     /** Per-group action item, e.g. "Add server…". */
     data class ActionNode(val id: String, val label: String) : Node {
         override val depth: Int get() = 1
@@ -853,6 +858,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
             is ResticNode -> if (node.unlocked) toggleRestic(node) // Unlocked — Fragment shows password prompt if needed.
             is FavoriteNode -> Unit // Handled by Fragment (may need password).
             is CompareNode -> Unit // Handled by Fragment (jumps to compare page).
+            is WebsiteNode -> Unit // Handled by Fragment (opens the website).
             is ActionNode -> Unit // Handled by Fragment.
             is InfoNode -> { // The ✕ button
                 val key = fileKey(node.file)
@@ -2641,6 +2647,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
             // Externally opened archives go at the top — they don't belong to any storage tree, so wedged in the middle they'd be hard to find.
             externalMount?.let { addFile(rows, it, 0, externalLabel, keyPrefix = EXTERNAL_KEY_PREFIX) }
             addGroup(rows, "fav", str(R.string.group_fav))
+            addGroup(rows, "websites", str(R.string.group_websites))
             // Saved comparisons have no dedicated empty state — if none were ever saved, don't show the group at all (saves space).
             if (CompareStore.all(getApplication()).isNotEmpty()) {
                 addGroup(rows, "cmp", str(R.string.compare_saved))
@@ -2837,6 +2844,10 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                 for (conn in ConnectionStore.all(app).filter { it.isMediaServer() }) addServer(rows, conn)
                 rows += ActionNode("add_jellyfin", str(R.string.action_add_jellyfin))
                 rows += ActionNode("add_emby", str(R.string.action_add_emby))
+            }
+            "websites" -> {
+                com.twig.app.WebsiteStore.all(app).forEach { rows += WebsiteNode(it) }
+                rows += ActionNode("add_website", str(R.string.website_add))
             }
             "saf" -> {
                 safRoots().forEach { addFile(rows, it, 1) }

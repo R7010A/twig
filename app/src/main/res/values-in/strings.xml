@@ -881,4 +881,22 @@
     <string name="folder_counts_description">Folder: %1$d, file: %2$d</string>
     <string name="info_activity_failed">Activity ini tidak dapat dibuka</string>
     <string name="info_app_shortcuts_limited">Android membatasi akses ke pintasan dinamis aplikasi lain. Hanya pintasan yang dideklarasikan oleh aplikasi yang ditampilkan.</string>
+
+    <!-- Website bookmarks -->
+    <string name="group_websites">Situs web</string>
+    <string name="website_add">Tambah situs web…</string>
+    <string name="website_edit">Edit situs web</string>
+    <string name="website_name">Nama (opsional)</string>
+    <string name="website_url">URL situs web</string>
+    <string name="website_fullscreen">Sembunyikan bilah alat</string>
+    <string name="website_invalid_url">Masukkan URL HTTP atau HTTPS yang valid</string>
+    <string name="website_delete_confirm">Hapus “%1$s”?</string>
+    <string name="website_missing">Bookmark situs web ini telah dihapus</string>
+    <string name="website_no_app">Tidak ada aplikasi untuk tindakan ini</string>
+    <string name="website_pull_to_refresh">Tarik untuk memuat ulang</string>
+    <string name="website_hide_status_bar">Sembunyikan bilah status</string>
+    <string name="website_hide_navigation_bar">Sembunyikan bilah navigasi</string>
+    <string name="website_disable_text_selection">Nonaktifkan pemilihan teks</string>
+    <string name="website_lock_scroll_axis">Kunci arah gulir</string>
+    <string name="website_desktop_site">Situs desktop</string>
 </resources>

@@ -917,4 +917,22 @@
     <string name="folder_counts_description">Папок: %1$d, файлов: %2$d</string>
     <string name="info_activity_failed">Не удалось открыть Activity</string>
     <string name="info_app_shortcuts_limited">Android ограничивает доступ к динамическим ярлыкам других приложений. Показаны только ярлыки, объявленные приложением.</string>
+
+    <!-- Website bookmarks -->
+    <string name="group_websites">Сайты</string>
+    <string name="website_add">Добавить сайт…</string>
+    <string name="website_edit">Изменить сайт</string>
+    <string name="website_name">Название (необязательно)</string>
+    <string name="website_url">Адрес сайта</string>
+    <string name="website_fullscreen">Скрыть панель инструментов</string>
+    <string name="website_invalid_url">Введите корректный адрес HTTP или HTTPS</string>
+    <string name="website_delete_confirm">Удалить «%1$s»?</string>
+    <string name="website_missing">Эта закладка удалена</string>
+    <string name="website_no_app">Нет приложения для этого действия</string>
+    <string name="website_pull_to_refresh">Потянуть для обновления</string>
+    <string name="website_hide_status_bar">Скрыть строку состояния</string>
+    <string name="website_hide_navigation_bar">Скрыть панель навигации</string>
+    <string name="website_disable_text_selection">Отключить выделение текста</string>
+    <string name="website_lock_scroll_axis">Зафиксировать направление прокрутки</string>
+    <string name="website_desktop_site">Версия для компьютера</string>
 </resources>

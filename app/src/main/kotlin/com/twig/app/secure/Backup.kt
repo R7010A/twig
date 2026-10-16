@@ -91,7 +91,7 @@ object Backup {
      */
     private val PREF_FILES = listOf(
         "twig_prefs", "twig_favorites", "twig_sort", "twig_history",
-        "twig_compares", "twig_cmds", "twig_playlists", "twig_playback",
+        "twig_compares", "twig_cmds", "twig_playlists", "twig_playback", "twig_websites",
     )
 
     /** Where SFTP private keys are persisted (see `MainActivity`'s keyPickerLauncher). */

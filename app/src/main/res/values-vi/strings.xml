@@ -880,4 +880,22 @@
     <string name="folder_counts_description">Thư mục: %1$d, tệp: %2$d</string>
     <string name="info_activity_failed">Không thể mở Activity này</string>
     <string name="info_app_shortcuts_limited">Android hạn chế quyền truy cập vào lối tắt động của ứng dụng khác. Chỉ hiển thị các lối tắt được ứng dụng khai báo.</string>
+
+    <!-- Website bookmarks -->
+    <string name="group_websites">Trang web</string>
+    <string name="website_add">Thêm trang web…</string>
+    <string name="website_edit">Chỉnh sửa trang web</string>
+    <string name="website_name">Tên (không bắt buộc)</string>
+    <string name="website_url">URL trang web</string>
+    <string name="website_fullscreen">Ẩn thanh công cụ</string>
+    <string name="website_invalid_url">Nhập URL HTTP hoặc HTTPS hợp lệ</string>
+    <string name="website_delete_confirm">Xóa “%1$s”?</string>
+    <string name="website_missing">Dấu trang này đã bị xóa</string>
+    <string name="website_no_app">Không có ứng dụng xử lý thao tác này</string>
+    <string name="website_pull_to_refresh">Kéo để làm mới</string>
+    <string name="website_hide_status_bar">Ẩn thanh trạng thái</string>
+    <string name="website_hide_navigation_bar">Ẩn thanh điều hướng</string>
+    <string name="website_disable_text_selection">Tắt chọn văn bản</string>
+    <string name="website_lock_scroll_axis">Khóa hướng cuộn</string>
+    <string name="website_desktop_site">Trang web cho máy tính</string>
 </resources>

@@ -4,6 +4,16 @@
 > shared conventions are in [AGENTS.md](../../AGENTS.md); the other sections live
 > beside this file in [docs/lessons/](.).
 
+- **Website pull-to-refresh fired midway through content below a fixed header (2026-10-16)**:
+  `WebView.canScrollVertically(-1)` only sees the outer document, whose offset stays zero
+  when a nested element owns scrolling. The start-of-gesture DOM probe checks the touched
+  element and its scroll ancestors, including open shadow roots and same-origin frames;
+  unknown/cross-origin frames cannot authorize a refresh. Probe coordinates account for
+  desktop viewport scaling and pinch zoom. A late reply cannot capture a gesture that
+  already started scrolling or authorize a newer gesture. `WebsiteGesturesTest` covers
+  these races, `WebsiteFeatureTest` exercises the asset/callback path, and
+  `tools/test_website_scroll.py` checks real DOM scrolling in headless Chromium.
+
 - **Fast pane swipes also clicked a node (2026-10-16)**: the gesture listener switched
   panes but returned false, leaving the row's click active. Intercept recognized swipes
   through release; check UP too when no MOVE arrives. Property cards also classify UP,

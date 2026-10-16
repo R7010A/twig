@@ -881,4 +881,22 @@
     <string name="folder_counts_description">Pastas: %1$d, arquivos: %2$d</string>
     <string name="info_activity_failed">Não foi possível abrir esta Activity</string>
     <string name="info_app_shortcuts_limited">O Android restringe o acesso aos atalhos dinâmicos de outros apps. Apenas os atalhos declarados pelo app são exibidos.</string>
+
+    <!-- Website bookmarks -->
+    <string name="group_websites">Sites</string>
+    <string name="website_add">Adicionar site…</string>
+    <string name="website_edit">Editar site</string>
+    <string name="website_name">Nome (opcional)</string>
+    <string name="website_url">URL do site</string>
+    <string name="website_fullscreen">Ocultar barra de ferramentas</string>
+    <string name="website_invalid_url">Digite uma URL HTTP ou HTTPS válida</string>
+    <string name="website_delete_confirm">Excluir “%1$s”?</string>
+    <string name="website_missing">Este favorito foi excluído</string>
+    <string name="website_no_app">Nenhum app pode executar esta ação</string>
+    <string name="website_pull_to_refresh">Puxar para atualizar</string>
+    <string name="website_hide_status_bar">Ocultar barra de status</string>
+    <string name="website_hide_navigation_bar">Ocultar barra de navegação</string>
+    <string name="website_disable_text_selection">Desativar seleção de texto</string>
+    <string name="website_lock_scroll_axis">Travar direção de rolagem</string>
+    <string name="website_desktop_site">Site para computador</string>
 </resources>

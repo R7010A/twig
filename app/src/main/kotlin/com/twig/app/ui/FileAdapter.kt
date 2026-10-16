@@ -743,6 +743,7 @@ class FileAdapter(
                 is PaneViewModel.GroupNode -> bindGroup(node)
                 is PaneViewModel.ServerNode -> bindServer(node)
                 is PaneViewModel.ActionNode -> bindAction(node)
+                is PaneViewModel.WebsiteNode -> bindWebsite(node)
                 is PaneViewModel.ResticNode -> bindRestic(node)
                 is PaneViewModel.FavoriteNode -> bindFavorite(node)
                 is PaneViewModel.CompareNode -> bindCompareFavorite(node)
@@ -970,6 +971,7 @@ class FileAdapter(
             setMeta(null)
             b.icon.setImageResource(
                 when (node.id) {
+                    "websites" -> R.drawable.ic_website
                     "fav" -> R.drawable.ic_star
                     "cmp" -> R.drawable.ic_compare_fav
                     "lan" -> R.drawable.ic_lan
@@ -1009,6 +1011,16 @@ class FileAdapter(
             )
             setIndicator(node.expanded)
             if (node.connecting) { b.progress.visibility = View.VISIBLE; setIndicator(null) }
+            b.check.visibility = View.GONE
+            b.root.setOnClickListener { onClick(node) }
+            b.root.setOnLongClickListener { onLongClick(node); true }
+        }
+
+        private fun bindWebsite(node: PaneViewModel.WebsiteNode) {
+            b.name.text = node.site.name
+            setMeta(node.site.url)
+            b.icon.setImageResource(R.drawable.ic_website)
+            setIndicator(null)
             b.check.visibility = View.GONE
             b.root.setOnClickListener { onClick(node) }
             b.root.setOnLongClickListener { onLongClick(node); true }

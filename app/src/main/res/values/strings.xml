@@ -951,4 +951,22 @@
     <string name="info_app_details_unavailable" translatable="false">Some app details could not be read.</string>
     <string name="info_app_shortcuts_limited">Android restricts access to dynamic shortcuts from other apps. Only declared shortcuts are shown.</string>
     <string name="info_activity_failed">Could not open this Activity</string>
+
+    <!-- Website bookmarks -->
+    <string name="group_websites">Websites</string>
+    <string name="website_add">Add website…</string>
+    <string name="website_edit">Edit website</string>
+    <string name="website_name">Name (optional)</string>
+    <string name="website_url">Website URL</string>
+    <string name="website_fullscreen">Hide toolbar</string>
+    <string name="website_invalid_url">Enter a valid HTTP or HTTPS URL</string>
+    <string name="website_delete_confirm">Delete “%1$s”?</string>
+    <string name="website_missing">This website bookmark has been deleted</string>
+    <string name="website_no_app">No app can handle this action</string>
+    <string name="website_pull_to_refresh">Pull to refresh</string>
+    <string name="website_hide_status_bar">Hide status bar</string>
+    <string name="website_hide_navigation_bar">Hide navigation bar</string>
+    <string name="website_disable_text_selection">Disable text selection</string>
+    <string name="website_lock_scroll_axis">Lock scroll direction</string>
+    <string name="website_desktop_site">Desktop site</string>
 </resources>

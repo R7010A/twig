@@ -885,4 +885,22 @@
     <string name="folder_counts_description">المجلدات: %1$d، الملفات: %2$d</string>
     <string name="info_activity_failed">تعذّر فتح هذا Activity</string>
     <string name="info_app_shortcuts_limited">يقيّد Android الوصول إلى الاختصارات الديناميكية للتطبيقات الأخرى. تُعرض فقط الاختصارات المعلنة من التطبيق.</string>
+
+    <!-- Website bookmarks -->
+    <string name="group_websites">مواقع الويب</string>
+    <string name="website_add">إضافة موقع…</string>
+    <string name="website_edit">تعديل الموقع</string>
+    <string name="website_name">الاسم (اختياري)</string>
+    <string name="website_url">عنوان الموقع</string>
+    <string name="website_fullscreen">إخفاء شريط الأدوات</string>
+    <string name="website_invalid_url">أدخل عنوان HTTP أو HTTPS صالحًا</string>
+    <string name="website_delete_confirm">حذف «%1$s»؟</string>
+    <string name="website_missing">تم حذف إشارة هذا الموقع</string>
+    <string name="website_no_app">لا يوجد تطبيق لتنفيذ هذا الإجراء</string>
+    <string name="website_pull_to_refresh">السحب للتحديث</string>
+    <string name="website_hide_status_bar">إخفاء شريط الحالة</string>
+    <string name="website_hide_navigation_bar">إخفاء شريط التنقل</string>
+    <string name="website_disable_text_selection">تعطيل تحديد النص</string>
+    <string name="website_lock_scroll_axis">قفل اتجاه التمرير</string>
+    <string name="website_desktop_site">موقع سطح المكتب</string>
 </resources>

@@ -881,4 +881,22 @@
     <string name="folder_counts_description">Dossiers : %1$d, fichiers : %2$d</string>
     <string name="info_activity_failed">Impossible d’ouvrir cette Activity</string>
     <string name="info_app_shortcuts_limited">Android limite l’accès aux raccourcis dynamiques des autres applications. Seuls les raccourcis déclarés par l’application sont affichés.</string>
+
+    <!-- Website bookmarks -->
+    <string name="group_websites">Sites web</string>
+    <string name="website_add">Ajouter un site web…</string>
+    <string name="website_edit">Modifier le site web</string>
+    <string name="website_name">Nom (facultatif)</string>
+    <string name="website_url">URL du site web</string>
+    <string name="website_fullscreen">Masquer la barre d’outils</string>
+    <string name="website_invalid_url">Saisissez une URL HTTP ou HTTPS valide</string>
+    <string name="website_delete_confirm">Supprimer « %1$s » ?</string>
+    <string name="website_missing">Ce favori a été supprimé</string>
+    <string name="website_no_app">Aucune application ne peut effectuer cette action</string>
+    <string name="website_pull_to_refresh">Tirer pour actualiser</string>
+    <string name="website_hide_status_bar">Masquer la barre d’état</string>
+    <string name="website_hide_navigation_bar">Masquer la barre de navigation</string>
+    <string name="website_disable_text_selection">Désactiver la sélection de texte</string>
+    <string name="website_lock_scroll_axis">Verrouiller le sens de défilement</string>
+    <string name="website_desktop_site">Version pour ordinateur</string>
 </resources>

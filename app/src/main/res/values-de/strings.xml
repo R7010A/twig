@@ -881,4 +881,22 @@
     <string name="folder_counts_description">Ordner: %1$d, Dateien: %2$d</string>
     <string name="info_activity_failed">Diese Activity konnte nicht geöffnet werden</string>
     <string name="info_app_shortcuts_limited">Android schränkt den Zugriff auf dynamische Verknüpfungen anderer Apps ein. Es werden nur von der App deklarierte Verknüpfungen angezeigt.</string>
+
+    <!-- Website bookmarks -->
+    <string name="group_websites">Websites</string>
+    <string name="website_add">Website hinzufügen…</string>
+    <string name="website_edit">Website bearbeiten</string>
+    <string name="website_name">Name (optional)</string>
+    <string name="website_url">Website-URL</string>
+    <string name="website_fullscreen">Symbolleiste ausblenden</string>
+    <string name="website_invalid_url">Gültige HTTP- oder HTTPS-URL eingeben</string>
+    <string name="website_delete_confirm">„%1$s“ löschen?</string>
+    <string name="website_missing">Dieses Website-Lesezeichen wurde gelöscht</string>
+    <string name="website_no_app">Keine App kann diese Aktion ausführen</string>
+    <string name="website_pull_to_refresh">Zum Aktualisieren ziehen</string>
+    <string name="website_hide_status_bar">Statusleiste ausblenden</string>
+    <string name="website_hide_navigation_bar">Navigationsleiste ausblenden</string>
+    <string name="website_disable_text_selection">Textauswahl deaktivieren</string>
+    <string name="website_lock_scroll_axis">Scrollrichtung sperren</string>
+    <string name="website_desktop_site">Desktopwebsite</string>
 </resources>

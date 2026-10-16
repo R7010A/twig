@@ -880,4 +880,22 @@
     <string name="folder_counts_description">目錄：%1$d，檔案：%2$d</string>
     <string name="info_activity_failed">無法開啟此 Activity</string>
     <string name="info_app_shortcuts_limited">Android 限制讀取其他應用程式的動態捷徑。此處僅顯示應用程式宣告的捷徑。</string>
+
+    <!-- Website bookmarks -->
+    <string name="group_websites">網站</string>
+    <string name="website_add">新增網站…</string>
+    <string name="website_edit">編輯網站</string>
+    <string name="website_name">名稱（選填）</string>
+    <string name="website_url">網址</string>
+    <string name="website_fullscreen">隱藏工具列</string>
+    <string name="website_invalid_url">請輸入有效的 HTTP 或 HTTPS 網址</string>
+    <string name="website_delete_confirm">刪除「%1$s」？</string>
+    <string name="website_missing">此網站書籤已刪除</string>
+    <string name="website_no_app">沒有可處理此操作的應用程式</string>
+    <string name="website_pull_to_refresh">下拉重新整理</string>
+    <string name="website_hide_status_bar">隱藏狀態列</string>
+    <string name="website_hide_navigation_bar">隱藏導覽列</string>
+    <string name="website_disable_text_selection">停用文字選取</string>
+    <string name="website_lock_scroll_axis">鎖定滑動方向（橫向或縱向）</string>
+    <string name="website_desktop_site">電腦版網站</string>
 </resources>

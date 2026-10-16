@@ -132,6 +132,7 @@ class PaneFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        com.twig.app.WebsiteStore.preferences(requireContext()).registerOnSharedPreferenceChangeListener(websiteListener)
         adapter = FileAdapter(
             density = Prefs.density(requireContext()),
             textSize = Prefs.textSize(requireContext()),
@@ -142,8 +143,10 @@ class PaneFragment : Fragment() {
                 when (node) {
                     is PaneViewModel.FileNode ->
                         if (node.expandable) viewModel.toggle(node) else open(node.file)
+                    is PaneViewModel.WebsiteNode -> startActivity(WebsiteActivity.intent(requireContext(), node.site.id))
                     is PaneViewModel.ActionNode ->
-                        if (node.id.startsWith("add_")) host?.onAddServer(node.id.removePrefix("add_"))
+                        if (node.id == "add_website") WebsiteDialogs.edit(requireContext())
+                        else if (node.id.startsWith("add_")) host?.onAddServer(node.id.removePrefix("add_"))
                     is PaneViewModel.ResticNode -> when {
                         node.connecting -> Unit // Unlocking in progress — don't show the password dialog again / don't stack another unlock.
                         node.unlocked -> viewModel.toggleRestic(node)
@@ -1591,6 +1594,7 @@ class PaneFragment : Fragment() {
             is PaneViewModel.FileNode -> longClickFile(node)
             is PaneViewModel.ServerNode -> serverMenu(node)
             is PaneViewModel.FavoriteNode -> favoriteMenu(node)
+            is PaneViewModel.WebsiteNode -> WebsiteDialogs.menu(requireContext(), node.site)
             is PaneViewModel.CompareNode -> compareFavMenu(node)
             is PaneViewModel.SearchNode -> searchNodeMenu(node)
             else -> Unit
@@ -2502,7 +2506,12 @@ class PaneFragment : Fragment() {
         }
     }
 
+    private val websiteListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
+        viewModel.refreshTree()
+    }
+
     override fun onDestroyView() {
+        com.twig.app.WebsiteStore.preferences(requireContext()).unregisterOnSharedPreferenceChangeListener(websiteListener)
         super.onDestroyView()
         progressBox?.detach() // The transfer itself isn't affected — just no one's watching anymore (the notification is still there).
         stopObservers()

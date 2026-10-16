@@ -881,4 +881,22 @@
     <string name="folder_counts_description">Klasörler: %1$d, dosyalar: %2$d</string>
     <string name="info_activity_failed">Bu Activity açılamadı</string>
     <string name="info_app_shortcuts_limited">Android, diğer uygulamaların dinamik kısayollarına erişimi kısıtlar. Yalnızca uygulamada tanımlanan kısayollar gösterilir.</string>
+
+    <!-- Website bookmarks -->
+    <string name="group_websites">Web siteleri</string>
+    <string name="website_add">Web sitesi ekle…</string>
+    <string name="website_edit">Web sitesini düzenle</string>
+    <string name="website_name">Ad (isteğe bağlı)</string>
+    <string name="website_url">Web sitesi URL’si</string>
+    <string name="website_fullscreen">Araç çubuğunu gizle</string>
+    <string name="website_invalid_url">Geçerli bir HTTP veya HTTPS URL’si girin</string>
+    <string name="website_delete_confirm">“%1$s” silinsin mi?</string>
+    <string name="website_missing">Bu web sitesi yer imi silindi</string>
+    <string name="website_no_app">Bu işlemi gerçekleştirecek uygulama yok</string>
+    <string name="website_pull_to_refresh">Yenilemek için çek</string>
+    <string name="website_hide_status_bar">Durum çubuğunu gizle</string>
+    <string name="website_hide_navigation_bar">Gezinme çubuğunu gizle</string>
+    <string name="website_disable_text_selection">Metin seçimini devre dışı bırak</string>
+    <string name="website_lock_scroll_axis">Kaydırma yönünü kilitle</string>
+    <string name="website_desktop_site">Masaüstü sitesi</string>
 </resources>

@@ -261,6 +261,14 @@
             </intent-filter>
         </activity>
 
+        <!-- Standalone website tasks, shared by tree bookmarks and desktop shortcuts. -->
+        <activity
+            android:name=".ui.WebsiteActivity"
+            android:exported="false"
+            android:taskAffinity="${applicationId}.website"
+            android:documentLaunchMode="intoExisting"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- Desktop shortcut for a single file (see PaneFragment.pinFileOpenShortcut /
              OpenShortcutActivity): headless relay, reconnects the source if needed and
              dispatches straight to the chosen viewer, then finishes. Not exported — the
