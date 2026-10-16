@@ -2647,7 +2647,6 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
             // Externally opened archives go at the top — they don't belong to any storage tree, so wedged in the middle they'd be hard to find.
             externalMount?.let { addFile(rows, it, 0, externalLabel, keyPrefix = EXTERNAL_KEY_PREFIX) }
             addGroup(rows, "fav", str(R.string.group_fav))
-            addGroup(rows, "websites", str(R.string.group_websites))
             // Saved comparisons have no dedicated empty state — if none were ever saved, don't show the group at all (saves space).
             if (CompareStore.all(getApplication()).isNotEmpty()) {
                 addGroup(rows, "cmp", str(R.string.compare_saved))
@@ -2665,6 +2664,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
             addGroup(rows, "s3", "S3")
             addGroup(rows, "media", str(R.string.group_media))
             addGroup(rows, "saf", str(R.string.group_saf))
+            addGroup(rows, "websites", str(R.string.group_websites))
             // Apps management: virtual read-only source, like a storage node it's an in-place expandable tree (installed / system).
             addFile(
                 rows,
