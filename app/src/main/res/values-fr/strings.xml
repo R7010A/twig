@@ -899,4 +899,6 @@
     <string name="website_disable_text_selection">Désactiver la sélection de texte</string>
     <string name="website_lock_scroll_axis">Verrouiller le sens de défilement</string>
     <string name="website_desktop_site">Version pour ordinateur</string>
+    <string name="website_open_fullscreen">Ouvrir en plein écran</string>
+    <string name="website_enter_fullscreen">Passer en plein écran</string>
 </resources>

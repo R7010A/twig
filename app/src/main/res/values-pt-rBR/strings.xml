@@ -899,4 +899,6 @@
     <string name="website_disable_text_selection">Desativar seleção de texto</string>
     <string name="website_lock_scroll_axis">Travar direção de rolagem</string>
     <string name="website_desktop_site">Site para computador</string>
+    <string name="website_open_fullscreen">Abrir em tela cheia</string>
+    <string name="website_enter_fullscreen">Entrar em tela cheia</string>
 </resources>

@@ -899,4 +899,6 @@
     <string name="website_disable_text_selection">Textauswahl deaktivieren</string>
     <string name="website_lock_scroll_axis">Scrollrichtung sperren</string>
     <string name="website_desktop_site">Desktopwebsite</string>
+    <string name="website_open_fullscreen">Im Vollbild öffnen</string>
+    <string name="website_enter_fullscreen">Vollbild aktivieren</string>
 </resources>

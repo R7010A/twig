@@ -40,6 +40,8 @@ class WebsiteActivity : AppCompatActivity() {
     private lateinit var b: ActivityWebsiteBinding
     private lateinit var site: Website
     private var mobileUserAgent = ""
+    private var immersiveFullscreen = false
+    private var fullscreenFromToolbar = false
     private var fullscreenLayer: FrameLayout? = null
     private var fullscreenCallback: WebChromeClient.CustomViewCallback? = null
     private var upload: ValueCallback<Array<Uri>>? = null
@@ -61,23 +63,35 @@ class WebsiteActivity : AppCompatActivity() {
             return
         }
         site = saved
+        immersiveFullscreen = savedInstanceState?.getBoolean("immersive_fullscreen", site.openFullscreen)
+            ?: site.openFullscreen
+        fullscreenFromToolbar = immersiveFullscreen &&
+            (savedInstanceState?.getBoolean("fullscreen_from_toolbar") == true)
         title = site.name
         b.toolbar.title = site.name
         b.toolbar.setNavigationOnClickListener { back() }
+        b.toolbar.menu.add(R.string.website_enter_fullscreen).setOnMenuItemClickListener {
+            immersiveFullscreen = true
+            fullscreenFromToolbar = true
+            applyWebsiteOptions()
+            true
+        }
         b.toolbar.menu.add(R.string.action_refresh).setOnMenuItemClickListener { b.web.reload(); true }
         b.toolbar.menu.add(R.string.action_pin_shortcut).setOnMenuItemClickListener {
             WebsiteDialogs.pin(this, site); true
         }
         // Insets for independently hidden system bars, including the on-screen keyboard.
         ViewCompat.setOnApplyWindowInsetsListener(b.root) { view, insets ->
-            if (site.hideStatusBar || site.hideNavigationBar) {
+            val hideStatus = immersiveFullscreen || site.hideStatusBar
+            val hideNavigation = immersiveFullscreen || site.hideNavigationBar
+            if (hideStatus || hideNavigation) {
                 val types = WindowInsetsCompat.Type.ime() or
-                    (if (site.hideStatusBar) 0 else WindowInsetsCompat.Type.statusBars()) or
-                    (if (site.hideNavigationBar) 0 else WindowInsetsCompat.Type.navigationBars())
+                    (if (hideStatus) 0 else WindowInsetsCompat.Type.statusBars()) or
+                    (if (hideNavigation) 0 else WindowInsetsCompat.Type.navigationBars())
                 val bars = insets.getInsets(types)
                 val cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
                 view.setPadding(maxOf(bars.left, cutout.left),
-                    if (site.hideStatusBar) 0 else maxOf(bars.top, cutout.top),
+                    if (hideStatus) 0 else maxOf(bars.top, cutout.top),
                     maxOf(bars.right, cutout.right), maxOf(bars.bottom, cutout.bottom))
             } else view.setPadding(0, 0, 0, 0)
             insets
@@ -175,6 +189,10 @@ class WebsiteActivity : AppCompatActivity() {
         if (saved == site) return
         val changedUrl = saved.url != site.url
         val changedDesktop = saved.desktopSite != site.desktopSite
+        if (saved.openFullscreen != site.openFullscreen) {
+            immersiveFullscreen = saved.openFullscreen
+            fullscreenFromToolbar = false
+        }
         site = saved
         if (changedUrl || changedDesktop) hidePageFullscreen()
         applyWebsiteOptions()
@@ -190,6 +208,16 @@ class WebsiteActivity : AppCompatActivity() {
             hidePageFullscreen()
             return
         }
+        if (immersiveFullscreen && fullscreenFromToolbar) {
+            immersiveFullscreen = false
+            fullscreenFromToolbar = false
+            applyWebsiteOptions()
+            // Consume Back only when it actually brings the toolbar back. If the
+            // bookmark now hides it permanently, do not add an invisible Back step.
+            if (!site.fullscreen) return
+        }
+        // System navigation already handles revealing hidden bars. A bookmark's
+        // display mode must not add another Back stage before history/finish.
         if (b.web.canGoBack()) b.web.goBack() else finish()
     }
 
@@ -242,7 +270,7 @@ class WebsiteActivity : AppCompatActivity() {
     private fun applyWebsiteOptions() {
         title = site.name
         b.toolbar.title = site.name
-        b.toolbar.visibility = if (site.fullscreen) View.GONE else View.VISIBLE
+        b.toolbar.visibility = if (site.fullscreen || immersiveFullscreen) View.GONE else View.VISIBLE
         b.web.pullToRefresh = site.pullToRefresh
         b.web.lockScrollAxis = site.lockScrollAxis
         b.web.settings.apply {
@@ -258,8 +286,8 @@ class WebsiteActivity : AppCompatActivity() {
     private fun applySystemBars() {
         if (!::site.isInitialized) return
         val pageFullscreen = fullscreenLayer != null
-        val hideStatus = pageFullscreen || site.hideStatusBar
-        val hideNavigation = pageFullscreen || site.hideNavigationBar
+        val hideStatus = pageFullscreen || immersiveFullscreen || site.hideStatusBar
+        val hideNavigation = pageFullscreen || immersiveFullscreen || site.hideNavigationBar
         if (pageFullscreen) NavBarTint.apply(this, Color.BLACK) else NavBarTint.surface(this)
         WindowCompat.setDecorFitsSystemWindows(window, !hideStatus && !hideNavigation)
         if (Build.VERSION.SDK_INT >= 28) window.attributes = window.attributes.apply {
@@ -341,6 +369,8 @@ class WebsiteActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean("immersive_fullscreen", immersiveFullscreen)
+        outState.putBoolean("fullscreen_from_toolbar", fullscreenFromToolbar)
         if (::site.isInitialized) outState.putString("bookmark_url", site.url)
         b.web.saveState(outState)
         super.onSaveInstanceState(outState)

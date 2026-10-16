@@ -41,6 +41,12 @@ class WebsiteFullscreenTest {
         val web = activity.findViewById<WebView>(R.id.web)
         val root = activity.findViewById<Toolbar>(R.id.toolbar).parent as View
         val client = requireNotNull(web.webChromeClient)
+        fun enterFromToolbar() {
+            val menu = activity.findViewById<Toolbar>(R.id.toolbar).menu as androidx.appcompat.view.menu.MenuBuilder
+            val item = (0 until menu.size()).map { menu.getItem(it) }
+                .first { it.title == activity.getString(R.string.website_enter_fullscreen) }
+            assertTrue(menu.performItemAction(item, 0))
+        }
         fun show(): Request = Request(View(activity)).also { request ->
             client.onShowCustomView(request.view, WebChromeClient.CustomViewCallback { request.hidden++ })
         }
@@ -153,4 +159,145 @@ class WebsiteFullscreenTest {
             assertEquals("https://example.org/new", shadowOf(page.web).lastLoadedUrl)
         }
     }
+
+    @Test fun `bookmark fullscreen with or without a hidden toolbar adds no application Back stage`() {
+        for (hideToolbar in listOf(false, true)) {
+            Page(Website(name = "Fullscreen", url = "https://example.com", openFullscreen = true,
+                fullscreen = hideToolbar)).use { page ->
+                assertEquals(View.GONE, page.activity.findViewById<Toolbar>(R.id.toolbar).visibility)
+                // This is the Back delivered to the app, after any system-level bar reveal.
+                page.activity.onBackPressedDispatcher.onBackPressed()
+                assertTrue(page.activity.isFinishing)
+            }
+        }
+    }
+
+    @Test fun `immersive display navigates web history immediately when Back reaches the application`() {
+        Page(Website(name = "Fullscreen", url = "https://example.com", openFullscreen = true,
+            fullscreen = true)).use { page ->
+            shadowOf(page.web).setCanGoBack(true)
+            page.activity.onBackPressedDispatcher.onBackPressed()
+            assertEquals(1, shadowOf(page.web).goBackInvocations)
+            assertFalse(page.activity.isFinishing)
+            assertEquals(0, shadowOf(page.web).reloadInvocations)
+        }
+    }
+
+    @Test fun `hiding all bars alone does not consume Back as fullscreen`() {
+        Page(Website(name = "Hidden bars", url = "https://example.com", fullscreen = true,
+            hideStatusBar = true, hideNavigationBar = true, openFullscreen = false)).use { page ->
+            page.activity.onBackPressedDispatcher.onBackPressed()
+            assertTrue(page.activity.isFinishing)
+        }
+    }
+
+    @Test
+    @Config(sdk = [28])
+    fun `toolbar fullscreen action restores toolbar before navigating and retains bookmark preferences`() {
+        Page(Website(name = "Video", url = "https://example.com", hideNavigationBar = true)).use { page ->
+            val toolbar = page.activity.findViewById<Toolbar>(R.id.toolbar)
+            val menu = toolbar.menu as androidx.appcompat.view.menu.MenuBuilder
+            val item = (0 until menu.size()).map { menu.getItem(it) }
+                .first { it.title == page.activity.getString(R.string.website_enter_fullscreen) }
+            assertTrue(menu.performItemAction(item, 0))
+            assertEquals(View.GONE, toolbar.visibility)
+            val flags = page.activity.window.decorView.systemUiVisibility
+            assertTrue(flags and View.SYSTEM_UI_FLAG_FULLSCREEN != 0)
+            assertTrue(flags and View.SYSTEM_UI_FLAG_HIDE_NAVIGATION != 0)
+            assertEquals(page.site, WebsiteStore.all(app).single())
+            page.activity.onBackPressedDispatcher.onBackPressed()
+            assertFalse(page.activity.isFinishing)
+            assertEquals(View.VISIBLE, toolbar.visibility)
+            val restored = page.activity.window.decorView.systemUiVisibility
+            assertEquals(0, restored and View.SYSTEM_UI_FLAG_FULLSCREEN)
+            assertTrue(restored and View.SYSTEM_UI_FLAG_HIDE_NAVIGATION != 0)
+            assertEquals(0, shadowOf(page.web).reloadInvocations)
+            page.activity.onBackPressedDispatcher.onBackPressed()
+            assertTrue(page.activity.isFinishing)
+        }
+    }
+
+    @Test fun `reopening a fullscreen bookmark keeps the live page without reloading`() {
+        Page(Website(name = "Fullscreen", url = "https://example.com", openFullscreen = true)).use { page ->
+            page.web.loadUrl("https://example.com/current")
+            page.controller.newIntent(WebsiteActivity.intent(app, page.site.id))
+            assertSame(page.web, page.activity.findViewById(R.id.web))
+            assertEquals("https://example.com/current", shadowOf(page.web).lastLoadedUrl)
+            assertEquals(0, shadowOf(page.web).reloadInvocations)
+            assertEquals(View.GONE, page.activity.findViewById<Toolbar>(R.id.toolbar).visibility)
+        }
+    }
+
+    @Test fun `editing fullscreen display applies and restores preferences on the existing page`() {
+        Page().use { page ->
+            for (fullscreen in listOf(true, false)) {
+                WebsiteStore.save(app, page.site.copy(openFullscreen = fullscreen))
+                page.controller.newIntent(WebsiteActivity.intent(app, page.site.id))
+                assertEquals(if (fullscreen) View.GONE else View.VISIBLE,
+                    page.activity.findViewById<Toolbar>(R.id.toolbar).visibility)
+                assertEquals(0, shadowOf(page.web).reloadInvocations)
+            }
+            page.activity.onBackPressedDispatcher.onBackPressed()
+            assertTrue(page.activity.isFinishing)
+        }
+    }
+
+    @Test fun `video fullscreen still closes before navigating an immersive bookmark`() {
+        Page(Website(name = "Video", url = "https://example.com", openFullscreen = true,
+            fullscreen = true)).use { page ->
+            val request = page.show()
+            page.activity.onBackPressedDispatcher.onBackPressed()
+            assertEquals(1, request.hidden)
+            assertFalse(page.activity.isFinishing)
+            assertNull(request.view.parent)
+            page.activity.onBackPressedDispatcher.onBackPressed()
+            assertTrue(page.activity.isFinishing)
+        }
+    }
+
+    @Test fun `recreation preserves fullscreen display entered through the menu`() {
+        Page().use { page ->
+            val toolbar = page.activity.findViewById<Toolbar>(R.id.toolbar)
+            val menu = toolbar.menu as androidx.appcompat.view.menu.MenuBuilder
+            val item = (0 until menu.size()).map { menu.getItem(it) }
+                .first { it.title == page.activity.getString(R.string.website_enter_fullscreen) }
+            menu.performItemAction(item, 0)
+            page.controller.recreate()
+            val recreated = page.controller.get()
+            assertEquals(View.GONE, recreated.findViewById<Toolbar>(R.id.toolbar).visibility)
+            assertFalse(recreated.isFinishing)
+            recreated.onBackPressedDispatcher.onBackPressed()
+            assertFalse(recreated.isFinishing)
+            assertEquals(View.VISIBLE, recreated.findViewById<Toolbar>(R.id.toolbar).visibility)
+            recreated.onBackPressedDispatcher.onBackPressed()
+            assertTrue(recreated.isFinishing)
+        }
+    }
+
+    @Test fun `manual fullscreen restores toolbar before consuming webpage history`() {
+        Page().use { page ->
+            shadowOf(page.web).setCanGoBack(true)
+            page.web.loadUrl("https://example.com/current")
+            page.enterFromToolbar()
+            page.controller.newIntent(WebsiteActivity.intent(app, page.site.id))
+            page.activity.onBackPressedDispatcher.onBackPressed()
+            assertEquals(View.VISIBLE, page.activity.findViewById<Toolbar>(R.id.toolbar).visibility)
+            assertEquals(0, shadowOf(page.web).goBackInvocations)
+            assertEquals("https://example.com/current", shadowOf(page.web).lastLoadedUrl)
+            assertEquals(0, shadowOf(page.web).reloadInvocations)
+            page.activity.onBackPressedDispatcher.onBackPressed()
+            assertEquals(1, shadowOf(page.web).goBackInvocations)
+        }
+    }
+
+    @Test fun `manual fullscreen adds no invisible Back step if the bookmark now hides the toolbar`() {
+        Page().use { page ->
+            page.enterFromToolbar()
+            WebsiteStore.save(app, page.site.copy(fullscreen = true))
+            page.controller.newIntent(WebsiteActivity.intent(app, page.site.id))
+            page.activity.onBackPressedDispatcher.onBackPressed()
+            assertTrue(page.activity.isFinishing)
+        }
+    }
+
 }

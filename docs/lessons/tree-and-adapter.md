@@ -4,6 +4,21 @@
 > shared conventions are in [AGENTS.md](../../AGENTS.md); the other sections live
 > beside this file in [docs/lessons/](.).
 
+- **Website fullscreen plus a hidden toolbar took three Back gestures (2026-10-17)**:
+  a separate application fullscreen-exit state consumed Back on top of system navigation
+  revealing immersive bars. The original tests called the Activity dispatcher directly,
+  bypassing that system layer, and incorrectly treated application callback counts as
+  device gesture counts. Bookmark fullscreen is now a display shortcut only: it hides
+  the toolbar and system bars without adding a Back stage before history/finish. The label
+  no longer promises "Back to exit fullscreen". Chromium's video/page custom view still
+  closes before history navigation because that view must be detached explicitly.
+  `WebsiteFullscreenTest` covers the reported combination, immediate history/finish and
+  custom-view cleanup; these tests do not claim to simulate system gesture interception.
+  Manual entry through the toolbar is a separate temporary action: Back restores that
+  toolbar before history, with the entry source saved across recreation. If the bookmark
+  has since enabled permanent toolbar hiding, skip the otherwise invisible exit step.
+  Do not apply this manual-entry Back handler to bookmarks opened fullscreen.
+
 - **Website video fullscreen buttons did nothing (2026-10-16)**: WebView does not host
   fullscreen content automatically. `WebsiteActivity` handles the engine's
   `onShowCustomView` / `onHideCustomView` callbacks in a black overlay, temporarily hiding

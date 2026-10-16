@@ -929,4 +929,6 @@
     <string name="website_disable_text_selection">禁用文字选择</string>
     <string name="website_lock_scroll_axis">锁定滑动方向（横向或纵向）</string>
     <string name="website_desktop_site">桌面版网站</string>
+    <string name="website_open_fullscreen">全屏打开</string>
+    <string name="website_enter_fullscreen">进入全屏</string>
 </resources>

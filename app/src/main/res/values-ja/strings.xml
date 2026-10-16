@@ -899,4 +899,6 @@
     <string name="website_disable_text_selection">テキスト選択を無効化</string>
     <string name="website_lock_scroll_axis">スクロール方向を固定</string>
     <string name="website_desktop_site">PC 版サイト</string>
+    <string name="website_open_fullscreen">全画面で開く</string>
+    <string name="website_enter_fullscreen">全画面にする</string>
 </resources>

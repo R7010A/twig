@@ -898,4 +898,6 @@
     <string name="website_disable_text_selection">Tắt chọn văn bản</string>
     <string name="website_lock_scroll_axis">Khóa hướng cuộn</string>
     <string name="website_desktop_site">Trang web cho máy tính</string>
+    <string name="website_open_fullscreen">Mở toàn màn hình</string>
+    <string name="website_enter_fullscreen">Vào toàn màn hình</string>
 </resources>

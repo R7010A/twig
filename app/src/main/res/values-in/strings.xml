@@ -899,4 +899,6 @@
     <string name="website_disable_text_selection">Nonaktifkan pemilihan teks</string>
     <string name="website_lock_scroll_axis">Kunci arah gulir</string>
     <string name="website_desktop_site">Situs desktop</string>
+    <string name="website_open_fullscreen">Buka layar penuh</string>
+    <string name="website_enter_fullscreen">Masuk layar penuh</string>
 </resources>

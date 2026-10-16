@@ -903,4 +903,6 @@
     <string name="website_disable_text_selection">تعطيل تحديد النص</string>
     <string name="website_lock_scroll_axis">قفل اتجاه التمرير</string>
     <string name="website_desktop_site">موقع سطح المكتب</string>
+    <string name="website_open_fullscreen">فتح بملء الشاشة</string>
+    <string name="website_enter_fullscreen">الدخول إلى ملء الشاشة</string>
 </resources>

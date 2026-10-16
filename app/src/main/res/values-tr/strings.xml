@@ -899,4 +899,6 @@
     <string name="website_disable_text_selection">Metin seçimini devre dışı bırak</string>
     <string name="website_lock_scroll_axis">Kaydırma yönünü kilitle</string>
     <string name="website_desktop_site">Masaüstü sitesi</string>
+    <string name="website_open_fullscreen">Tam ekran aç</string>
+    <string name="website_enter_fullscreen">Tam ekrana geç</string>
 </resources>

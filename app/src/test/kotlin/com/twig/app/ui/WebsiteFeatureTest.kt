@@ -264,7 +264,8 @@ class WebsiteFeatureTest {
         WebsiteDialogs.edit(controller.get(), site)
         shadowOf(android.os.Looper.getMainLooper()).idle()
         val dialog = org.robolectric.shadows.ShadowDialog.getLatestDialog() as androidx.appcompat.app.AlertDialog
-        val options = listOf(R.string.website_fullscreen to site.fullscreen,
+        val options = listOf(R.string.website_open_fullscreen to site.openFullscreen,
+            R.string.website_fullscreen to site.fullscreen,
             R.string.website_hide_status_bar to site.hideStatusBar,
             R.string.website_hide_navigation_bar to site.hideNavigationBar,
             R.string.website_pull_to_refresh to site.pullToRefresh,
@@ -278,7 +279,8 @@ class WebsiteFeatureTest {
         }
         dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).performClick()
         assertEquals(site.copy(fullscreen = false, hideStatusBar = true, hideNavigationBar = false,
-            pullToRefresh = true, disableTextSelection = false, lockScrollAxis = true, desktopSite = false),
+            pullToRefresh = true, disableTextSelection = false, lockScrollAxis = true, desktopSite = false,
+            openFullscreen = true),
             WebsiteStore.all(app).single())
         controller.pause().stop().destroy()
     }
@@ -309,7 +311,7 @@ class WebsiteFeatureTest {
     @Test fun `configuration backup restores bookmarks and fullscreen preferences`() {
         val site = Website(name = "Example", url = "https://example.com", fullscreen = true,
             hideStatusBar = false, hideNavigationBar = true, pullToRefresh = true,
-            disableTextSelection = true, lockScrollAxis = true, desktopSite = true)
+            disableTextSelection = true, lockScrollAxis = true, desktopSite = true, openFullscreen = true)
         WebsiteStore.save(app, site)
         val out = ByteArrayOutputStream()
         Backup.export(app, out, null)

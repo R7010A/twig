@@ -899,4 +899,6 @@
     <string name="website_disable_text_selection">텍스트 선택 비활성화</string>
     <string name="website_lock_scroll_axis">스크롤 방향 고정</string>
     <string name="website_desktop_site">데스크톱 사이트</string>
+    <string name="website_open_fullscreen">전체 화면으로 열기</string>
+    <string name="website_enter_fullscreen">전체 화면 시작</string>
 </resources>

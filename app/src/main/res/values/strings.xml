@@ -969,4 +969,6 @@
     <string name="website_disable_text_selection">Disable text selection</string>
     <string name="website_lock_scroll_axis">Lock scroll direction</string>
     <string name="website_desktop_site">Desktop site</string>
+    <string name="website_open_fullscreen">Open fullscreen</string>
+    <string name="website_enter_fullscreen">Enter fullscreen</string>
 </resources>

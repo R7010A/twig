@@ -898,4 +898,6 @@
     <string name="website_disable_text_selection">停用文字選取</string>
     <string name="website_lock_scroll_axis">鎖定滑動方向（橫向或縱向）</string>
     <string name="website_desktop_site">電腦版網站</string>
+    <string name="website_open_fullscreen">全螢幕開啟</string>
+    <string name="website_enter_fullscreen">進入全螢幕</string>
 </resources>

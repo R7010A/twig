@@ -899,4 +899,6 @@
     <string name="website_disable_text_selection">Disabilita selezione del testo</string>
     <string name="website_lock_scroll_axis">Blocca direzione di scorrimento</string>
     <string name="website_desktop_site">Sito desktop</string>
+    <string name="website_open_fullscreen">Apri a schermo intero</string>
+    <string name="website_enter_fullscreen">Passa a schermo intero</string>
 </resources>

@@ -935,4 +935,6 @@
     <string name="website_disable_text_selection">Отключить выделение текста</string>
     <string name="website_lock_scroll_axis">Зафиксировать направление прокрутки</string>
     <string name="website_desktop_site">Версия для компьютера</string>
+    <string name="website_open_fullscreen">Открывать на весь экран</string>
+    <string name="website_enter_fullscreen">На весь экран</string>
 </resources>

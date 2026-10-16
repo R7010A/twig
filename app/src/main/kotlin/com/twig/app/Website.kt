@@ -19,6 +19,8 @@ data class Website(
     val disableTextSelection: Boolean = false,
     val lockScrollAxis: Boolean = false,
     val desktopSite: Boolean = false,
+    /** Open in immersive display without adding an application Back-navigation step. */
+    val openFullscreen: Boolean = false,
 )
 
 object WebsiteStore {
@@ -38,6 +40,7 @@ object WebsiteStore {
                     hideNavigationBar = o.optBoolean("hideNavigationBar", fullscreen),
                     disableTextSelection = o.optBoolean("disableTextSelection"),
                     lockScrollAxis = o.optBoolean("lockScrollAxis"), desktopSite = o.optBoolean("desktopSite"),
+                    openFullscreen = o.optBoolean("openFullscreen"),
                 )
             }
         }.getOrDefault(emptyList())
@@ -59,7 +62,8 @@ object WebsiteStore {
                 .put("url", it.url).put("fullscreen", it.fullscreen)
                 .put("pullToRefresh", it.pullToRefresh).put("hideStatusBar", it.hideStatusBar)
                 .put("hideNavigationBar", it.hideNavigationBar).put("disableTextSelection", it.disableTextSelection)
-                .put("lockScrollAxis", it.lockScrollAxis).put("desktopSite", it.desktopSite))
+                .put("lockScrollAxis", it.lockScrollAxis).put("desktopSite", it.desktopSite)
+                .put("openFullscreen", it.openFullscreen))
         }
         preferences(ctx).edit().putString("list", items.toString()).apply()
     }

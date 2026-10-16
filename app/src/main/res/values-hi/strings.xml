@@ -899,4 +899,6 @@
     <string name="website_disable_text_selection">टेक्स्ट चयन बंद करें</string>
     <string name="website_lock_scroll_axis">स्क्रॉल की दिशा लॉक करें</string>
     <string name="website_desktop_site">डेस्कटॉप साइट</string>
+    <string name="website_open_fullscreen">पूर्ण स्क्रीन में खोलें</string>
+    <string name="website_enter_fullscreen">पूर्ण स्क्रीन शुरू करें</string>
 </resources>
