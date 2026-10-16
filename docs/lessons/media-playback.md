@@ -4,6 +4,10 @@
 > shared conventions are in [AGENTS.md](../../AGENTS.md); the other sections live
 > beside this file in [docs/lessons/](.).
 
+- **Fast lyric swipes could seek or toggle the cover (2026-10-16)**: classify both MOVE
+  and UP with `SwipeGesture` before deciding to tap. `LyricsSwipeTest` covers releases
+  without MOVE, vertical drags and cancellation.
+
 - **Properties spun forever on an MKV with a zero-filled Cues index (2026-10-15)**:
   track retrieval timed out without releasing preparation, then system metadata parsing
   could block indefinitely. `MediaProbe` shares a 16 MiB / 10 s budget across both parsers;

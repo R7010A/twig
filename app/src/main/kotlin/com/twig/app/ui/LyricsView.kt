@@ -205,6 +205,12 @@ class LyricsView @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (!dragging && (event.actionMasked == MotionEvent.ACTION_MOVE || event.actionMasked == MotionEvent.ACTION_UP)) {
+            val axis = SwipeGesture.axis(event.x - startX, event.y - startY, touchSlop.toFloat())
+            dragging = axis != SwipeGesture.UNDECIDED
+            horizontalDrag = axis == SwipeGesture.HORIZONTAL
+            if (horizontalDrag) parent?.requestDisallowInterceptTouchEvent(true)
+        }
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 if (!scroller.isFinished) scroller.forceFinished(true) // Press again during inertial scroll: take over immediately
@@ -217,13 +223,6 @@ class LyricsView @JvmOverloads constructor(
             }
             MotionEvent.ACTION_MOVE -> {
                 velocityTracker?.addMovement(event)
-                val totalDx = event.x - startX
-                val totalDy = event.y - startY
-                if (!dragging && (abs(totalDx) > touchSlop || abs(totalDy) > touchSlop)) {
-                    dragging = true
-                    horizontalDrag = abs(totalDx) > abs(totalDy) // horizontal wins and is treated as a track-switch gesture
-                    if (horizontalDrag) parent?.requestDisallowInterceptTouchEvent(true)
-                }
                 if (dragging && !horizontalDrag) {
                     // Vertical: scroll the lyrics (slightly amplified displacement so the touch feels more responsive)
                     scrollY = (scrollY - (event.y - downY) * DRAG_SPEED).coerceIn(0f, maxScroll())
@@ -259,8 +258,12 @@ class LyricsView @JvmOverloads constructor(
                     }
                 }
                 velocityTracker?.recycle(); velocityTracker = null
+                parent?.requestDisallowInterceptTouchEvent(false)
             }
-            MotionEvent.ACTION_CANCEL -> { velocityTracker?.recycle(); velocityTracker = null }
+            MotionEvent.ACTION_CANCEL -> {
+                velocityTracker?.recycle(); velocityTracker = null
+                parent?.requestDisallowInterceptTouchEvent(false)
+            }
         }
         return true
     }
