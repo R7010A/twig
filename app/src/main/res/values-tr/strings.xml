@@ -15,6 +15,7 @@
     <string name="strip_delete">Sil</string>
     <string name="confirm_delete_server">%1$s sunucusu silinsin mi?</string>
     <string name="msg_pick_dir_first">Önce hedef olarak bir klasöre dokunun</string>
+    <string name="msg_pick_other_dir_first">Önce diğer panelde hedef olarak bir klasöre dokunun</string>
     <string name="msg_dest_not_writable">Hedef yazılabilir değil (kaynak salt okunur); başka klasör seçin</string>
     <string name="restic_repo">Restic yedek deposu</string>
     <string name="restic_locked">Parolayı girip kilidi açmak için dokunun</string>

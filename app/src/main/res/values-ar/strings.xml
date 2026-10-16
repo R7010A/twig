@@ -15,6 +15,7 @@
     <string name="strip_delete">حذف</string>
     <string name="confirm_delete_server">حذف الخادم %1$s؟</string>
     <string name="msg_pick_dir_first">اضغط على مجلد أولا لتحديد الوجهة</string>
+    <string name="msg_pick_other_dir_first">اضغط أولا على مجلد في اللوحة الأخرى لتحديد الوجهة</string>
     <string name="msg_dest_not_writable">الوجهة للقراءة فقط؛ اختر مجلدا آخر</string>
     <string name="restic_repo">مستودع نسخ احتياطي restic</string>
     <string name="restic_locked">اضغط لإدخال كلمة المرور وفتح القفل</string>

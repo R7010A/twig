@@ -739,10 +739,8 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
     private fun syncStripEnabled() {
         // The first pane can render before the other pane's adapter is initialized.
         val pane = activePane()?.takeIf { it.isReady() }
-        val other = paneAt(1 - activeIndex)?.takeIf { it.isReady() }
-        val actions = pane?.stripActions(other?.viewModel?.currentDir) ?: PaneFragment.StripActions()
-        val compare = pane?.viewModel?.currentDir?.isDir == true &&
-            other?.viewModel?.currentDir?.isDir == true
+        val actions = pane?.stripActions() ?: PaneFragment.StripActions()
+        val compare = pane?.viewModel?.currentDir?.isDir == true
         for (s in listOf(b.stripMid, b.stripLeft, b.stripRight)) {
             setStripEnabled(s.asNewFolder, actions.create)
             setStripEnabled(s.asCopy, actions.copy)

@@ -967,11 +967,11 @@ class PaneFragment : Fragment() {
         val search: Boolean = false,
     )
 
-    /** Use the same sources and directory targets as the action handlers, without doing IO. */
-    fun stripActions(destination: XFile?): StripActions {
+    /** Check source availability without IO; transfer destinations are validated when clicked. */
+    fun stripActions(): StripActions {
         val sources = selectionOrCurrent()
         val modify = sources.isNotEmpty() && sources.all { it.isMutable() }
-        val transfer = sources.isNotEmpty() && destination?.isWritableDir() == true
+        val transfer = sources.isNotEmpty()
         val target = viewModel.currentSelection() ?: viewModel.currentDir
         return StripActions(
             create = canCreateHere(),
@@ -1187,7 +1187,7 @@ class PaneFragment : Fragment() {
         val sibling = host?.siblingOf(this)
         val dest = sibling?.viewModel?.currentDir
         if (dest == null) {
-            toast(getString(R.string.msg_pick_dir_first)); return
+            toast(getString(R.string.msg_pick_other_dir_first)); return
         }
         if (!dest.isWritableDir()) {
             toast(getString(R.string.msg_dest_not_writable)); return
@@ -1335,7 +1335,7 @@ class PaneFragment : Fragment() {
         val sibling = host?.siblingOf(this)
         val dest = sibling?.viewModel?.currentDir
         if (dest == null) {
-            toast(getString(R.string.msg_pick_dir_first)); return
+            toast(getString(R.string.msg_pick_other_dir_first)); return
         }
         if (!dest.isWritableDir()) {
             toast(getString(R.string.msg_dest_not_writable)); return

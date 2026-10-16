@@ -15,6 +15,7 @@
     <string name="strip_delete">Delete</string>
     <string name="confirm_delete_server">Delete server %1$s?</string>
     <string name="msg_pick_dir_first">Tap a folder first to set it as the target</string>
+    <string name="msg_pick_other_dir_first">Tap a folder in the other pane first to set it as the target</string>
     <string name="msg_dest_not_writable">Destination isn\'t writable (read-only source); pick another folder</string>
     <string name="restic_repo">Restic backup repository</string>
     <string name="restic_locked">Tap to enter the password and unlock</string>

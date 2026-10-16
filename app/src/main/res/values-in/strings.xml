@@ -15,6 +15,7 @@
     <string name="strip_delete">Hapus</string>
     <string name="confirm_delete_server">Hapus server %1$s?</string>
     <string name="msg_pick_dir_first">Ketuk folder dahulu untuk memilih tujuan</string>
+    <string name="msg_pick_other_dir_first">Ketuk folder di panel lain dahulu untuk memilih tujuan</string>
     <string name="msg_dest_not_writable">Tujuan hanya baca; pilih folder lain</string>
     <string name="restic_repo">Repositori cadangan restic</string>
     <string name="restic_locked">Ketuk untuk memasukkan kata sandi dan membuka kunci</string>

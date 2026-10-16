@@ -15,6 +15,7 @@
     <string name="strip_delete">削除</string>
     <string name="confirm_delete_server">サーバー %1$s を削除しますか？</string>
     <string name="msg_pick_dir_first">先にフォルダーをタップして転送先を指定してください</string>
+    <string name="msg_pick_other_dir_first">先に反対側のペインでフォルダーをタップして転送先を指定してください</string>
     <string name="msg_dest_not_writable">転送先は読み取り専用です。別のフォルダーを選んでください</string>
     <string name="restic_repo">resticバックアップリポジトリ</string>
     <string name="restic_locked">タップしてパスワードを入力し、ロックを解除</string>

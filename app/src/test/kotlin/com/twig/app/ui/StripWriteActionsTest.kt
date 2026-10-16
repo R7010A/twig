@@ -108,7 +108,6 @@ class StripWriteActionsTest {
         val pane = pane0()
         assertTrue("the pane's view is not built, nothing to assert", pane.isReady())
         val adapter = adapterOf(pane)
-        pane1().viewModel.currentDir = XFile("file", "/destination", isDir = true)
 
         // Nothing checked, and the freshly bootstrapped tree has no green-highlighted file to
         // fall back on: this is the state the user was looking at when the buttons were dead.
@@ -139,7 +138,7 @@ class StripWriteActionsTest {
         assertAllWriteActions(false, "and unchecking greys them out again")
     }
     @Test
-    fun `virtual groups disable directory actions while checks and opposite destination control transfers`() {
+    fun `virtual groups disable directory actions while transfers depend only on sources`() {
         val pane = pane0()
         val adapter = adapterOf(pane)
         val dir = XFile("file", "/destination", isDir = true)
@@ -171,9 +170,9 @@ class StripWriteActionsTest {
 
         pane1().viewModel.currentDir = dir.copy(canWrite = false)
         activity.onClipTargetChanged()
-        assertStrip(R.id.as_copy, false)
-        assertStrip(R.id.as_compress, false)
-        assertStrip(R.id.as_move, false)
+        assertStrip(R.id.as_copy, true)
+        assertStrip(R.id.as_compress, true)
+        assertStrip(R.id.as_move, true)
         assertStrip(R.id.as_delete, true)
 
         pane.viewModel.currentDir = XFile("file", "/source", isDir = true)
@@ -183,7 +182,13 @@ class StripWriteActionsTest {
         assertStrip(R.id.as_search, true)
         pane1().viewModel.currentDir = null
         activity.onClipTargetChanged()
-        assertStrip(R.id.as_compare, false)
+        assertStrip(R.id.as_compare, true)
+        activity.findViewById<View>(R.id.strip_left).findViewById<View>(R.id.as_compare).performClick()
+        assertEquals(activity.getString(R.string.compare_need_two),
+            org.robolectric.shadows.ShadowToast.getTextOfLatestToast())
+        assertStrip(R.id.as_copy, true)
+        assertStrip(R.id.as_compress, true)
+        assertStrip(R.id.as_move, true)
     }
 
 }

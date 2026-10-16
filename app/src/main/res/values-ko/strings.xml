@@ -15,6 +15,7 @@
     <string name="strip_delete">삭제</string>
     <string name="confirm_delete_server">서버 %1$s을(를) 삭제할까요?</string>
     <string name="msg_pick_dir_first">먼저 폴더를 눌러 대상 위치를 지정하세요</string>
+    <string name="msg_pick_other_dir_first">먼저 반대쪽 패널의 폴더를 눌러 대상 위치를 지정하세요</string>
     <string name="msg_dest_not_writable">대상이 읽기 전용입니다. 다른 폴더를 선택하세요</string>
     <string name="restic_repo">restic 백업 저장소</string>
     <string name="restic_locked">눌러서 비밀번호를 입력하고 잠금 해제</string>

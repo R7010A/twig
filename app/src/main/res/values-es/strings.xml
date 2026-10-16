@@ -15,6 +15,7 @@
     <string name="strip_delete">Eliminar</string>
     <string name="confirm_delete_server">¿Eliminar el servidor %1$s?</string>
     <string name="msg_pick_dir_first">Toca primero una carpeta para elegir el destino</string>
+    <string name="msg_pick_other_dir_first">Toca primero una carpeta en el otro panel para elegir el destino</string>
     <string name="msg_dest_not_writable">El destino no se puede escribir (origen de solo lectura); elige otra carpeta</string>
     <string name="restic_repo">Repositorio de copias restic</string>
     <string name="restic_locked">Toca para introducir la contraseña y desbloquear</string>

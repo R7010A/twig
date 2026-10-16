@@ -15,6 +15,7 @@
     <string name="strip_delete">Löschen</string>
     <string name="confirm_delete_server">Server %1$s löschen?</string>
     <string name="msg_pick_dir_first">Zuerst einen Ordner als Ziel antippen</string>
+    <string name="msg_pick_other_dir_first">Zuerst einen Ordner im anderen Bereich als Ziel antippen</string>
     <string name="msg_dest_not_writable">Ziel ist nicht beschreibbar (Quelle schreibgeschützt); anderen Ordner wählen</string>
     <string name="restic_repo">Restic-Sicherungsrepository</string>
     <string name="restic_locked">Antippen, Passwort eingeben und entsperren</string>

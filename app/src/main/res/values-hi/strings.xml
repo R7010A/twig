@@ -15,6 +15,7 @@
     <string name="strip_delete">हटाएँ</string>
     <string name="confirm_delete_server">सर्वर %1$s हटाएँ?</string>
     <string name="msg_pick_dir_first">पहले किसी फ़ोल्डर पर टैप करके गंतव्य चुनें</string>
+    <string name="msg_pick_other_dir_first">पहले दूसरे पैनल में किसी फ़ोल्डर पर टैप करके गंतव्य चुनें</string>
     <string name="msg_dest_not_writable">गंतव्य केवल पढ़ने योग्य है; दूसरा फ़ोल्डर चुनें</string>
     <string name="restic_repo">Restic बैकअप रिपॉज़िटरी</string>
     <string name="restic_locked">पासवर्ड डालकर अनलॉक करने के लिए टैप करें</string>

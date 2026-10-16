@@ -15,6 +15,7 @@
     <string name="strip_delete">Supprimer</string>
     <string name="confirm_delete_server">Supprimer le serveur %1$s ?</string>
     <string name="msg_pick_dir_first">Touchez d’abord un dossier pour choisir la destination</string>
+    <string name="msg_pick_other_dir_first">Touchez d’abord un dossier dans l’autre volet pour choisir la destination</string>
     <string name="msg_dest_not_writable">Destination non accessible en écriture (source en lecture seule) ; choisissez un autre dossier</string>
     <string name="restic_repo">Dépôt de sauvegarde restic</string>
     <string name="restic_locked">Touchez pour saisir le mot de passe et déverrouiller</string>

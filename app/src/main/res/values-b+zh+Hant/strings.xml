@@ -15,6 +15,7 @@
     <string name="strip_delete">刪除</string>
     <string name="confirm_delete_server">刪除伺服器 %1$s?</string>
     <string name="msg_pick_dir_first">請先點選一個目錄作為目標</string>
+    <string name="msg_pick_other_dir_first">請先點選對側的一個目錄作為目標</string>
     <string name="msg_dest_not_writable">目標不可寫(只讀來源),換一個目錄</string>
     <string name="restic_repo">Restic 備份倉庫</string>
     <string name="restic_locked">點選輸入密碼解鎖</string>

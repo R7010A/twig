@@ -15,6 +15,7 @@
     <string name="strip_delete">Xóa</string>
     <string name="confirm_delete_server">Xóa máy chủ %1$s?</string>
     <string name="msg_pick_dir_first">Chạm vào thư mục để chọn đích trước</string>
+    <string name="msg_pick_other_dir_first">Chạm vào một thư mục ở ngăn bên kia để chọn đích trước</string>
     <string name="msg_dest_not_writable">Đích chỉ đọc; hãy chọn thư mục khác</string>
     <string name="restic_repo">Kho sao lưu restic</string>
     <string name="restic_locked">Chạm để nhập mật khẩu và mở khóa</string>

@@ -15,6 +15,7 @@
     <string name="strip_delete">Удалить</string>
     <string name="confirm_delete_server">Удалить сервер %1$s?</string>
     <string name="msg_pick_dir_first">Сначала нажмите на папку, чтобы выбрать её как целевую</string>
+    <string name="msg_pick_other_dir_first">Сначала нажмите на папку в другой панели, чтобы выбрать её как целевую</string>
     <string name="msg_dest_not_writable">Получатель не доступен для записи (только чтение); выберите другую папку</string>
     <string name="restic_repo">Хранилище резервных копий Restic</string>
     <string name="restic_locked">Нажмите, чтобы ввести пароль и разблокировать</string>
