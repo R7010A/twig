@@ -5,6 +5,7 @@ import android.os.Environment
 import androidx.test.core.app.ApplicationProvider
 import com.twig.app.Favorite
 import com.twig.app.FavoritesStore
+import com.twig.app.Prefs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -15,6 +16,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -82,6 +84,49 @@ class PaneViewModelRestoreTest {
         .map { it.file.name }
 
     // ---- expanding a local directory ----
+
+    @Test fun `disabling location memory starts with only Favorites expanded`() = runTest(dispatcher) {
+        Prefs.setRememberLocation(app, false)
+        val local = Favorite("Documents", "local", dir("favorite-documents").path)
+        val remote = Favorite("Server", "conn", "/docs", connLabel = "offline-server")
+        FavoritesStore.add(app, local)
+        FavoritesStore.add(app, remote)
+
+        vm.bootstrap()
+        advanceUntilIdle()
+
+        val rows = vm.state.value.rows
+        assertEquals(listOf("g:fav"), rows.filterIsInstance<PaneViewModel.GroupNode>().filter { it.expanded }.map { it.key })
+        assertTrue(rows.filterIsInstance<PaneViewModel.FileNode>().none { it.expanded || it.depth > 0 })
+        val favorites = rows.filterIsInstance<PaneViewModel.FavoriteNode>()
+        assertEquals(listOf(local.id, remote.id), favorites.map { it.fav.id })
+        assertTrue(favorites.none { it.expanded || it.connecting })
+        assertNull(vm.state.value.currentDir)
+        assertFalse(vm.state.value.restoring)
+    }
+
+    @Test fun `empty Favorites stays collapsed when location memory is disabled`() = runTest(dispatcher) {
+        Prefs.setRememberLocation(app, false)
+        vm.bootstrap()
+        advanceUntilIdle()
+
+        val rows = vm.state.value.rows
+        assertTrue(rows.filterIsInstance<PaneViewModel.GroupNode>().none { it.expanded })
+        assertTrue(rows.filterIsInstance<PaneViewModel.FileNode>().none { it.expanded || it.depth > 0 })
+        assertNull(vm.state.value.currentDir)
+    }
+
+    @Test fun `location memory still opens internal storage when there is no saved location`() = runTest(dispatcher) {
+        Prefs.setRememberLocation(app, true)
+        FavoritesStore.add(app, Favorite("Documents", "local", dir("favorite-documents").path))
+        vm.bootstrap()
+        advanceUntilIdle()
+
+        val rows = vm.state.value.rows
+        assertTrue(rows.filterIsInstance<PaneViewModel.FileNode>().any { it.label != null && it.expanded })
+        assertTrue(rows.filterIsInstance<PaneViewModel.GroupNode>().none { it.expanded })
+        assertEquals(ext.path, vm.state.value.currentDir?.path)
+    }
 
     @Test
     fun `restores the last expanded local directory and lists its files`() = runTest(dispatcher) {

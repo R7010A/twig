@@ -545,12 +545,18 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
     /**
      * First assembly. When [descriptors] is non-empty, restore the previous expansions
      * (local directory + network location + groups/servers, with the network ones
-     * reconnecting via the saved connections); otherwise default-expand internal
-     * storage. [currentDesc] restores the current directory.
+     * reconnecting via the saved connections). With no saved expansions, open internal
+     * storage when remembering locations, or just the non-empty Favorites group otherwise.
+     * [currentDesc] restores the current directory.
      */
     fun bootstrap(descriptors: List<String> = emptyList(), currentDesc: String? = null) {
         if (_state.value.rows.isNotEmpty()) return
         if (descriptors.isEmpty()) {
+            if (!Prefs.rememberLocation(getApplication())) {
+                if (FavoritesStore.all(getApplication()).isNotEmpty()) expanded.add("g:fav")
+                rebuild()
+                return
+            }
             rebuild()
             (state.value.rows.firstOrNull { it is FileNode && (it as FileNode).label != null } as? FileNode)
                 ?.let { toggleFile(it) }
