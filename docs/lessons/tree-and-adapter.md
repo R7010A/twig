@@ -9,6 +9,8 @@
   through release; check UP too when no MOVE arrives. Property cards also classify UP,
   cancel child actions and dispatch the tab change after child cancellation. Shared
   intent/cancellation helpers live in `SwipeGesture`; the pane and card tests cover both.
+  Treemaps also cancel their tap detector on swipes/pinches and inspect release displacement;
+  `TreemapSwipeTest` covers taps, missing MOVE, cancellation and zoomed panning.
 
 - **Properties ripple disappeared on the first tap, especially with folder counts (2026-10-16)**:
   a row rebind briefly hid its button, ending the ripple. Set final visibility directly;

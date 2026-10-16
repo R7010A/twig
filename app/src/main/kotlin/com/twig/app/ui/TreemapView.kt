@@ -10,6 +10,7 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
+import android.view.ViewConfiguration
 import com.twig.app.Format
 import kotlin.math.abs
 
@@ -51,6 +52,7 @@ class TreemapView @JvmOverloads constructor(
     private var tiles: List<Tile> = emptyList()
 
     private val dpi = resources.displayMetrics.density
+    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     private val fill = Paint()
     private val border = Paint().apply {
         style = Paint.Style.STROKE
@@ -298,7 +300,7 @@ class TreemapView @JvmOverloads constructor(
     private var downX = 0f
     private var downY = 0f
     private var swiped = false
-    private var gdCancelled = false // once pinching starts, don't feed gd this round, prevents accidental tap/long-press
+    private var gdCancelled = false // Once a swipe or pinch starts, cancel tile taps/long-presses.
 
     @Suppress("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -309,26 +311,26 @@ class TreemapView @JvmOverloads constructor(
                 downX = event.x; downY = event.y
                 swiped = false; gdCancelled = false
             }
-            MotionEvent.ACTION_MOVE -> {
+            MotionEvent.ACTION_POINTER_DOWN -> swiped = true
+            MotionEvent.ACTION_MOVE, MotionEvent.ACTION_UP -> {
                 // Only horizontal swipe switches panes when not zoomed in; single-finger drag pans after zoom
                 if (!swiped && !scaleGd.isInProgress && scale <= 1f) {
                     val dx = event.x - downX
                     val dy = event.y - downY
-                    if (abs(dx) > 48 * dpi && abs(dx) > abs(dy)) {
+                    if (SwipeGesture.axis(dx, dy, 48 * dpi) == SwipeGesture.HORIZONTAL) {
                         swiped = true
                         onSwipe?.invoke(dx)
                     }
                 }
             }
         }
-        if (scaleGd.isInProgress) {
+        val releaseDrag = event.actionMasked == MotionEvent.ACTION_UP &&
+            SwipeGesture.axis(event.x - downX, event.y - downY, touchSlop.toFloat()) != SwipeGesture.UNDECIDED
+        if (swiped || scaleGd.isInProgress || releaseDrag) {
             swiped = true
             if (!gdCancelled) {
                 gdCancelled = true
-                val c = MotionEvent.obtain(event)
-                c.action = MotionEvent.ACTION_CANCEL
-                gd.onTouchEvent(c)
-                c.recycle()
+                SwipeGesture.cancel(event) { gd.onTouchEvent(it) }
             }
         } else if (!gdCancelled) {
             gd.onTouchEvent(event)
