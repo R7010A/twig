@@ -1,7 +1,10 @@
 package com.twig.app.ui
 
 import android.app.Activity
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.Rect
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.os.Looper
@@ -130,6 +133,32 @@ class PropertiesButtonTest {
         val button = row.itemView.findViewById<View>(R.id.info_toggle)
         assertEquals(View.INVISIBLE, button.visibility)
         assertFalse(button.hasOnClickListeners())
+    }
+
+    @Test fun `refreshing a file row does not hide its running properties ripple`() {
+        val original = node(true)
+        val adapter = FileAdapter(1, {}, {}, {}, { _, _ -> }, {})
+        adapter.submitList(listOf(original))
+        val holder = holder(adapter) as FileAdapter.VH
+        val button = holder.itemView.findViewById<View>(R.id.info_toggle)
+        val ripple = object : RippleDrawable(ColorStateList.valueOf(Color.GREEN), null, ColorDrawable(Color.WHITE)) {
+            var hides = 0
+            override fun setVisible(visible: Boolean, restart: Boolean): Boolean {
+                if (!visible) hides++
+                return super.setVisible(visible, restart)
+            }
+        }
+        button.background = ripple
+        ripple.hides = 0
+        button.isPressed = true
+        // Count probes update the visible text first; the next VM rebuild includes the cached count
+        // in FileNode and DiffUtil rebinds this row as Properties opens.
+        holder.bind(original.copy(directoryCount = DirectoryCounts.Count(2, 3)))
+        assertEquals(0, ripple.hides)
+        assertTrue(button.isPressed)
+        button.isPressed = false
+        holder.bind(original)
+        assertEquals(0, ripple.hides)
     }
 
     @Test fun `a press ending in the properties square never clicks the underlying node`() {

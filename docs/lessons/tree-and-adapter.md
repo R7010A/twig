@@ -4,6 +4,11 @@
 > shared conventions are in [AGENTS.md](../../AGENTS.md); the other sections live
 > beside this file in [docs/lessons/](.).
 
+- **Properties ripple disappeared on the first tap, especially with folder counts (2026-10-16)**:
+  a row rebind briefly hid its button, ending the ripple. Set final visibility directly;
+  do not hide then show during reset. Press-delay changes did not fix this.
+  `PropertiesButtonTest` covers count updates rebinding a pressed or released button.
+
 - **Folder counts are optional direct-child counts, limited to local and SMB sources**
   (`DirectoryCounts`, 2026-10-15). The metadata line starts with monochrome folder/file
   outline icons and separate numbers; date/time stays at the end. Two equal-width text-scaled

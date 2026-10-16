@@ -726,7 +726,8 @@ class FileAdapter(
             b.sub.setTextSize(TypedValue.COMPLEX_UNIT_SP, metaSp)
             b.root.isActivated = false
             b.progress.visibility = View.GONE
-            b.infoToggle.visibility = View.INVISIBLE
+            // Hiding a live RippleDrawable ends its animation, even when shown again in this bind.
+            b.infoToggle.visibility = if (node is PaneViewModel.FileNode) View.VISIBLE else View.INVISIBLE
             b.infoToggle.setOnClickListener(null)
             b.root.setOnTouchListener(null)
 
@@ -859,7 +860,6 @@ class FileAdapter(
         private fun bindFile(node: PaneViewModel.FileNode) {
             val ctx = b.root.context
             val file = node.file
-            b.infoToggle.visibility = View.VISIBLE
             b.infoToggle.setOnClickListener { onInfo(node) }
 
             b.name.text = node.label ?: file.name
