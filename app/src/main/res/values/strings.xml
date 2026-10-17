@@ -984,4 +984,16 @@
     <string name="website_orientation_locked">Lock current orientation</string>
     <string name="website_orientation_landscape">Landscape</string>
     <string name="website_orientation_portrait">Portrait</string>
+    <string name="website_user_agent">User-Agent</string>
+    <string name="website_user_agent_hint">Empty = mobile/desktop default; custom UA takes priority</string>
+    <string name="website_headers">Request headers</string>
+    <string name="website_headers_hint">One Name: value per line</string>
+    <string name="website_script">JavaScript</string>
+    <string name="website_script_hint">JavaScript without script tags; runs once after each page finishes loading</string>
+    <string name="website_style">CSS</string>
+    <string name="website_style_hint">CSS without style tags; edits apply immediately</string>
+    <string name="website_custom_scope">JS/CSS: same-origin main page only. JS changes reload the page.\nHeaders: same-origin GET page navigation only, not API/resource requests. Redirects and browser-managed headers depend on WebView.</string>
+    <string name="website_user_agent_invalid">User-Agent cannot contain line breaks or control characters</string>
+    <string name="website_headers_invalid">Invalid headers: check names, duplicates and control characters. Set User-Agent above; connection headers are browser-managed.</string>
+    <string name="website_advanced">Advanced</string>
 </resources>

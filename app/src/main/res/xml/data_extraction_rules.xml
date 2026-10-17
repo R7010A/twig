@@ -11,6 +11,7 @@
         <exclude domain="sharedpref" path="twig_restic_pw.xml" />
         <exclude domain="sharedpref" path="twig_archive_pw.xml" />
         <exclude domain="sharedpref" path="twig_share.xml" />
+        <exclude domain="sharedpref" path="twig_websites.xml" />
         <exclude domain="file" path="keys/" />
         <exclude domain="file" path=".ssh/" />
         <exclude domain="sharedpref" path="twig_stream.xml" />
@@ -22,6 +23,7 @@
         <exclude domain="sharedpref" path="twig_restic_pw.xml" />
         <exclude domain="sharedpref" path="twig_archive_pw.xml" />
         <exclude domain="sharedpref" path="twig_share.xml" />
+        <exclude domain="sharedpref" path="twig_websites.xml" />
         <exclude domain="file" path="keys/" />
         <exclude domain="file" path=".ssh/" />
         <exclude domain="sharedpref" path="twig_stream.xml" />

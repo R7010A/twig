@@ -950,4 +950,16 @@
     <string name="website_orientation_locked">Зафиксировать текущую ориентацию</string>
     <string name="website_orientation_landscape">Альбомная</string>
     <string name="website_orientation_portrait">Портретная</string>
+    <string name="website_user_agent">User-Agent</string>
+    <string name="website_user_agent_hint">Пусто = мобильный/настольный UA; свой UA имеет приоритет</string>
+    <string name="website_headers">Заголовки запросов</string>
+    <string name="website_headers_hint">Один Имя: значение в строке</string>
+    <string name="website_script">JavaScript</string>
+    <string name="website_script_hint">Без тегов script; один запуск после полной загрузки каждой страницы</string>
+    <string name="website_style">CSS</string>
+    <string name="website_style_hint">Без тегов style; изменения применяются сразу</string>
+    <string name="website_custom_scope">JS/CSS: только главная страница того же источника. Изменение JS перезагружает страницу.\nЗаголовки: только GET-навигация того же источника, без API/ресурсов. Перенаправления и управляемые заголовки зависят от WebView.</string>
+    <string name="website_user_agent_invalid">User-Agent не может содержать переводы строк и управляющие символы</string>
+    <string name="website_headers_invalid">Недопустимые заголовки: проверьте имена, повторы и управляющие символы. User-Agent задаётся выше; заголовками соединения управляет браузер.</string>
+    <string name="website_advanced">Дополнительно</string>
 </resources>

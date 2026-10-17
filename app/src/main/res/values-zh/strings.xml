@@ -944,4 +944,16 @@
     <string name="website_orientation_locked">锁定</string>
     <string name="website_orientation_landscape">横屏</string>
     <string name="website_orientation_portrait">竖屏</string>
+    <string name="website_user_agent">User-Agent</string>
+    <string name="website_user_agent_hint">留空使用移动/桌面默认值；自定义 UA 优先</string>
+    <string name="website_headers">请求 Header</string>
+    <string name="website_headers_hint">每行一个 Header名: 值</string>
+    <string name="website_script">JavaScript</string>
+    <string name="website_script_hint">不包含 script 标签；每次页面加载完成后执行一次</string>
+    <string name="website_style">CSS</string>
+    <string name="website_style_hint">不包含 style 标签；修改立即应用</string>
+    <string name="website_custom_scope">JS/CSS：仅网址同源的主页面生效，修改 JS 会重新加载页面。\nHeader：仅同源 GET 页面导航，不覆盖 API、图片等资源请求。重定向及浏览器管理的头部由 WebView 决定。</string>
+    <string name="website_user_agent_invalid">User-Agent 不可包含换行或控制字符</string>
+    <string name="website_headers_invalid">Header 无效：请检查名称、重复项和控制字符。User-Agent 请填到上方字段；连接控制头由浏览器管理。</string>
+    <string name="website_advanced">高级</string>
 </resources>

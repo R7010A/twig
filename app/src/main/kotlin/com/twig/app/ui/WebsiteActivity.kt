@@ -53,6 +53,7 @@ class WebsiteActivity : AppCompatActivity() {
     private lateinit var b: ActivityWebsiteBinding
     private lateinit var site: Website
     private var mobileUserAgent = ""
+    private var customStyleApplied = false
     private var immersiveFullscreen = false
     private var fullscreenFromToolbar = false
     private var fullscreenLayer: FrameLayout? = null
@@ -149,13 +150,30 @@ class WebsiteActivity : AppCompatActivity() {
             }
 
             override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
+                customStyleApplied = false
                 cancelCertificateRequests()
                 view.clearSslPreferences()
             }
 
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 val scheme = request.url.scheme?.lowercase()
-                if (scheme == "https" || scheme == "http") return false
+                if (scheme == "https" || scheme == "http") {
+                    if (request.isForMainFrame && request.method == "GET") {
+                        val url = request.url.toString()
+                        val headers = WebsiteCustomization.headersFor(site, url)
+                        if (!request.isRedirect && headers.isNotEmpty()) {
+                            view.loadUrl(url, headers.toMutableMap())
+                            return true
+                        }
+                        if (request.isRedirect && site.headers.isNotEmpty() &&
+                            !WebsiteCustomization.sameOrigin(site.url, url)) {
+                            // Restart a foreign redirect without this bookmark's additional headers.
+                            view.loadUrl(url)
+                            return true
+                        }
+                    }
+                    return false
+                }
                 // Never grant a website access to app files or arbitrary intent extras.
                 if (request.isForMainFrame && request.hasGesture() && scheme in setOf("mailto", "tel", "sms", "geo")) {
                     try {
@@ -169,10 +187,15 @@ class WebsiteActivity : AppCompatActivity() {
 
             override fun onPageCommitVisible(view: WebView, url: String) {
                 applyPageOptions()
+                applyCustomStyle()
             }
 
             override fun onPageFinished(view: WebView, url: String) {
                 applyPageOptions()
+                applyCustomStyle()
+                if (WebsiteCustomization.sameOrigin(site.url, view.url)) {
+                    WebsiteCustomization.pageScript(site)?.let { view.evaluateJavascript(it, null) }
+                }
                 if (b.searchBar.visibility == View.VISIBLE) searchPage()
                 b.toolbar.subtitle = Uri.parse(url).host
                 persistCookies()
@@ -211,8 +234,11 @@ class WebsiteActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() = back()
         })
-        if (savedInstanceState?.getString("bookmark_url") != site.url ||
-            b.web.restoreState(savedInstanceState) == null) b.web.loadUrl(site.url)
+        val sameRequest = savedInstanceState?.getString("website_request_key")?.let {
+            it == WebsiteCustomization.requestKey(site)
+        } ?: (site.userAgent.isEmpty() && site.headers.isEmpty() && site.script.isEmpty())
+        if (savedInstanceState?.getString("bookmark_url") != site.url || !sameRequest ||
+            b.web.restoreState(savedInstanceState) == null) loadWebsite(site.url)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -230,17 +256,34 @@ class WebsiteActivity : AppCompatActivity() {
         if (saved == site) return
         val changedUrl = saved.url != site.url
         val changedDesktop = saved.desktopSite != site.desktopSite
+        val changedAgent = saved.userAgent != site.userAgent
+        val changedHeaders = saved.headers != site.headers
+        val changedScript = saved.script != site.script
         if (saved.openFullscreen != site.openFullscreen) {
             immersiveFullscreen = saved.openFullscreen
             fullscreenFromToolbar = false
         }
         site = saved
-        if (changedUrl || changedDesktop) hidePageFullscreen()
+        if (changedUrl || changedDesktop || changedAgent || changedHeaders || changedScript) hidePageFullscreen()
         applyWebsiteOptions()
         when {
-            changedUrl -> b.web.loadUrl(site.url)
-            changedDesktop -> b.web.reload()
-            else -> applyPageOptions()
+            changedUrl -> loadWebsite(site.url)
+            changedHeaders -> loadWebsite(b.web.url ?: site.url)
+            changedDesktop || changedAgent || changedScript -> b.web.reload()
+            else -> { applyPageOptions(); applyCustomStyle() }
+        }
+    }
+
+    private fun loadWebsite(url: String) {
+        val headers = WebsiteCustomization.headersFor(site, url)
+        if (headers.isEmpty()) b.web.loadUrl(url) else b.web.loadUrl(url, headers.toMutableMap())
+    }
+
+    private fun applyCustomStyle() {
+        if (site.style.isEmpty() && !customStyleApplied) return
+        if (WebsiteCustomization.sameOrigin(site.url, b.web.url)) {
+            b.web.evaluateJavascript(WebsiteCustomization.styleScript(site), null)
+            customStyleApplied = site.style.isNotEmpty()
         }
     }
 
@@ -350,7 +393,9 @@ class WebsiteActivity : AppCompatActivity() {
         b.web.pullToRefresh = site.pullToRefresh
         b.web.lockScrollAxis = site.lockScrollAxis
         b.web.settings.apply {
-            val wanted = if (site.desktopSite) desktopUserAgent(mobileUserAgent) else mobileUserAgent
+            val wanted = site.userAgent.takeIf { WebsiteCustomization.validUserAgent(it) }.orEmpty().ifBlank {
+                if (site.desktopSite) desktopUserAgent(mobileUserAgent) else mobileUserAgent
+            }
             if (userAgentString != wanted) userAgentString = wanted
             useWideViewPort = true
             loadWithOverviewMode = site.desktopSite
@@ -505,7 +550,10 @@ class WebsiteActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putBoolean("immersive_fullscreen", immersiveFullscreen)
         outState.putBoolean("fullscreen_from_toolbar", fullscreenFromToolbar)
-        if (::site.isInitialized) outState.putString("bookmark_url", site.url)
+        if (::site.isInitialized) {
+            outState.putString("bookmark_url", site.url)
+            outState.putString("website_request_key", WebsiteCustomization.requestKey(site))
+        }
         b.web.saveState(outState)
         super.onSaveInstanceState(outState)
     }

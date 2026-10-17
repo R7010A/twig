@@ -913,4 +913,16 @@
     <string name="website_orientation_locked">鎖定</string>
     <string name="website_orientation_landscape">橫向</string>
     <string name="website_orientation_portrait">直向</string>
+    <string name="website_user_agent">User-Agent</string>
+    <string name="website_user_agent_hint">留空使用行動/桌面預設值；自訂 UA 優先</string>
+    <string name="website_headers">請求 Header</string>
+    <string name="website_headers_hint">每行一個 Header名稱: 值</string>
+    <string name="website_script">JavaScript</string>
+    <string name="website_script_hint">不包含 script 標籤；每次頁面載入完成後執行一次</string>
+    <string name="website_style">CSS</string>
+    <string name="website_style_hint">不包含 style 標籤；修改立即套用</string>
+    <string name="website_custom_scope">JS/CSS：僅網址同源的主頁面生效，修改 JS 會重新載入頁面。\nHeader：僅同源 GET 頁面導覽，不涵蓋 API、圖片等資源請求。重新導向及瀏覽器管理的標頭由 WebView 決定。</string>
+    <string name="website_user_agent_invalid">User-Agent 不可包含換行或控制字元</string>
+    <string name="website_headers_invalid">Header 無效：請檢查名稱、重複項目和控制字元。User-Agent 請填入上方欄位；連線控制標頭由瀏覽器管理。</string>
+    <string name="website_advanced">進階</string>
 </resources>

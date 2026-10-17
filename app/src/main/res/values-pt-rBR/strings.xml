@@ -914,4 +914,16 @@
     <string name="website_orientation_locked">Bloquear orientação atual</string>
     <string name="website_orientation_landscape">Paisagem</string>
     <string name="website_orientation_portrait">Retrato</string>
+    <string name="website_user_agent">User-Agent</string>
+    <string name="website_user_agent_hint">Vazio = padrão móvel/desktop; UA personalizado tem prioridade</string>
+    <string name="website_headers">Cabeçalhos de requisição</string>
+    <string name="website_headers_hint">Um Nome: valor por linha</string>
+    <string name="website_script">JavaScript</string>
+    <string name="website_script_hint">Sem tags script; executado uma vez após cada carregamento completo</string>
+    <string name="website_style">CSS</string>
+    <string name="website_style_hint">Sem tags style; alterações aplicadas imediatamente</string>
+    <string name="website_custom_scope">JS/CSS: apenas a página principal da mesma origem. Alterar JS recarrega a página.\nCabeçalhos: apenas navegação GET da mesma origem, sem requisições de API/recursos. Redirecionamentos e cabeçalhos gerenciados dependem do WebView.</string>
+    <string name="website_user_agent_invalid">User-Agent não pode conter quebras de linha ou caracteres de controle</string>
+    <string name="website_headers_invalid">Cabeçalhos inválidos: verifique nomes, duplicatas e caracteres de controle. Defina User-Agent acima; o navegador gerencia cabeçalhos de conexão.</string>
+    <string name="website_advanced">Avançado</string>
 </resources>

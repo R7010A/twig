@@ -914,4 +914,16 @@
     <string name="website_orientation_locked">Verrouiller l’orientation actuelle</string>
     <string name="website_orientation_landscape">Paysage</string>
     <string name="website_orientation_portrait">Portrait</string>
+    <string name="website_user_agent">User-Agent</string>
+    <string name="website_user_agent_hint">Vide = valeur mobile/bureau ; le UA personnalisé est prioritaire</string>
+    <string name="website_headers">En-têtes de requête</string>
+    <string name="website_headers_hint">Un Nom: valeur par ligne</string>
+    <string name="website_script">JavaScript</string>
+    <string name="website_script_hint">Sans balises script ; exécuté une fois après chaque chargement complet</string>
+    <string name="website_style">CSS</string>
+    <string name="website_style_hint">Sans balises style ; modifications appliquées immédiatement</string>
+    <string name="website_custom_scope">JS/CSS : uniquement la page principale de même origine. Modifier JS recharge la page.\nEn-têtes : navigation GET de même origine uniquement, sans requêtes API/ressources. Redirections et en-têtes gérés dépendent de WebView.</string>
+    <string name="website_user_agent_invalid">User-Agent ne doit contenir ni sauts de ligne ni caractères de contrôle</string>
+    <string name="website_headers_invalid">En-têtes invalides : vérifier noms, doublons et caractères de contrôle. Définir User-Agent ci-dessus ; le navigateur gère les en-têtes de connexion.</string>
+    <string name="website_advanced">Avancé</string>
 </resources>

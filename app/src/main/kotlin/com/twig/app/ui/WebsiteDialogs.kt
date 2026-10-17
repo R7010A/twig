@@ -2,6 +2,8 @@ package com.twig.app.ui
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Typeface
+import android.graphics.Rect
 import android.util.Log
 import android.text.InputType
 import android.widget.CheckBox
@@ -16,10 +18,12 @@ import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.content.ContextCompat
 import com.twig.app.R
 import com.twig.app.Website
 import com.twig.app.WebsiteStore
 import com.twig.app.WebsiteOrientation
+import com.twig.app.secure.Secrets
 
 object WebsiteDialogs {
     fun edit(ctx: Context, site: Website? = null) {
@@ -74,6 +78,67 @@ object WebsiteDialogs {
             check(findViewWithTag<RadioButton>(selected).id)
         }
         form.addView(orientation)
+        val advanced = LinearLayout(ctx).apply {
+            this.orientation = LinearLayout.VERTICAL
+            tag = "website_advanced_fields"
+            visibility = View.GONE
+        }
+        val advancedHeader = TextView(ctx).apply {
+            tag = R.string.website_advanced
+            setText(R.string.website_advanced)
+            setTextColor(ContextCompat.getColor(ctx, R.color.text_primary))
+            textSize = 15f
+            setTypeface(typeface, Typeface.BOLD)
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            compoundDrawablePadding = (8 * ctx.resources.displayMetrics.density).toInt()
+            setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_chevron_right, 0)
+            val background = android.util.TypedValue()
+            ctx.theme.resolveAttribute(android.R.attr.selectableItemBackground, background, true)
+            setBackgroundResource(background.resourceId)
+            isFocusable = true
+        }
+        fun expandAdvanced(show: Boolean) {
+            if (!show && advanced.hasFocus()) {
+                ctx.getSystemService(android.view.inputmethod.InputMethodManager::class.java)
+                    ?.hideSoftInputFromWindow(advanced.windowToken, 0)
+                advanced.findFocus()?.clearFocus()
+            }
+            advanced.visibility = if (show) View.VISIBLE else View.GONE
+            advancedHeader.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0,
+                if (show) R.drawable.ic_chevron_down else R.drawable.ic_chevron_right, 0)
+        }
+        advancedHeader.setOnClickListener { expandAdvanced(advanced.visibility != View.VISIBLE) }
+        form.addView(advancedHeader, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+            (48 * ctx.resources.displayMetrics.density).toInt()))
+        form.addView(advanced)
+        fun field(label: Int, hint: Int, value: String, multiline: Boolean = false) = EditText(ctx).apply {
+            tag = label
+            advanced.addView(TextView(ctx).apply { setText(label) })
+            this.hint = ctx.getString(hint)
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or
+                (if (multiline) InputType.TYPE_TEXT_FLAG_MULTI_LINE else 0)
+            if (multiline) {
+                minLines = 3
+                maxLines = 7
+                gravity = android.view.Gravity.TOP or android.view.Gravity.START
+                typeface = Typeface.MONOSPACE
+                textSize = 13f
+            } else setSingleLine()
+            importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO
+            setText(value)
+            advanced.addView(this)
+        }
+        val userAgent = field(R.string.website_user_agent, R.string.website_user_agent_hint, site?.userAgent.orEmpty())
+        val headers = field(R.string.website_headers, R.string.website_headers_hint, site?.headers.orEmpty(), true)
+        val script = field(R.string.website_script, R.string.website_script_hint, site?.script.orEmpty(), true)
+        val style = field(R.string.website_style, R.string.website_style_hint, site?.style.orEmpty(), true)
+        advanced.addView(TextView(ctx).apply { setText(R.string.website_custom_scope) })
+        fun advancedError(field: EditText, message: Int) {
+            expandAdvanced(true)
+            field.error = ctx.getString(message)
+            field.requestFocus()
+            field.post { field.requestRectangleOnScreen(Rect(0, 0, field.width, field.height), true) }
+        }
         val dialog = AlertDialog.Builder(ctx)
             .setTitle(if (site == null) R.string.website_add else R.string.website_edit)
             .setView(ScrollView(ctx).apply { addView(form) })
@@ -87,6 +152,15 @@ object WebsiteDialogs {
                     url.error = ctx.getString(R.string.website_invalid_url)
                     return@setOnClickListener
                 }
+                val agent = userAgent.text.toString().trim()
+                if (!WebsiteCustomization.validUserAgent(agent)) {
+                    advancedError(userAgent, R.string.website_user_agent_invalid)
+                    return@setOnClickListener
+                }
+                if (WebsiteCustomization.parseHeaders(headers.text.toString()) == null) {
+                    advancedError(headers, R.string.website_headers_invalid)
+                    return@setOnClickListener
+                }
                 val label = name.text.toString().trim().ifEmpty { android.net.Uri.parse(address).host.orEmpty() }
                 val saved = (site ?: Website(name = label, url = address)).copy(
                     name = label, url = address, fullscreen = fullscreen.isChecked,
@@ -95,8 +169,15 @@ object WebsiteDialogs {
                     pullToRefresh = pullToRefresh.isChecked, disableTextSelection = selection.isChecked,
                     lockScrollAxis = scrollAxis.isChecked, desktopSite = desktop.isChecked,
                     orientation = orientation.findViewById<RadioButton>(orientation.checkedRadioButtonId).tag as WebsiteOrientation,
+                    userAgent = agent, headers = headers.text.toString(),
+                    script = script.text.toString(), style = style.text.toString(),
                 )
-                WebsiteStore.save(ctx, saved)
+                try {
+                    WebsiteStore.save(ctx, saved)
+                } catch (_: Secrets.KeyUnavailable) {
+                    advancedError(headers, R.string.backup_locked)
+                    return@setOnClickListener
+                }
                 if (site != null && site.url != saved.url) WebsiteIcons.forget(ctx, site)
                 updateShortcut(ctx, saved)
                 dialog.dismiss()

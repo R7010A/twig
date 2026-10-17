@@ -914,4 +914,16 @@
     <string name="website_orientation_locked">Kunci orientasi saat ini</string>
     <string name="website_orientation_landscape">Lanskap</string>
     <string name="website_orientation_portrait">Potret</string>
+    <string name="website_user_agent">User-Agent</string>
+    <string name="website_user_agent_hint">Kosong = bawaan seluler/desktop; UA khusus diprioritaskan</string>
+    <string name="website_headers">Header permintaan</string>
+    <string name="website_headers_hint">Satu Nama: nilai per baris</string>
+    <string name="website_script">JavaScript</string>
+    <string name="website_script_hint">Tanpa tag script; dijalankan sekali setelah setiap halaman selesai dimuat</string>
+    <string name="website_style">CSS</string>
+    <string name="website_style_hint">Tanpa tag style; perubahan langsung diterapkan</string>
+    <string name="website_custom_scope">JS/CSS: hanya halaman utama dengan asal yang sama. Perubahan JS memuat ulang halaman.\nHeader: hanya navigasi GET dengan asal yang sama, bukan permintaan API/sumber daya. Pengalihan dan header terkelola bergantung pada WebView.</string>
+    <string name="website_user_agent_invalid">User-Agent tidak boleh berisi baris baru atau karakter kontrol</string>
+    <string name="website_headers_invalid">Header tidak valid: periksa nama, duplikat, dan karakter kontrol. Atur User-Agent di atas; header koneksi dikelola peramban.</string>
+    <string name="website_advanced">Lanjutan</string>
 </resources>

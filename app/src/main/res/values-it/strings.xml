@@ -914,4 +914,16 @@
     <string name="website_orientation_locked">Blocca orientamento attuale</string>
     <string name="website_orientation_landscape">Orizzontale</string>
     <string name="website_orientation_portrait">Verticale</string>
+    <string name="website_user_agent">User-Agent</string>
+    <string name="website_user_agent_hint">Vuoto = valore mobile/desktop; UA personalizzato prioritario</string>
+    <string name="website_headers">Header delle richieste</string>
+    <string name="website_headers_hint">Un Nome: valore per riga</string>
+    <string name="website_script">JavaScript</string>
+    <string name="website_script_hint">Senza tag script; eseguito una volta dopo ogni caricamento completo</string>
+    <string name="website_style">CSS</string>
+    <string name="website_style_hint">Senza tag style; modifiche applicate subito</string>
+    <string name="website_custom_scope">JS/CSS: solo la pagina principale della stessa origine. Modificare JS ricarica la pagina.\nHeader: solo navigazione GET della stessa origine, senza richieste API/risorse. Reindirizzamenti e header gestiti dipendono da WebView.</string>
+    <string name="website_user_agent_invalid">User-Agent non può contenere ritorni a capo o caratteri di controllo</string>
+    <string name="website_headers_invalid">Header non validi: controllare nomi, duplicati e caratteri di controllo. Impostare User-Agent sopra; gli header di connessione sono gestiti dal browser.</string>
+    <string name="website_advanced">Avanzate</string>
 </resources>

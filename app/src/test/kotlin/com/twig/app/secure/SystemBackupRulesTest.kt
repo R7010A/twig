@@ -30,6 +30,7 @@ class SystemBackupRulesTest {
             "sharedpref" to "twig_archive_pw.xml",
             "sharedpref" to "twig_share.xml",
             "sharedpref" to "twig_stream.xml",
+            "sharedpref" to "twig_websites.xml",
             "file" to "keys/",
             "file" to ".ssh/",
             "root" to "app_webview/",

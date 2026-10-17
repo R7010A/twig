@@ -918,4 +918,16 @@
     <string name="website_orientation_locked">قفل الاتجاه الحالي</string>
     <string name="website_orientation_landscape">أفقي</string>
     <string name="website_orientation_portrait">عمودي</string>
+    <string name="website_user_agent">User-Agent</string>
+    <string name="website_user_agent_hint">فارغ = الافتراضي للهاتف/سطح المكتب؛ الأولوية للقيمة المخصصة</string>
+    <string name="website_headers">ترويسات الطلب</string>
+    <string name="website_headers_hint">اسم: قيمة واحدة في كل سطر</string>
+    <string name="website_script">JavaScript</string>
+    <string name="website_script_hint">بلا وسوم script؛ يُنفذ مرة بعد اكتمال تحميل كل صفحة</string>
+    <string name="website_style">CSS</string>
+    <string name="website_style_hint">بلا وسوم style؛ تُطبق التغييرات فورًا</string>
+    <string name="website_custom_scope">JS/CSS: الصفحة الرئيسية من نفس المصدر فقط. تغيير JS يعيد تحميل الصفحة.\nالترويسات: تنقل GET من نفس المصدر فقط، دون طلبات API/الموارد. تعتمد عمليات إعادة التوجيه والترويسات المُدارة على WebView.</string>
+    <string name="website_user_agent_invalid">لا يمكن أن يحتوي User-Agent على أسطر جديدة أو أحرف تحكم</string>
+    <string name="website_headers_invalid">ترويسات غير صالحة: تحقق من الأسماء والتكرار وأحرف التحكم. اضبط User-Agent أعلاه؛ يدير المتصفح ترويسات الاتصال.</string>
+    <string name="website_advanced">متقدم</string>
 </resources>

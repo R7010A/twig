@@ -6,6 +6,7 @@ import android.util.Base64
 import com.twig.app.ConnectionStore
 import com.twig.app.Prefs
 import com.twig.app.SavedConnection
+import com.twig.app.WebsiteStore
 import com.twig.app.share.ShareStore
 import org.json.JSONArray
 import org.json.JSONObject
@@ -174,6 +175,9 @@ object Backup {
         val prefs = JSONObject()
         PREF_FILES.forEach { f ->
             val dump = dumpPrefs(ctx.getSharedPreferences(f, Context.MODE_PRIVATE))
+            if (f == "twig_websites" && dump.has("list")) {
+                dump.getJSONObject("list").put("v", WebsiteStore.exportJson(ctx))
+            }
             if (dump.length() > 0) prefs.put(f, dump)
         }
         o.put("prefs", prefs)
@@ -325,7 +329,13 @@ object Backup {
             all.keys().forEach { file ->
                 if (file !in PREF_FILES) return@forEach // anything off the whitelist is not written back, to defend against a constructed backup file
                 val sp = ctx.getSharedPreferences(file, Context.MODE_PRIVATE)
-                prefCount += restorePrefs(sp, all.getJSONObject(file))
+                val values = all.getJSONObject(file)
+                if (file == "twig_websites") {
+                    values.optJSONObject("list")?.takeIf { it.optString("t") == "s" }?.let {
+                        WebsiteStore.importJson(ctx, it.getString("v"))
+                        prefCount++
+                    }
+                } else prefCount += restorePrefs(sp, values)
             }
         }
         return Result(connCount, pwCount, keyCount, prefCount)

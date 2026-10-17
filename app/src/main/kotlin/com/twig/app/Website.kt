@@ -1,6 +1,7 @@
 package com.twig.app
 
 import android.content.Context
+import com.twig.app.secure.Secrets
 import java.net.URI
 import java.util.UUID
 import org.json.JSONArray
@@ -22,6 +23,11 @@ data class Website(
     /** Open in immersive display without adding an application Back-navigation step. */
     val openFullscreen: Boolean = false,
     val orientation: WebsiteOrientation = WebsiteOrientation.SYSTEM,
+    val script: String = "",
+    val style: String = "",
+    val userAgent: String = "",
+    /** One Name: value per line; kept decrypted only in memory. */
+    val headers: String = "",
 )
 
 enum class WebsiteOrientation(val key: String) {
@@ -37,7 +43,11 @@ object WebsiteStore {
 
     fun all(ctx: Context): List<Website> {
         val raw = preferences(ctx).getString("list", null) ?: return emptyList()
-        return runCatching {
+        return parse(raw, { value -> runCatching { Secrets.dec(ctx, value) }.getOrDefault(value) })
+    }
+
+    private fun parse(raw: String, openHeaders: (String) -> String, strict: Boolean = false): List<Website> {
+        val parsed = runCatching {
             val items = JSONArray(raw)
             (0 until items.length()).map { index ->
                 val o = items.getJSONObject(index)
@@ -51,9 +61,12 @@ object WebsiteStore {
                     lockScrollAxis = o.optBoolean("lockScrollAxis"), desktopSite = o.optBoolean("desktopSite"),
                     openFullscreen = o.optBoolean("openFullscreen"),
                     orientation = WebsiteOrientation.fromKey(o.optString("orientation")),
+                    script = o.optString("script"), style = o.optString("style"),
+                    userAgent = o.optString("userAgent"), headers = openHeaders(o.optString("headers")),
                 )
             }
-        }.getOrDefault(emptyList())
+        }
+        return if (strict) parsed.getOrThrow() else parsed.getOrDefault(emptyList())
     }
 
     fun save(ctx: Context, site: Website) {
@@ -65,7 +78,24 @@ object WebsiteStore {
 
     fun remove(ctx: Context, id: String) = persist(ctx, all(ctx).filter { it.id != id })
 
+    /** Backups carry plaintext fields under their own optional password encryption. */
+    fun exportJson(ctx: Context): String {
+        val sites = all(ctx)
+        if (sites.any { it.headers.startsWith("enc1:") }) throw Secrets.KeyUnavailable()
+        return json(sites) { it.headers }.toString()
+    }
+
+    fun importJson(ctx: Context, raw: String) = persist(ctx, parse(raw, { it }, strict = true))
+
     private fun persist(ctx: Context, sites: List<Website>) {
+        val items = json(sites) {
+            // A locked reader may carry existing ciphertext. Never encrypt it twice.
+            if (it.headers.startsWith("enc1:")) it.headers else Secrets.enc(ctx, it.headers)
+        }
+        preferences(ctx).edit().putString("list", items.toString()).apply()
+    }
+
+    private fun json(sites: List<Website>, sealHeaders: (Website) -> String): JSONArray {
         val items = JSONArray()
         sites.forEach {
             items.put(JSONObject().put("id", it.id).put("name", it.name)
@@ -73,9 +103,11 @@ object WebsiteStore {
                 .put("pullToRefresh", it.pullToRefresh).put("hideStatusBar", it.hideStatusBar)
                 .put("hideNavigationBar", it.hideNavigationBar).put("disableTextSelection", it.disableTextSelection)
                 .put("lockScrollAxis", it.lockScrollAxis).put("desktopSite", it.desktopSite)
-                .put("openFullscreen", it.openFullscreen).put("orientation", it.orientation.key))
+                .put("openFullscreen", it.openFullscreen).put("orientation", it.orientation.key)
+                .put("script", it.script).put("style", it.style).put("userAgent", it.userAgent)
+                .put("headers", sealHeaders(it)))
         }
-        preferences(ctx).edit().putString("list", items.toString()).apply()
+        return items
     }
 
     /** Bare hosts use HTTPS; never accept local-file or executable URLs. */

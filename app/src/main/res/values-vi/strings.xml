@@ -913,4 +913,16 @@
     <string name="website_orientation_locked">Khóa hướng hiện tại</string>
     <string name="website_orientation_landscape">Ngang</string>
     <string name="website_orientation_portrait">Dọc</string>
+    <string name="website_user_agent">User-Agent</string>
+    <string name="website_user_agent_hint">Để trống = mặc định di động/máy tính; UA tùy chỉnh được ưu tiên</string>
+    <string name="website_headers">Header yêu cầu</string>
+    <string name="website_headers_hint">Mỗi dòng một Tên: giá trị</string>
+    <string name="website_script">JavaScript</string>
+    <string name="website_script_hint">Không có thẻ script; chạy một lần sau mỗi lần tải xong trang</string>
+    <string name="website_style">CSS</string>
+    <string name="website_style_hint">Không có thẻ style; thay đổi áp dụng ngay</string>
+    <string name="website_custom_scope">JS/CSS: chỉ trang chính cùng nguồn. Thay đổi JS sẽ tải lại trang.\nHeader: chỉ điều hướng trang GET cùng nguồn, không gồm yêu cầu API/tài nguyên. Chuyển hướng và header được quản lý tùy thuộc WebView.</string>
+    <string name="website_user_agent_invalid">User-Agent không được chứa ký tự xuống dòng hoặc điều khiển</string>
+    <string name="website_headers_invalid">Header không hợp lệ: kiểm tra tên, mục trùng và ký tự điều khiển. Đặt User-Agent ở trên; trình duyệt quản lý header kết nối.</string>
+    <string name="website_advanced">Nâng cao</string>
 </resources>

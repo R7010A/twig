@@ -914,4 +914,16 @@
     <string name="website_orientation_locked">वर्तमान दिशा लॉक करें</string>
     <string name="website_orientation_landscape">लैंडस्केप</string>
     <string name="website_orientation_portrait">पोर्ट्रेट</string>
+    <string name="website_user_agent">User-Agent</string>
+    <string name="website_user_agent_hint">खाली = मोबाइल/डेस्कटॉप डिफ़ॉल्ट; कस्टम UA को प्राथमिकता</string>
+    <string name="website_headers">अनुरोध हेडर</string>
+    <string name="website_headers_hint">हर पंक्ति में एक नाम: मान</string>
+    <string name="website_script">JavaScript</string>
+    <string name="website_script_hint">script टैग के बिना; हर पेज पूरा लोड होने के बाद एक बार चलता है</string>
+    <string name="website_style">CSS</string>
+    <string name="website_style_hint">style टैग के बिना; बदलाव तुरंत लागू होते हैं</string>
+    <string name="website_custom_scope">JS/CSS: केवल समान मूल का मुख्य पेज। JS बदलने पर पेज फिर लोड होता है।\nहेडर: केवल समान मूल के GET पेज नेविगेशन; API/संसाधन अनुरोध शामिल नहीं। रीडायरेक्ट और प्रबंधित हेडर WebView पर निर्भर हैं।</string>
+    <string name="website_user_agent_invalid">User-Agent में नई पंक्ति या नियंत्रण वर्ण नहीं हो सकते</string>
+    <string name="website_headers_invalid">अमान्य हेडर: नाम, दोहराव और नियंत्रण वर्ण जाँचें। User-Agent ऊपर सेट करें; कनेक्शन हेडर ब्राउज़र संभालता है।</string>
+    <string name="website_advanced">उन्नत</string>
 </resources>

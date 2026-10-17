@@ -914,4 +914,16 @@
     <string name="website_orientation_locked">Geçerli yönü kilitle</string>
     <string name="website_orientation_landscape">Yatay</string>
     <string name="website_orientation_portrait">Dikey</string>
+    <string name="website_user_agent">User-Agent</string>
+    <string name="website_user_agent_hint">Boş = mobil/masaüstü varsayılanı; özel UA önceliklidir</string>
+    <string name="website_headers">İstek başlıkları</string>
+    <string name="website_headers_hint">Her satıra bir Ad: değer</string>
+    <string name="website_script">JavaScript</string>
+    <string name="website_script_hint">script etiketleri olmadan; her sayfa yüklendikten sonra bir kez çalışır</string>
+    <string name="website_style">CSS</string>
+    <string name="website_style_hint">style etiketleri olmadan; değişiklikler hemen uygulanır</string>
+    <string name="website_custom_scope">JS/CSS: yalnızca aynı kaynaktaki ana sayfa. JS değişiklikleri sayfayı yeniden yükler.\nBaşlıklar: yalnızca aynı kaynak GET sayfa gezintisi; API/kaynak istekleri hariç. Yönlendirmeler ve yönetilen başlıklar WebView tarafından belirlenir.</string>
+    <string name="website_user_agent_invalid">User-Agent satır sonu veya kontrol karakteri içeremez</string>
+    <string name="website_headers_invalid">Geçersiz başlıklar: adları, tekrarları ve kontrol karakterlerini denetleyin. User-Agent üstte ayarlanır; bağlantı başlıklarını tarayıcı yönetir.</string>
+    <string name="website_advanced">Gelişmiş</string>
 </resources>
