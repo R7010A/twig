@@ -936,4 +936,18 @@
     <string name="website_download_redirects">下載重新導向無效、不安全或次數過多。</string>
     <string name="website_download_http_error">下載失敗（HTTP %1$d）。</string>
     <string name="website_download_incomplete">檔案下載不完整。</string>
+    <string name="website_debug">網頁除錯</string>
+    <string name="website_debug_console">Console</string>
+    <string name="website_debug_pc">電腦除錯（本次工作階段）</string>
+    <string name="website_debug_pc_help">開啟手機的 USB 偵錯並連接可信任的電腦，在電腦 Chrome 中開啟 chrome://inspect/#devices，選擇 Inspect。\n\n此開關影響 Twig 的所有 WebView；離開網站頁面後自動關閉。</string>
+    <string name="website_debug_js_input">在目前頁面執行的 JavaScript</string>
+    <string name="website_debug_css_input">在此網站預覽的 CSS</string>
+    <string name="website_debug_run">執行</string>
+    <string name="website_debug_save_reload">儲存並重新整理</string>
+    <string name="website_debug_preview">預覽</string>
+    <string name="website_debug_restore">還原已儲存</string>
+    <string name="website_debug_console_empty">這裡顯示網頁記錄、錯誤和 JavaScript 執行結果。可在 Script 頁輸入並執行程式碼。</string>
+    <string name="website_debug_style_scope">CSS 預覽僅適用於所儲存網站的同源頁面。</string>
+    <string name="website_debug_pc_forced">電腦除錯：系統強制開啟</string>
+    <string name="website_debug_pc_forced_help">目前系統建置類型為 %1$s。WebView 在此系統上強制開啟網頁除錯，Twig 無法透過應用程式介面關閉。\n\n電腦仍可透過 USB 偵錯與 Chrome 的 chrome://inspect/#devices 連線。</string>
 </resources>

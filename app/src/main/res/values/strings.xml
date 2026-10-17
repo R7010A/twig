@@ -1007,4 +1007,18 @@
     <string name="website_download_redirects">The download redirect is invalid or unsafe, or there are too many redirects.</string>
     <string name="website_download_http_error">Download failed (HTTP %1$d).</string>
     <string name="website_download_incomplete">The download was incomplete.</string>
+    <string name="website_debug">Web debugging</string>
+    <string name="website_debug_console">Console</string>
+    <string name="website_debug_pc">Computer debugging (session)</string>
+    <string name="website_debug_pc_help">Enable USB debugging on the phone and connect it to a trusted computer. Open chrome://inspect/#devices in desktop Chrome and choose Inspect.\n\nThis switch affects all Twig WebViews. It turns off automatically when you leave the website screens.</string>
+    <string name="website_debug_js_input">JavaScript to execute on the current page</string>
+    <string name="website_debug_css_input">CSS to preview on this website</string>
+    <string name="website_debug_run">Run</string>
+    <string name="website_debug_save_reload">Save &amp; reload</string>
+    <string name="website_debug_preview">Preview</string>
+    <string name="website_debug_restore">Restore saved</string>
+    <string name="website_debug_console_empty">Page logs, errors and JavaScript results appear here. Use the Script tab to run code.</string>
+    <string name="website_debug_style_scope">CSS preview applies only to the saved website origin.</string>
+    <string name="website_debug_pc_forced">Computer debugging: forced by system</string>
+    <string name="website_debug_pc_forced_help">This Android build is %1$s. WebView forces web debugging on and does not allow Twig to disable it.\n\nConnect via USB debugging and chrome://inspect/#devices in desktop Chrome.</string>
 </resources>

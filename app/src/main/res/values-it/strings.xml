@@ -937,4 +937,18 @@
     <string name="website_download_redirects">Il reindirizzamento non è valido, non è sicuro o ci sono troppi reindirizzamenti.</string>
     <string name="website_download_http_error">Download non riuscito (HTTP %1$d).</string>
     <string name="website_download_incomplete">Il download è incompleto.</string>
+    <string name="website_debug">Debug web</string>
+    <string name="website_debug_console">Console</string>
+    <string name="website_debug_pc">Debug dal computer (sessione)</string>
+    <string name="website_debug_pc_help">Attiva il debug USB sul telefono e collegalo a un computer attendibile. Apri chrome://inspect/#devices in Chrome sul computer e scegli Inspect.\n\nIl comando riguarda tutti i WebView di Twig e si disattiva uscendo dalle schermate dei siti.</string>
+    <string name="website_debug_js_input">JavaScript da eseguire nella pagina attuale</string>
+    <string name="website_debug_css_input">CSS da visualizzare in anteprima sul sito</string>
+    <string name="website_debug_run">Esegui</string>
+    <string name="website_debug_save_reload">Salva e ricarica</string>
+    <string name="website_debug_preview">Anteprima</string>
+    <string name="website_debug_restore">Ripristina salvato</string>
+    <string name="website_debug_console_empty">Qui appaiono log, errori e risultati JavaScript. Esegui il codice nella scheda Script.</string>
+    <string name="website_debug_style_scope">L’anteprima CSS si applica solo all’origine del sito salvato.</string>
+    <string name="website_debug_pc_forced">Debug dal computer: imposto dal sistema</string>
+    <string name="website_debug_pc_forced_help">Questa build Android è %1$s. WebView impone il debug web e non consente a Twig di disattivarlo.\n\nConnettiti tramite debug USB e chrome://inspect/#devices in Chrome sul computer.</string>
 </resources>

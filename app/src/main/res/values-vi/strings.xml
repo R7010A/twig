@@ -936,4 +936,18 @@
     <string name="website_download_redirects">Chuyển hướng tải xuống không hợp lệ, không an toàn hoặc quá nhiều.</string>
     <string name="website_download_http_error">Tải xuống thất bại (HTTP %1$d).</string>
     <string name="website_download_incomplete">Tải xuống chưa hoàn tất.</string>
+    <string name="website_debug">Gỡ lỗi trang web</string>
+    <string name="website_debug_console">Console</string>
+    <string name="website_debug_pc">Gỡ lỗi qua máy tính (phiên này)</string>
+    <string name="website_debug_pc_help">Bật gỡ lỗi USB trên điện thoại và kết nối máy tính đáng tin cậy. Mở chrome://inspect/#devices trong Chrome trên máy tính rồi chọn Inspect.\n\nCông tắc áp dụng cho mọi WebView của Twig và tự tắt khi rời màn hình trang web.</string>
+    <string name="website_debug_js_input">JavaScript chạy trên trang hiện tại</string>
+    <string name="website_debug_css_input">CSS để xem trước trên trang này</string>
+    <string name="website_debug_run">Chạy</string>
+    <string name="website_debug_save_reload">Lưu và tải lại</string>
+    <string name="website_debug_preview">Xem trước</string>
+    <string name="website_debug_restore">Khôi phục đã lưu</string>
+    <string name="website_debug_console_empty">Nhật ký, lỗi và kết quả JavaScript xuất hiện ở đây. Chạy mã trong thẻ Script.</string>
+    <string name="website_debug_style_scope">Xem trước CSS chỉ áp dụng cho cùng nguồn của trang đã lưu.</string>
+    <string name="website_debug_pc_forced">Gỡ lỗi qua máy tính: hệ thống bắt buộc bật</string>
+    <string name="website_debug_pc_forced_help">Loại bản dựng Android là %1$s. WebView bắt buộc bật gỡ lỗi web và không cho phép Twig tắt.\n\nKết nối qua gỡ lỗi USB và chrome://inspect/#devices trong Chrome trên máy tính.</string>
 </resources>

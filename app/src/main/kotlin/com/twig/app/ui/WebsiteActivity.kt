@@ -19,6 +19,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.webkit.SslErrorHandler
+import android.webkit.ConsoleMessage
 import android.webkit.CookieManager
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -54,6 +55,8 @@ class WebsiteActivity : AppCompatActivity() {
     private lateinit var b: ActivityWebsiteBinding
     private lateinit var site: Website
     private var mobileUserAgent = ""
+    private lateinit var debugger: WebsiteDebugPanel
+    private var remoteDebugMenu: MenuItem? = null
     private var customStyleApplied = false
     private var pendingMainUrl: String? = null
     private var immersiveFullscreen = false
@@ -81,6 +84,9 @@ class WebsiteActivity : AppCompatActivity() {
             return
         }
         site = saved
+        debugger = WebsiteDebugPanel(this, b.debugHost, b.web, { site }) { updated ->
+            site = site.copy(script = updated.script, style = updated.style)
+        }
         immersiveFullscreen = savedInstanceState?.getBoolean("immersive_fullscreen", site.openFullscreen)
             ?: site.openFullscreen
         fullscreenFromToolbar = immersiveFullscreen &&
@@ -113,6 +119,23 @@ class WebsiteActivity : AppCompatActivity() {
         b.toolbar.menu.add(R.string.action_pin_shortcut).setOnMenuItemClickListener {
             WebsiteDialogs.pin(this, site); true
         }
+        b.toolbar.menu.add(R.string.website_debug).setOnMenuItemClickListener {
+            debugger.show(); true
+        }
+        remoteDebugMenu = b.toolbar.menu.add(R.string.website_debug_pc).apply {
+            setOnMenuItemClickListener {
+                val forced = WebsiteRemoteDebug.forcedBySystem
+                if (!forced) WebsiteRemoteDebug.setEnabled(!WebsiteRemoteDebug.enabled)
+                syncRemoteDebugMenu()
+                if (forced || WebsiteRemoteDebug.enabled) androidx.appcompat.app.AlertDialog.Builder(this@WebsiteActivity)
+                    .setTitle(if (forced) R.string.website_debug_pc_forced else R.string.website_debug_pc)
+                    .setMessage(if (forced) getString(R.string.website_debug_pc_forced_help, Build.TYPE)
+                        else getString(R.string.website_debug_pc_help))
+                    .setPositiveButton(android.R.string.ok, null).show()
+                true
+            }
+        }
+        syncRemoteDebugMenu()
         // Insets for independently hidden system bars, including the on-screen keyboard.
         ViewCompat.setOnApplyWindowInsetsListener(b.root) { view, insets ->
             val hideStatus = immersiveFullscreen || site.hideStatusBar
@@ -164,6 +187,7 @@ class WebsiteActivity : AppCompatActivity() {
 
             override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
                 pendingMainUrl = url
+                debugger.navigation(url)
                 customStyleApplied = false
                 cancelCertificateRequests()
                 view.clearSslPreferences()
@@ -217,6 +241,11 @@ class WebsiteActivity : AppCompatActivity() {
             }
         }
         b.web.webChromeClient = object : WebChromeClient() {
+            override fun onConsoleMessage(message: ConsoleMessage): Boolean {
+                debugger.console(message)
+                return true
+            }
+
             override fun onReceivedIcon(view: WebView, icon: Bitmap) {
                 WebsiteIcons.received(this@WebsiteActivity, site, view.url, icon)
             }
@@ -298,10 +327,11 @@ class WebsiteActivity : AppCompatActivity() {
     }
 
     private fun applyCustomStyle() {
-        if (site.style.isEmpty() && !customStyleApplied) return
+        val styled = debugger.styleSite(site)
+        if (styled.style.isEmpty() && !customStyleApplied) return
         if (WebsiteCustomization.sameOrigin(site.url, b.web.url)) {
-            b.web.evaluateJavascript(WebsiteCustomization.styleScript(site), null)
-            customStyleApplied = site.style.isNotEmpty()
+            b.web.evaluateJavascript(WebsiteCustomization.styleScript(styled), null)
+            customStyleApplied = styled.style.isNotEmpty()
         }
     }
 
@@ -310,6 +340,7 @@ class WebsiteActivity : AppCompatActivity() {
             hidePageFullscreen()
             return
         }
+        if (debugger.hide()) return
         if (b.searchBar.visibility == View.VISIBLE) {
             toggleSearch(false)
             return
@@ -557,8 +588,18 @@ class WebsiteActivity : AppCompatActivity() {
         super.onPause()
     }
 
+    private fun syncRemoteDebugMenu() {
+        val forced = WebsiteRemoteDebug.forcedBySystem
+        remoteDebugMenu?.apply {
+            setTitle(if (forced) R.string.website_debug_pc_forced else R.string.website_debug_pc)
+            isCheckable = !forced
+            isChecked = !forced && WebsiteRemoteDebug.enabled
+        }
+    }
+
     override fun onResume() {
         super.onResume()
+        syncRemoteDebugMenu()
         if (::b.isInitialized) {
             b.web.clearSslPreferences()
             b.web.onResume()
@@ -576,12 +617,21 @@ class WebsiteActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
     }
 
+    override fun onStart() {
+        super.onStart()
+        WebsiteRemoteDebug.start(this)
+        syncRemoteDebugMenu()
+    }
+
     override fun onStop() {
+        WebsiteRemoteDebug.stop(this)
         downloads.stop()
         super.onStop()
     }
 
     override fun onDestroy() {
+        WebsiteRemoteDebug.stop(this)
+        if (::debugger.isInitialized) debugger.destroy()
         downloads.destroy()
         cancelCertificateRequests()
         hidePageFullscreen(restorePage = false)

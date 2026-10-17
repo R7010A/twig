@@ -937,4 +937,18 @@
     <string name="website_download_redirects">İndirme yönlendirmesi geçersiz, güvensiz veya çok fazla yönlendirme var.</string>
     <string name="website_download_http_error">İndirme başarısız (HTTP %1$d).</string>
     <string name="website_download_incomplete">İndirme tamamlanmadı.</string>
+    <string name="website_debug">Web hata ayıklama</string>
+    <string name="website_debug_console">Konsol</string>
+    <string name="website_debug_pc">Bilgisayardan hata ayıklama (oturum)</string>
+    <string name="website_debug_pc_help">Telefonda USB hata ayıklamayı açıp güvenilir bir bilgisayara bağlayın. Bilgisayarda Chrome ile chrome://inspect/#devices adresini açıp Inspect seçin.\n\nTüm Twig WebView öğelerini etkiler ve web sitesi ekranlarından çıkıldığında otomatik kapanır.</string>
+    <string name="website_debug_js_input">Geçerli sayfada çalıştırılacak JavaScript</string>
+    <string name="website_debug_css_input">Bu sitede önizlenecek CSS</string>
+    <string name="website_debug_run">Çalıştır</string>
+    <string name="website_debug_save_reload">Kaydet ve yenile</string>
+    <string name="website_debug_preview">Önizle</string>
+    <string name="website_debug_restore">Kayıtlıyı geri yükle</string>
+    <string name="website_debug_console_empty">Sayfa günlükleri, hatalar ve JavaScript sonuçları burada görünür. Script sekmesinde kod çalıştırın.</string>
+    <string name="website_debug_style_scope">CSS önizlemesi yalnızca kayıtlı sitenin kaynağına uygulanır.</string>
+    <string name="website_debug_pc_forced">Bilgisayardan hata ayıklama: sistem zorunlu kılıyor</string>
+    <string name="website_debug_pc_forced_help">Bu Android derlemesi %1$s türündedir. WebView web hata ayıklamayı zorunlu olarak açar ve Twig kapatamaz.\n\nUSB hata ayıklama ve bilgisayardaki Chrome üzerinden chrome://inspect/#devices ile bağlanın.</string>
 </resources>

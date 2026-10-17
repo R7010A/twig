@@ -937,4 +937,18 @@
     <string name="website_download_redirects">La redirección de descarga no es válida, es insegura o hay demasiadas redirecciones.</string>
     <string name="website_download_http_error">Error de descarga (HTTP %1$d).</string>
     <string name="website_download_incomplete">La descarga quedó incompleta.</string>
+    <string name="website_debug">Depuración web</string>
+    <string name="website_debug_console">Consola</string>
+    <string name="website_debug_pc">Depuración por ordenador (sesión)</string>
+    <string name="website_debug_pc_help">Activa la depuración USB del teléfono y conéctalo a un ordenador de confianza. Abre chrome://inspect/#devices en Chrome del ordenador y elige Inspect.\n\nAfecta a todos los WebView de Twig y se desactiva al salir de las pantallas de sitios.</string>
+    <string name="website_debug_js_input">JavaScript para ejecutar en la página actual</string>
+    <string name="website_debug_css_input">CSS para previsualizar en este sitio</string>
+    <string name="website_debug_run">Ejecutar</string>
+    <string name="website_debug_save_reload">Guardar y recargar</string>
+    <string name="website_debug_preview">Vista previa</string>
+    <string name="website_debug_restore">Restaurar guardado</string>
+    <string name="website_debug_console_empty">Aquí aparecen registros, errores y resultados de JavaScript. Usa la pestaña Script para ejecutar código.</string>
+    <string name="website_debug_style_scope">La vista previa CSS solo se aplica al origen del sitio guardado.</string>
+    <string name="website_debug_pc_forced">Depuración por ordenador: forzada por el sistema</string>
+    <string name="website_debug_pc_forced_help">Esta compilación de Android es %1$s. WebView fuerza la depuración web y no permite a Twig desactivarla.\n\nConecta mediante depuración USB y chrome://inspect/#devices en Chrome del ordenador.</string>
 </resources>

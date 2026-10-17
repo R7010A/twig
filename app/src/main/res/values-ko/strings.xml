@@ -937,4 +937,18 @@
     <string name="website_download_redirects">다운로드 리디렉션이 유효하지 않거나 안전하지 않거나 너무 많습니다.</string>
     <string name="website_download_http_error">다운로드 실패 (HTTP %1$d).</string>
     <string name="website_download_incomplete">다운로드가 완료되지 않았습니다.</string>
+    <string name="website_debug">웹 디버깅</string>
+    <string name="website_debug_console">콘솔</string>
+    <string name="website_debug_pc">컴퓨터 디버깅 (이번 세션)</string>
+    <string name="website_debug_pc_help">휴대전화에서 USB 디버깅을 켜고 신뢰하는 컴퓨터에 연결하세요. 컴퓨터 Chrome에서 chrome://inspect/#devices 를 열고 Inspect를 선택하세요.\n\nTwig의 모든 WebView에 적용되며 웹사이트 화면을 떠나면 자동으로 꺼집니다.</string>
+    <string name="website_debug_js_input">현재 페이지에서 실행할 JavaScript</string>
+    <string name="website_debug_css_input">이 사이트에서 미리 볼 CSS</string>
+    <string name="website_debug_run">실행</string>
+    <string name="website_debug_save_reload">저장 후 새로고침</string>
+    <string name="website_debug_preview">미리보기</string>
+    <string name="website_debug_restore">저장된 내용 복원</string>
+    <string name="website_debug_console_empty">페이지 로그, 오류 및 JavaScript 결과가 표시됩니다. Script 탭에서 코드를 실행하세요.</string>
+    <string name="website_debug_style_scope">CSS 미리보기는 저장된 사이트와 동일한 출처에만 적용됩니다.</string>
+    <string name="website_debug_pc_forced">컴퓨터 디버깅: 시스템에서 강제 활성화</string>
+    <string name="website_debug_pc_forced_help">이 Android 빌드 유형은 %1$s입니다. WebView가 웹 디버깅을 강제로 켜므로 Twig에서 끌 수 없습니다.\n\nUSB 디버깅과 컴퓨터 Chrome의 chrome://inspect/#devices로 연결하세요.</string>
 </resources>

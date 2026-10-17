@@ -937,4 +937,18 @@
     <string name="website_download_redirects">Die Download-Weiterleitung ist ungültig, unsicher oder zu häufig.</string>
     <string name="website_download_http_error">Download fehlgeschlagen (HTTP %1$d).</string>
     <string name="website_download_incomplete">Der Download war unvollständig.</string>
+    <string name="website_debug">Web-Debugging</string>
+    <string name="website_debug_console">Konsole</string>
+    <string name="website_debug_pc">Computer-Debugging (Sitzung)</string>
+    <string name="website_debug_pc_help">USB-Debugging am Telefon aktivieren und mit einem vertrauenswürdigen Computer verbinden. In Chrome am Computer chrome://inspect/#devices öffnen und Inspect wählen.\n\nDer Schalter betrifft alle WebViews von Twig und wird beim Verlassen der Website-Bildschirme automatisch deaktiviert.</string>
+    <string name="website_debug_js_input">JavaScript für die aktuelle Seite</string>
+    <string name="website_debug_css_input">CSS-Vorschau für diese Website</string>
+    <string name="website_debug_run">Ausführen</string>
+    <string name="website_debug_save_reload">Speichern &amp; neu laden</string>
+    <string name="website_debug_preview">Vorschau</string>
+    <string name="website_debug_restore">Gespeichertes laden</string>
+    <string name="website_debug_console_empty">Seitenprotokolle, Fehler und JavaScript-Ergebnisse erscheinen hier. Code im Tab Script ausführen.</string>
+    <string name="website_debug_style_scope">Die CSS-Vorschau gilt nur für den Ursprung der gespeicherten Website.</string>
+    <string name="website_debug_pc_forced">Computer-Debugging: vom System erzwungen</string>
+    <string name="website_debug_pc_forced_help">Dieser Android-Build ist %1$s. WebView erzwingt Web-Debugging und erlaubt Twig nicht, es zu deaktivieren.\n\nVerbindung über USB-Debugging und chrome://inspect/#devices in Chrome am Computer.</string>
 </resources>

@@ -356,3 +356,23 @@ option.**
     WebView's [SSL error callback](https://developer.android.com/reference/android/webkit/WebViewClient.html#onReceivedSslError(android.webkit.WebView,android.webkit.SslErrorHandler,android.net.http.SslError))
     only runs for recoverable certificate errors. A replacement certificate accepted
     by the system has no such callback and follows Chromium's normal verification.
+
+
+- **WebView debugging can be forced by the Android build type** (2026-10-17,
+  `WebsiteRemoteDebug` / `WebsiteActivity`). The computer could still inspect pages
+  while Twig's menu was unchecked. The initial assumption was that a successful
+  `setWebContentsDebuggingEnabled(false)` call meant debugging had stopped; the
+  tests recorded the API request, without a real WebView provider. Chromium ignores
+  that request on `userdebug` / `eng` systems and enables debugging during startup.
+  Its system-build check uses `Build.TYPE`, so a device reporting
+  `ro.debuggable=0` can still qualify. The affected device reported `userdebug`,
+  WebView 153.0.8010.36, and a Twig installation without `FLAG_DEBUGGABLE`.
+  Treat the app's session request separately from the forced system policy:
+  the menu shows an informational “forced by system” entry with no checkbox on
+  those build types. Ordinary `user` systems retain the session-only switch.
+  Tests cover both branches; a mocked API call alone cannot establish whether
+  the actual provider stopped accepting connections. Chromium's
+  [SharedStatics](https://chromium.googlesource.com/chromium/src/+/875e15c94d995212867016abd2651d71f1c9f4b4/android_webview/glue/java/src/com/android/webview/chromium/SharedStatics.java)
+  contains the early return, and
+  [AndroidInfo](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/base/android/java/src/org/chromium/base/AndroidInfo.java)
+  defines the build-type check.

@@ -973,4 +973,18 @@
     <string name="website_download_redirects">Перенаправление недопустимо, небезопасно или перенаправлений слишком много.</string>
     <string name="website_download_http_error">Ошибка загрузки (HTTP %1$d).</string>
     <string name="website_download_incomplete">Файл загружен не полностью.</string>
+    <string name="website_debug">Отладка страницы</string>
+    <string name="website_debug_console">Консоль</string>
+    <string name="website_debug_pc">Отладка с компьютера (сеанс)</string>
+    <string name="website_debug_pc_help">Включите отладку USB на телефоне и подключите его к доверенному компьютеру. Откройте chrome://inspect/#devices в Chrome на компьютере и выберите Inspect.\n\nПереключатель влияет на все WebView Twig и выключается при выходе из экранов сайтов.</string>
+    <string name="website_debug_js_input">JavaScript для выполнения на текущей странице</string>
+    <string name="website_debug_css_input">CSS для просмотра на этом сайте</string>
+    <string name="website_debug_run">Выполнить</string>
+    <string name="website_debug_save_reload">Сохранить и обновить</string>
+    <string name="website_debug_preview">Предпросмотр</string>
+    <string name="website_debug_restore">Вернуть сохранённое</string>
+    <string name="website_debug_console_empty">Здесь отображаются журналы, ошибки и результаты JavaScript. Выполняйте код на вкладке Script.</string>
+    <string name="website_debug_style_scope">Предпросмотр CSS применяется только к источнику сохранённого сайта.</string>
+    <string name="website_debug_pc_forced">Отладка с компьютера: включена системой</string>
+    <string name="website_debug_pc_forced_help">Тип сборки Android: %1$s. WebView принудительно включает веб-отладку и не позволяет Twig отключить её.\n\nПодключайтесь через отладку USB и chrome://inspect/#devices в Chrome на компьютере.</string>
 </resources>

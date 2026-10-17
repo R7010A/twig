@@ -941,4 +941,18 @@
     <string name="website_download_redirects">إعادة توجيه التنزيل غير صالحة أو غير آمنة أو متكررة أكثر من اللازم.</string>
     <string name="website_download_http_error">فشل التنزيل (HTTP %1$d).</string>
     <string name="website_download_incomplete">التنزيل غير مكتمل.</string>
+    <string name="website_debug">تصحيح أخطاء الويب</string>
+    <string name="website_debug_console">وحدة التحكم</string>
+    <string name="website_debug_pc">تصحيح عبر الكمبيوتر (الجلسة)</string>
+    <string name="website_debug_pc_help">فعّل تصحيح USB على الهاتف وصله بكمبيوتر موثوق. افتح chrome://inspect/#devices في Chrome على الكمبيوتر واختر Inspect.\n\nيؤثر المفتاح على جميع WebView في Twig، ويتوقف تلقائيًا عند مغادرة شاشات المواقع.</string>
+    <string name="website_debug_js_input">JavaScript للتنفيذ في الصفحة الحالية</string>
+    <string name="website_debug_css_input">CSS لمعاينته في هذا الموقع</string>
+    <string name="website_debug_run">تشغيل</string>
+    <string name="website_debug_save_reload">حفظ وإعادة تحميل</string>
+    <string name="website_debug_preview">معاينة</string>
+    <string name="website_debug_restore">استعادة المحفوظ</string>
+    <string name="website_debug_console_empty">تظهر سجلات الصفحة والأخطاء ونتائج JavaScript هنا. استخدم علامة Script لتشغيل الشيفرة.</string>
+    <string name="website_debug_style_scope">تطبق معاينة CSS فقط على أصل الموقع المحفوظ.</string>
+    <string name="website_debug_pc_forced">تصحيح الكمبيوتر: مفروض من النظام</string>
+    <string name="website_debug_pc_forced_help">نوع بناء Android هو %1$s. يفرض WebView تصحيح الويب ولا يسمح لـ Twig بتعطيله.\n\nاتصل عبر تصحيح USB وchrome://inspect/#devices في Chrome على الكمبيوتر.</string>
 </resources>

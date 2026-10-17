@@ -937,4 +937,18 @@
     <string name="website_download_redirects">डाउनलोड रीडायरेक्ट अमान्य, असुरक्षित या बहुत अधिक हैं।</string>
     <string name="website_download_http_error">डाउनलोड विफल (HTTP %1$d)।</string>
     <string name="website_download_incomplete">डाउनलोड अधूरा था।</string>
+    <string name="website_debug">वेब डीबगिंग</string>
+    <string name="website_debug_console">कंसोल</string>
+    <string name="website_debug_pc">कंप्यूटर डीबगिंग (सत्र)</string>
+    <string name="website_debug_pc_help">फ़ोन पर USB डीबगिंग चालू करें और विश्वसनीय कंप्यूटर से कनेक्ट करें। कंप्यूटर के Chrome में chrome://inspect/#devices खोलें और Inspect चुनें।\n\nयह Twig के सभी WebView को प्रभावित करता है और वेबसाइट स्क्रीन छोड़ने पर अपने आप बंद हो जाता है।</string>
+    <string name="website_debug_js_input">वर्तमान पेज पर चलाने के लिए JavaScript</string>
+    <string name="website_debug_css_input">इस वेबसाइट पर पूर्वावलोकन के लिए CSS</string>
+    <string name="website_debug_run">चलाएँ</string>
+    <string name="website_debug_save_reload">सहेजें और रीलोड करें</string>
+    <string name="website_debug_preview">पूर्वावलोकन</string>
+    <string name="website_debug_restore">सहेजा हुआ लौटाएँ</string>
+    <string name="website_debug_console_empty">पेज लॉग, त्रुटियाँ और JavaScript परिणाम यहाँ दिखते हैं। कोड चलाने के लिए Script टैब खोलें।</string>
+    <string name="website_debug_style_scope">CSS पूर्वावलोकन केवल सहेजी गई वेबसाइट के समान मूल पर लागू होता है।</string>
+    <string name="website_debug_pc_forced">कंप्यूटर डीबगिंग: सिस्टम द्वारा चालू</string>
+    <string name="website_debug_pc_forced_help">यह Android बिल्ड %1$s है। WebView वेब डीबगिंग चालू रखता है और Twig को इसे बंद करने की अनुमति नहीं देता।\n\nUSB डीबगिंग और कंप्यूटर Chrome में chrome://inspect/#devices से कनेक्ट करें।</string>
 </resources>

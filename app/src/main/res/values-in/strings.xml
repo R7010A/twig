@@ -937,4 +937,18 @@
     <string name="website_download_redirects">Pengalihan unduhan tidak valid, tidak aman, atau terlalu banyak.</string>
     <string name="website_download_http_error">Unduhan gagal (HTTP %1$d).</string>
     <string name="website_download_incomplete">Unduhan tidak lengkap.</string>
+    <string name="website_debug">Debug web</string>
+    <string name="website_debug_console">Konsol</string>
+    <string name="website_debug_pc">Debug komputer (sesi)</string>
+    <string name="website_debug_pc_help">Aktifkan debug USB di ponsel dan hubungkan ke komputer tepercaya. Buka chrome://inspect/#devices di Chrome komputer dan pilih Inspect.\n\nSakelar memengaruhi semua WebView Twig dan mati otomatis saat meninggalkan layar situs.</string>
+    <string name="website_debug_js_input">JavaScript untuk dijalankan di halaman ini</string>
+    <string name="website_debug_css_input">CSS untuk dipratinjau di situs ini</string>
+    <string name="website_debug_run">Jalankan</string>
+    <string name="website_debug_save_reload">Simpan &amp; muat ulang</string>
+    <string name="website_debug_preview">Pratinjau</string>
+    <string name="website_debug_restore">Pulihkan tersimpan</string>
+    <string name="website_debug_console_empty">Log halaman, kesalahan, dan hasil JavaScript muncul di sini. Jalankan kode di tab Script.</string>
+    <string name="website_debug_style_scope">Pratinjau CSS hanya berlaku untuk asal situs yang disimpan.</string>
+    <string name="website_debug_pc_forced">Debug komputer: dipaksa oleh sistem</string>
+    <string name="website_debug_pc_forced_help">Build Android ini adalah %1$s. WebView memaksa debug web aktif dan tidak mengizinkan Twig menonaktifkannya.\n\nHubungkan melalui debug USB dan chrome://inspect/#devices di Chrome komputer.</string>
 </resources>

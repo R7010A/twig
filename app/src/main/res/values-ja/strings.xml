@@ -937,4 +937,18 @@
     <string name="website_download_redirects">ダウンロードのリダイレクトが無効、安全でない、または多すぎます。</string>
     <string name="website_download_http_error">ダウンロード失敗（HTTP %1$d）。</string>
     <string name="website_download_incomplete">ダウンロードが不完全です。</string>
+    <string name="website_debug">ウェブのデバッグ</string>
+    <string name="website_debug_console">コンソール</string>
+    <string name="website_debug_pc">パソコンでデバッグ（今回のみ）</string>
+    <string name="website_debug_pc_help">スマートフォンの USB デバッグを有効にし、信頼できるパソコンに接続してください。パソコンの Chrome で chrome://inspect/#devices を開き、Inspect を選択します。\n\nTwig のすべての WebView に適用されます。ウェブサイト画面を離れると自動的に無効になります。</string>
+    <string name="website_debug_js_input">現在のページで実行する JavaScript</string>
+    <string name="website_debug_css_input">このサイトでプレビューする CSS</string>
+    <string name="website_debug_run">実行</string>
+    <string name="website_debug_save_reload">保存して再読み込み</string>
+    <string name="website_debug_preview">プレビュー</string>
+    <string name="website_debug_restore">保存済みに戻す</string>
+    <string name="website_debug_console_empty">ページのログ、エラー、JavaScript の結果が表示されます。Script タブでコードを実行できます。</string>
+    <string name="website_debug_style_scope">CSS プレビューは保存したサイトと同じオリジンにのみ適用されます。</string>
+    <string name="website_debug_pc_forced">パソコンでデバッグ：システムで強制有効</string>
+    <string name="website_debug_pc_forced_help">Android のビルドタイプは %1$s です。WebView がウェブデバッグを強制的に有効にするため、Twig から無効にはできません。\n\nUSB デバッグとパソコンの Chrome の chrome://inspect/#devices で接続できます。</string>
 </resources>

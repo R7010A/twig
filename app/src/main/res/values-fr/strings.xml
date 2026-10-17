@@ -937,4 +937,18 @@
     <string name="website_download_redirects">La redirection est invalide, non sûre ou trop fréquente.</string>
     <string name="website_download_http_error">Échec du téléchargement (HTTP %1$d).</string>
     <string name="website_download_incomplete">Le téléchargement est incomplet.</string>
+    <string name="website_debug">Débogage web</string>
+    <string name="website_debug_console">Console</string>
+    <string name="website_debug_pc">Débogage par ordinateur (session)</string>
+    <string name="website_debug_pc_help">Activez le débogage USB du téléphone et connectez-le à un ordinateur de confiance. Ouvrez chrome://inspect/#devices dans Chrome sur ordinateur et choisissez Inspect.\n\nCe réglage concerne tous les WebView de Twig et se désactive en quittant les écrans de sites.</string>
+    <string name="website_debug_js_input">JavaScript à exécuter sur la page actuelle</string>
+    <string name="website_debug_css_input">CSS à prévisualiser sur ce site</string>
+    <string name="website_debug_run">Exécuter</string>
+    <string name="website_debug_save_reload">Enregistrer et recharger</string>
+    <string name="website_debug_preview">Aperçu</string>
+    <string name="website_debug_restore">Restaurer</string>
+    <string name="website_debug_console_empty">Les journaux, erreurs et résultats JavaScript apparaissent ici. Exécutez du code dans Script.</string>
+    <string name="website_debug_style_scope">L’aperçu CSS concerne uniquement l’origine du site enregistré.</string>
+    <string name="website_debug_pc_forced">Débogage par ordinateur : imposé par le système</string>
+    <string name="website_debug_pc_forced_help">Cette version Android est de type %1$s. WebView impose le débogage web et ne permet pas à Twig de le désactiver.\n\nConnectez-vous via le débogage USB et chrome://inspect/#devices dans Chrome sur ordinateur.</string>
 </resources>
