@@ -24,6 +24,7 @@ import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import android.webkit.HttpAuthHandler
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import android.widget.Toast
@@ -54,6 +55,7 @@ class WebsiteActivity : AppCompatActivity() {
     private lateinit var site: Website
     private var mobileUserAgent = ""
     private var customStyleApplied = false
+    private var pendingMainUrl: String? = null
     private var immersiveFullscreen = false
     private var fullscreenFromToolbar = false
     private var fullscreenLayer: FrameLayout? = null
@@ -145,17 +147,26 @@ class WebsiteActivity : AppCompatActivity() {
         applyWebsiteOptions()
         CookieManager.getInstance().setAcceptCookie(true)
         b.web.webViewClient = object : WebViewClient() {
+            override fun onReceivedHttpAuthRequest(view: WebView, handler: HttpAuthHandler, host: String, realm: String) {
+                val credentials = WebsiteCustomization.basicAuthFor(site, view.url ?: pendingMainUrl, host)
+                if (credentials != null && handler.useHttpAuthUsernamePassword()) {
+                    handler.proceed(credentials.first, credentials.second)
+                } else handler.cancel()
+            }
+
             override fun onReceivedSslError(view: WebView, handler: SslErrorHandler, error: SslError) {
                 confirmCertificate(view, handler, error)
             }
 
             override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
+                pendingMainUrl = url
                 customStyleApplied = false
                 cancelCertificateRequests()
                 view.clearSslPreferences()
             }
 
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+                if (request.isForMainFrame) pendingMainUrl = request.url.toString()
                 val scheme = request.url.scheme?.lowercase()
                 if (scheme == "https" || scheme == "http") {
                     if (request.isForMainFrame && request.method == "GET") {
@@ -236,7 +247,8 @@ class WebsiteActivity : AppCompatActivity() {
         })
         val sameRequest = savedInstanceState?.getString("website_request_key")?.let {
             it == WebsiteCustomization.requestKey(site)
-        } ?: (site.userAgent.isEmpty() && site.headers.isEmpty() && site.script.isEmpty())
+        } ?: (site.userAgent.isEmpty() && site.headers.isEmpty() && site.script.isEmpty() &&
+            site.basicAuthUsername.isEmpty() && site.basicAuthPassword.isEmpty())
         if (savedInstanceState?.getString("bookmark_url") != site.url || !sameRequest ||
             b.web.restoreState(savedInstanceState) == null) loadWebsite(site.url)
     }
@@ -259,22 +271,24 @@ class WebsiteActivity : AppCompatActivity() {
         val changedAgent = saved.userAgent != site.userAgent
         val changedHeaders = saved.headers != site.headers
         val changedScript = saved.script != site.script
+        val changedAuth = saved.basicAuthUsername != site.basicAuthUsername || saved.basicAuthPassword != site.basicAuthPassword
         if (saved.openFullscreen != site.openFullscreen) {
             immersiveFullscreen = saved.openFullscreen
             fullscreenFromToolbar = false
         }
         site = saved
-        if (changedUrl || changedDesktop || changedAgent || changedHeaders || changedScript) hidePageFullscreen()
+        if (changedUrl || changedDesktop || changedAgent || changedHeaders || changedScript || changedAuth) hidePageFullscreen()
         applyWebsiteOptions()
         when {
             changedUrl -> loadWebsite(site.url)
-            changedHeaders -> loadWebsite(b.web.url ?: site.url)
+            changedHeaders || changedAuth -> loadWebsite(b.web.url ?: site.url)
             changedDesktop || changedAgent || changedScript -> b.web.reload()
             else -> { applyPageOptions(); applyCustomStyle() }
         }
     }
 
     private fun loadWebsite(url: String) {
+        pendingMainUrl = url
         val headers = WebsiteCustomization.headersFor(site, url)
         if (headers.isEmpty()) b.web.loadUrl(url) else b.web.loadUrl(url, headers.toMutableMap())
     }

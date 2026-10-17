@@ -926,4 +926,8 @@
     <string name="website_user_agent_invalid">User-Agent non può contenere ritorni a capo o caratteri di controllo</string>
     <string name="website_headers_invalid">Header non validi: controllare nomi, duplicati e caratteri di controllo. Impostare User-Agent sopra; gli header di connessione sono gestiti dal browser.</string>
     <string name="website_advanced">Avanzate</string>
+    <string name="website_basic_auth">Autenticazione HTTP Basic (facoltativa)</string>
+    <string name="website_basic_auth_username">Nome utente</string>
+    <string name="website_basic_auth_password">Password</string>
+    <string name="website_basic_auth_invalid">Il nome utente non può contenere due punti; le credenziali non possono contenere caratteri di controllo.</string>
 </resources>

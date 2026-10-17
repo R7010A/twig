@@ -926,4 +926,8 @@
     <string name="website_user_agent_invalid">User-Agent tidak boleh berisi baris baru atau karakter kontrol</string>
     <string name="website_headers_invalid">Header tidak valid: periksa nama, duplikat, dan karakter kontrol. Atur User-Agent di atas; header koneksi dikelola peramban.</string>
     <string name="website_advanced">Lanjutan</string>
+    <string name="website_basic_auth">Autentikasi HTTP Basic (opsional)</string>
+    <string name="website_basic_auth_username">Nama pengguna</string>
+    <string name="website_basic_auth_password">Kata sandi</string>
+    <string name="website_basic_auth_invalid">Nama pengguna tidak boleh mengandung titik dua; kredensial tidak boleh mengandung karakter kontrol.</string>
 </resources>

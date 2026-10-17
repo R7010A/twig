@@ -926,4 +926,8 @@
     <string name="website_user_agent_invalid">User-Agent não pode conter quebras de linha ou caracteres de controle</string>
     <string name="website_headers_invalid">Cabeçalhos inválidos: verifique nomes, duplicatas e caracteres de controle. Defina User-Agent acima; o navegador gerencia cabeçalhos de conexão.</string>
     <string name="website_advanced">Avançado</string>
+    <string name="website_basic_auth">Autenticação HTTP Basic (opcional)</string>
+    <string name="website_basic_auth_username">Usuário</string>
+    <string name="website_basic_auth_password">Senha</string>
+    <string name="website_basic_auth_invalid">O usuário não pode conter dois-pontos; as credenciais não podem conter caracteres de controle.</string>
 </resources>

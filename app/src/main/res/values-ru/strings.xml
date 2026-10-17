@@ -962,4 +962,8 @@
     <string name="website_user_agent_invalid">User-Agent не может содержать переводы строк и управляющие символы</string>
     <string name="website_headers_invalid">Недопустимые заголовки: проверьте имена, повторы и управляющие символы. User-Agent задаётся выше; заголовками соединения управляет браузер.</string>
     <string name="website_advanced">Дополнительно</string>
+    <string name="website_basic_auth">Аутентификация HTTP Basic (необязательно)</string>
+    <string name="website_basic_auth_username">Имя пользователя</string>
+    <string name="website_basic_auth_password">Пароль</string>
+    <string name="website_basic_auth_invalid">Имя пользователя не может содержать двоеточие; учетные данные не могут содержать управляющие символы.</string>
 </resources>

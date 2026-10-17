@@ -28,6 +28,8 @@ data class Website(
     val userAgent: String = "",
     /** One Name: value per line; kept decrypted only in memory. */
     val headers: String = "",
+    val basicAuthUsername: String = "",
+    val basicAuthPassword: String = "",
 )
 
 enum class WebsiteOrientation(val key: String) {
@@ -46,7 +48,7 @@ object WebsiteStore {
         return parse(raw, { value -> runCatching { Secrets.dec(ctx, value) }.getOrDefault(value) })
     }
 
-    private fun parse(raw: String, openHeaders: (String) -> String, strict: Boolean = false): List<Website> {
+    private fun parse(raw: String, openSecret: (String) -> String, strict: Boolean = false): List<Website> {
         val parsed = runCatching {
             val items = JSONArray(raw)
             (0 until items.length()).map { index ->
@@ -62,7 +64,9 @@ object WebsiteStore {
                     openFullscreen = o.optBoolean("openFullscreen"),
                     orientation = WebsiteOrientation.fromKey(o.optString("orientation")),
                     script = o.optString("script"), style = o.optString("style"),
-                    userAgent = o.optString("userAgent"), headers = openHeaders(o.optString("headers")),
+                    userAgent = o.optString("userAgent"), headers = openSecret(o.optString("headers")),
+                    basicAuthUsername = openSecret(o.optString("basicAuthUsername")),
+                    basicAuthPassword = openSecret(o.optString("basicAuthPassword")),
                 )
             }
         }
@@ -81,8 +85,10 @@ object WebsiteStore {
     /** Backups carry plaintext fields under their own optional password encryption. */
     fun exportJson(ctx: Context): String {
         val sites = all(ctx)
-        if (sites.any { it.headers.startsWith("enc1:") }) throw Secrets.KeyUnavailable()
-        return json(sites) { it.headers }.toString()
+        if (sites.any { site ->
+            listOf(site.headers, site.basicAuthUsername, site.basicAuthPassword).any { it.startsWith("enc1:") }
+        }) throw Secrets.KeyUnavailable()
+        return json(sites) { it }.toString()
     }
 
     fun importJson(ctx: Context, raw: String) = persist(ctx, parse(raw, { it }, strict = true))
@@ -90,12 +96,12 @@ object WebsiteStore {
     private fun persist(ctx: Context, sites: List<Website>) {
         val items = json(sites) {
             // A locked reader may carry existing ciphertext. Never encrypt it twice.
-            if (it.headers.startsWith("enc1:")) it.headers else Secrets.enc(ctx, it.headers)
+            if (it.startsWith("enc1:")) it else Secrets.enc(ctx, it)
         }
         preferences(ctx).edit().putString("list", items.toString()).apply()
     }
 
-    private fun json(sites: List<Website>, sealHeaders: (Website) -> String): JSONArray {
+    private fun json(sites: List<Website>, sealSecret: (String) -> String): JSONArray {
         val items = JSONArray()
         sites.forEach {
             items.put(JSONObject().put("id", it.id).put("name", it.name)
@@ -105,7 +111,9 @@ object WebsiteStore {
                 .put("lockScrollAxis", it.lockScrollAxis).put("desktopSite", it.desktopSite)
                 .put("openFullscreen", it.openFullscreen).put("orientation", it.orientation.key)
                 .put("script", it.script).put("style", it.style).put("userAgent", it.userAgent)
-                .put("headers", sealHeaders(it)))
+                .put("headers", sealSecret(it.headers))
+                .put("basicAuthUsername", sealSecret(it.basicAuthUsername))
+                .put("basicAuthPassword", sealSecret(it.basicAuthPassword)))
         }
         return items
     }

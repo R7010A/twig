@@ -926,4 +926,8 @@
     <string name="website_user_agent_invalid">User-Agent satır sonu veya kontrol karakteri içeremez</string>
     <string name="website_headers_invalid">Geçersiz başlıklar: adları, tekrarları ve kontrol karakterlerini denetleyin. User-Agent üstte ayarlanır; bağlantı başlıklarını tarayıcı yönetir.</string>
     <string name="website_advanced">Gelişmiş</string>
+    <string name="website_basic_auth">HTTP Basic kimlik doğrulaması (isteğe bağlı)</string>
+    <string name="website_basic_auth_username">Kullanıcı adı</string>
+    <string name="website_basic_auth_password">Parola</string>
+    <string name="website_basic_auth_invalid">Kullanıcı adı iki nokta üst üste; kimlik bilgileri kontrol karakterleri içeremez.</string>
 </resources>

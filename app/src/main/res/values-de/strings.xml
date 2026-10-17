@@ -926,4 +926,8 @@
     <string name="website_user_agent_invalid">User-Agent darf keine Zeilenumbrüche oder Steuerzeichen enthalten</string>
     <string name="website_headers_invalid">Ungültige Header: Namen, Duplikate und Steuerzeichen prüfen. User-Agent oben setzen; Verbindungsheader verwaltet der Browser.</string>
     <string name="website_advanced">Erweitert</string>
+    <string name="website_basic_auth">HTTP-Basic-Authentifizierung (optional)</string>
+    <string name="website_basic_auth_username">Benutzername</string>
+    <string name="website_basic_auth_password">Passwort</string>
+    <string name="website_basic_auth_invalid">Der Benutzername darf keinen Doppelpunkt enthalten; Zugangsdaten dürfen keine Steuerzeichen enthalten.</string>
 </resources>

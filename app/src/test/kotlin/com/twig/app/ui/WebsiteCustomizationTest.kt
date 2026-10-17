@@ -4,6 +4,7 @@ import android.app.Application
 import android.net.Uri
 import android.os.Looper
 import android.view.View
+import android.webkit.HttpAuthHandler
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.widget.EditText
@@ -27,11 +28,25 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.Implements
+import org.robolectric.annotation.Implementation
+import org.robolectric.shadow.api.Shadow
+import org.robolectric.util.ReflectionHelpers
 import org.robolectric.shadows.ShadowDialog
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34], application = Application::class)
+@Config(sdk = [34], application = Application::class, shadows = [WebsiteCustomizationTest.AuthHandlerShadow::class])
 class WebsiteCustomizationTest {
+    @Implements(HttpAuthHandler::class)
+    class AuthHandlerShadow {
+        var suitable = true
+        var credentials: Pair<String, String>? = null
+        var cancelled = false
+        @Implementation fun useHttpAuthUsernamePassword() = suitable
+        @Implementation fun proceed(username: String, password: String) { credentials = username to password }
+        @Implementation fun cancel() { cancelled = true }
+    }
+
     private val app: Application = ApplicationProvider.getApplicationContext()
     private val site = Website(id = "custom", name = "Custom", url = "https://twig.test/site")
     private val wrapper = object : Secrets.Wrapper {
@@ -80,6 +95,59 @@ class WebsiteCustomizationTest {
             override fun getMethod() = method
             override fun getRequestHeaders() = emptyMap<String, String>()
         }
+
+    @Test fun `native HTTP auth supplies saved credentials only on the bookmark site and stops rejected retries`() {
+        val configured = site.copy(basicAuthUsername = "alice", basicAuthPassword = "p:a ss")
+        Page(configured).use { page ->
+            fun challenge(host: String = "twig.test", suitable: Boolean = true): AuthHandlerShadow {
+                val handler = ReflectionHelpers.callConstructor(HttpAuthHandler::class.java)
+                val state = Shadow.extract<AuthHandlerShadow>(handler).apply { this.suitable = suitable }
+                page.web.webViewClient!!.onReceivedHttpAuthRequest(page.web, handler, host, "Private")
+                return state
+            }
+            assertEquals("alice" to "p:a ss", challenge().credentials)
+            assertTrue(challenge(suitable = false).cancelled)
+            assertTrue(challenge("other.test").cancelled)
+            for (url in listOf("https://other.test", "http://twig.test", "https://twig.test:8443")) {
+                page.web.loadUrl(url)
+                assertTrue(challenge().cancelled)
+            }
+            page.web.loadUrl(site.url)
+            page.edit(configured.copy(basicAuthUsername = "bob", basicAuthPassword = "new"))
+            assertEquals("bob" to "new", challenge().credentials)
+            page.edit(site)
+            assertTrue(challenge().cancelled)
+        }
+        assertFalse(WebsiteCustomization.validBasicAuth("bad:name", "pass"))
+        assertFalse(WebsiteCustomization.validBasicAuth("name", "bad\npass"))
+    }
+
+    @Test fun `basic auth is visible below URL with a masked password and roundtrips outside advanced`() {
+        Page(site).use { page ->
+            WebsiteDialogs.edit(page.activity, site)
+            shadowOf(Looper.getMainLooper()).idle()
+            val dialog = ShadowDialog.getLatestDialog() as AlertDialog
+            val root = dialog.window!!.decorView
+            val user = root.findViewWithTag<EditText>(R.string.website_basic_auth_username)
+            val password = root.findViewWithTag<EditText>(R.string.website_basic_auth_password)
+            assertTrue(user.isShown)
+            assertTrue(password.isShown)
+            assertTrue(password.transformationMethod is android.text.method.PasswordTransformationMethod)
+            assertEquals(View.GONE, root.findViewWithTag<View>("website_advanced_fields").visibility)
+            user.setText("alice")
+            password.setText(" pass:word ")
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick()
+            val saved = site.copy(basicAuthUsername = "alice", basicAuthPassword = " pass:word ")
+            assertEquals(saved, WebsiteStore.all(app).single())
+            WebsiteDialogs.edit(page.activity, saved)
+            shadowOf(Looper.getMainLooper()).idle()
+            val reopened = ShadowDialog.getLatestDialog() as AlertDialog
+            assertEquals(" pass:word ", reopened.window!!.decorView
+                .findViewWithTag<EditText>(R.string.website_basic_auth_password).text.toString())
+            reopened.getButton(AlertDialog.BUTTON_POSITIVE).performClick()
+            assertEquals(saved, WebsiteStore.all(app).single())
+        }
+    }
 
     @Test fun `headers accept values containing colons but reject ambiguous or managed fields`() {
         assertEquals(mapOf("Authorization" to "Bearer abc", "X-Link" to "https://twig.test:8443/path"),
@@ -218,10 +286,13 @@ class WebsiteCustomizationTest {
 
     @Test fun `headers are encrypted on disk and backups reencrypt them for another device`() {
         val configured = site.copy(headers = "Authorization: Bearer unique-test-secret", script = "window.ok = true;",
-            style = "body { color: green; }", userAgent = "Custom/1.0")
+            style = "body { color: green; }", userAgent = "Custom/1.0",
+            basicAuthUsername = "private-user", basicAuthPassword = "private-pass")
         WebsiteStore.save(app, configured)
         val stored = WebsiteStore.preferences(app).getString("list", "")!!
         assertFalse(stored.contains("unique-test-secret"))
+        assertFalse(stored.contains("private-user"))
+        assertFalse(stored.contains("private-pass"))
         val cipher = JSONArray(stored).getJSONObject(0).getString("headers")
         assertTrue(cipher.startsWith(Secrets.PREFIX))
         val output = ByteArrayOutputStream()
@@ -238,13 +309,15 @@ class WebsiteCustomizationTest {
     }
 
     @Test fun `temporarily unavailable keys preserve encrypted headers and never send ciphertext`() {
-        val configured = site.copy(headers = "X-Token: private-token")
+        val configured = site.copy(headers = "X-Token: private-token", basicAuthUsername = "private-user", basicAuthPassword = "private-pass")
         WebsiteStore.save(app, configured)
         val cipher = JSONArray(WebsiteStore.preferences(app).getString("list", "")).getJSONObject(0).getString("headers")
         Secrets.lock()
         wrapper.unavailable = true
         val locked = WebsiteStore.all(app).single()
         assertEquals(cipher, locked.headers)
+        assertTrue(locked.basicAuthPassword.startsWith(Secrets.PREFIX))
+        assertNull(WebsiteCustomization.basicAuthFor(locked, locked.url, "twig.test"))
         assertTrue(WebsiteCustomization.headersFor(locked, locked.url).isEmpty())
         WebsiteStore.save(app, locked.copy(name = "Renamed"))
         val before = WebsiteStore.preferences(app).getString("list", "")!!

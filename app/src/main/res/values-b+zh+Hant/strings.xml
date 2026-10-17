@@ -925,4 +925,8 @@
     <string name="website_user_agent_invalid">User-Agent 不可包含換行或控制字元</string>
     <string name="website_headers_invalid">Header 無效：請檢查名稱、重複項目和控制字元。User-Agent 請填入上方欄位；連線控制標頭由瀏覽器管理。</string>
     <string name="website_advanced">進階</string>
+    <string name="website_basic_auth">HTTP Basic 驗證（選填）</string>
+    <string name="website_basic_auth_username">使用者名稱</string>
+    <string name="website_basic_auth_password">密碼</string>
+    <string name="website_basic_auth_invalid">使用者名稱不能包含冒號，使用者名稱和密碼不能包含控制字元。</string>
 </resources>

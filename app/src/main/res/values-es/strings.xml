@@ -926,4 +926,8 @@
     <string name="website_user_agent_invalid">User-Agent no admite saltos de línea ni caracteres de control</string>
     <string name="website_headers_invalid">Cabeceras no válidas: comprueba nombres, duplicados y caracteres de control. Define User-Agent arriba; el navegador gestiona las cabeceras de conexión.</string>
     <string name="website_advanced">Avanzado</string>
+    <string name="website_basic_auth">Autenticación HTTP Basic (opcional)</string>
+    <string name="website_basic_auth_username">Usuario</string>
+    <string name="website_basic_auth_password">Contraseña</string>
+    <string name="website_basic_auth_invalid">El usuario no puede contener dos puntos; las credenciales no pueden contener caracteres de control.</string>
 </resources>

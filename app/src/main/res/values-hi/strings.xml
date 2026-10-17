@@ -926,4 +926,8 @@
     <string name="website_user_agent_invalid">User-Agent में नई पंक्ति या नियंत्रण वर्ण नहीं हो सकते</string>
     <string name="website_headers_invalid">अमान्य हेडर: नाम, दोहराव और नियंत्रण वर्ण जाँचें। User-Agent ऊपर सेट करें; कनेक्शन हेडर ब्राउज़र संभालता है।</string>
     <string name="website_advanced">उन्नत</string>
+    <string name="website_basic_auth">HTTP Basic प्रमाणीकरण (वैकल्पिक)</string>
+    <string name="website_basic_auth_username">उपयोगकर्ता नाम</string>
+    <string name="website_basic_auth_password">पासवर्ड</string>
+    <string name="website_basic_auth_invalid">उपयोगकर्ता नाम में कोलन और क्रेडेंशियल में नियंत्रण वर्ण नहीं हो सकते।</string>
 </resources>

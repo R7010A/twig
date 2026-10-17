@@ -45,6 +45,25 @@ object WebsiteDialogs {
         }
         form.addView(name)
         form.addView(url)
+        form.addView(TextView(ctx).apply { setText(R.string.website_basic_auth) })
+        val authUsername = EditText(ctx).apply {
+            tag = R.string.website_basic_auth_username
+            hint = ctx.getString(R.string.website_basic_auth_username)
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            setSingleLine()
+            importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO
+            setText(site?.basicAuthUsername.orEmpty())
+        }
+        val authPassword = EditText(ctx).apply {
+            tag = R.string.website_basic_auth_password
+            hint = ctx.getString(R.string.website_basic_auth_password)
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+            importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO
+            setText(site?.basicAuthPassword.orEmpty())
+        }
+        form.addView(authUsername)
+        form.addView(authPassword)
         fun option(label: Int, checked: Boolean) = CheckBox(ctx).apply {
             tag = label // Identify each option within the scrollable form.
             setText(label)
@@ -152,6 +171,11 @@ object WebsiteDialogs {
                     url.error = ctx.getString(R.string.website_invalid_url)
                     return@setOnClickListener
                 }
+                if (!WebsiteCustomization.validBasicAuth(authUsername.text.toString(), authPassword.text.toString())) {
+                    authUsername.error = ctx.getString(R.string.website_basic_auth_invalid)
+                    authUsername.requestFocus()
+                    return@setOnClickListener
+                }
                 val agent = userAgent.text.toString().trim()
                 if (!WebsiteCustomization.validUserAgent(agent)) {
                     advancedError(userAgent, R.string.website_user_agent_invalid)
@@ -170,12 +194,16 @@ object WebsiteDialogs {
                     lockScrollAxis = scrollAxis.isChecked, desktopSite = desktop.isChecked,
                     orientation = orientation.findViewById<RadioButton>(orientation.checkedRadioButtonId).tag as WebsiteOrientation,
                     userAgent = agent, headers = headers.text.toString(),
+                    basicAuthUsername = authUsername.text.toString(), basicAuthPassword = authPassword.text.toString(),
                     script = script.text.toString(), style = style.text.toString(),
                 )
                 try {
                     WebsiteStore.save(ctx, saved)
                 } catch (_: Secrets.KeyUnavailable) {
-                    advancedError(headers, R.string.backup_locked)
+                    if (saved.basicAuthUsername.isNotEmpty() || saved.basicAuthPassword.isNotEmpty()) {
+                        authPassword.error = ctx.getString(R.string.backup_locked)
+                        authPassword.requestFocus()
+                    } else advancedError(headers, R.string.backup_locked)
                     return@setOnClickListener
                 }
                 if (site != null && site.url != saved.url) WebsiteIcons.forget(ctx, site)

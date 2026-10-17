@@ -925,4 +925,8 @@
     <string name="website_user_agent_invalid">User-Agent không được chứa ký tự xuống dòng hoặc điều khiển</string>
     <string name="website_headers_invalid">Header không hợp lệ: kiểm tra tên, mục trùng và ký tự điều khiển. Đặt User-Agent ở trên; trình duyệt quản lý header kết nối.</string>
     <string name="website_advanced">Nâng cao</string>
+    <string name="website_basic_auth">Xác thực HTTP Basic (tùy chọn)</string>
+    <string name="website_basic_auth_username">Tên người dùng</string>
+    <string name="website_basic_auth_password">Mật khẩu</string>
+    <string name="website_basic_auth_invalid">Tên người dùng không được chứa dấu hai chấm; thông tin đăng nhập không được chứa ký tự điều khiển.</string>
 </resources>

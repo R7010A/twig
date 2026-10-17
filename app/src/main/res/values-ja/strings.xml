@@ -926,4 +926,8 @@
     <string name="website_user_agent_invalid">User-Agent に改行や制御文字は使用できません</string>
     <string name="website_headers_invalid">ヘッダーが無効です。名前、重複、制御文字を確認してください。User-Agent は上の欄で設定します。接続ヘッダーはブラウザが管理します。</string>
     <string name="website_advanced">詳細設定</string>
+    <string name="website_basic_auth">HTTP Basic 認証（任意）</string>
+    <string name="website_basic_auth_username">ユーザー名</string>
+    <string name="website_basic_auth_password">パスワード</string>
+    <string name="website_basic_auth_invalid">ユーザー名にコロンは使用できません。認証情報に制御文字は使用できません。</string>
 </resources>

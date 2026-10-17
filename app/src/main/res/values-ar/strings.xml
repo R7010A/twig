@@ -930,4 +930,8 @@
     <string name="website_user_agent_invalid">لا يمكن أن يحتوي User-Agent على أسطر جديدة أو أحرف تحكم</string>
     <string name="website_headers_invalid">ترويسات غير صالحة: تحقق من الأسماء والتكرار وأحرف التحكم. اضبط User-Agent أعلاه؛ يدير المتصفح ترويسات الاتصال.</string>
     <string name="website_advanced">متقدم</string>
+    <string name="website_basic_auth">مصادقة HTTP Basic (اختياري)</string>
+    <string name="website_basic_auth_username">اسم المستخدم</string>
+    <string name="website_basic_auth_password">كلمة المرور</string>
+    <string name="website_basic_auth_invalid">لا يمكن أن يحتوي اسم المستخدم على نقطتين، أو أن تحتوي بيانات الاعتماد على محارف تحكم.</string>
 </resources>

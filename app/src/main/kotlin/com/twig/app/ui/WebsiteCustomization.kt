@@ -47,13 +47,28 @@ internal object WebsiteCustomization {
     fun headersFor(site: Website, url: String): Map<String, String> =
         if (sameOrigin(site.url, url)) parseHeaders(site.headers).orEmpty() else emptyMap()
 
+    fun validBasicAuth(username: String, password: String) =
+        ':' !in username && listOf(username, password).all { value ->
+            !value.startsWith("enc1:") && value.none { it.code < 32 || it.code == 127 }
+        }
+
+    /** WebView owns challenge negotiation and retry tracking; do not persist its auth cache. */
+    fun basicAuthFor(site: Website, pageUrl: String?, host: String): Pair<String, String>? {
+        if (site.basicAuthUsername.isEmpty() || !validBasicAuth(site.basicAuthUsername, site.basicAuthPassword) ||
+            !sameOrigin(site.url, pageUrl)) return null
+        val bookmarkHost = runCatching { URI(site.url).host }.getOrNull()
+        if (!host.equals(bookmarkHost, ignoreCase = true)) return null
+        return site.basicAuthUsername to site.basicAuthPassword
+    }
+
     private fun quote(value: String) = JSONObject.quote(value)
         .replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
 
     private fun guard(site: Website) = "if(location.origin!==new URL(${quote(site.url)}).origin)return;"
 
     fun requestKey(site: Website): String = digest(org.json.JSONArray()
-        .put(site.desktopSite).put(site.userAgent).put(site.headers).put(site.script).toString())
+        .put(site.desktopSite).put(site.userAgent).put(site.headers).put(site.script)
+        .put(site.basicAuthUsername).put(site.basicAuthPassword).toString())
 
     private fun digest(value: String) = MessageDigest.getInstance("SHA-256")
         .digest(value.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }

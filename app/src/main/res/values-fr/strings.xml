@@ -926,4 +926,8 @@
     <string name="website_user_agent_invalid">User-Agent ne doit contenir ni sauts de ligne ni caractères de contrôle</string>
     <string name="website_headers_invalid">En-têtes invalides : vérifier noms, doublons et caractères de contrôle. Définir User-Agent ci-dessus ; le navigateur gère les en-têtes de connexion.</string>
     <string name="website_advanced">Avancé</string>
+    <string name="website_basic_auth">Authentification HTTP Basic (facultatif)</string>
+    <string name="website_basic_auth_username">Identifiant</string>
+    <string name="website_basic_auth_password">Mot de passe</string>
+    <string name="website_basic_auth_invalid">L’identifiant ne peut pas contenir de deux-points ; les identifiants ne peuvent pas contenir de caractères de contrôle.</string>
 </resources>
