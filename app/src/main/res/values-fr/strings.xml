@@ -930,4 +930,11 @@
     <string name="website_basic_auth_username">Identifiant</string>
     <string name="website_basic_auth_password">Mot de passe</string>
     <string name="website_basic_auth_invalid">L’identifiant ne peut pas contenir de deux-points ; les identifiants ne peuvent pas contenir de caractères de contrôle.</string>
+    <string name="website_download_location">Choisir un autre emplacement</string>
+    <string name="website_download_name">Nom du fichier</string>
+    <string name="website_download_unsupported">Ce type de téléchargement n’est pas encore pris en charge. Seuls les liens HTTP/HTTPS sont acceptés.</string>
+    <string name="website_download_invalid_name">Saisissez un nom sans barres obliques ni caractères de contrôle.</string>
+    <string name="website_download_redirects">La redirection est invalide, non sûre ou trop fréquente.</string>
+    <string name="website_download_http_error">Échec du téléchargement (HTTP %1$d).</string>
+    <string name="website_download_incomplete">Le téléchargement est incomplet.</string>
 </resources>

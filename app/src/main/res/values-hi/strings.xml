@@ -930,4 +930,11 @@
     <string name="website_basic_auth_username">उपयोगकर्ता नाम</string>
     <string name="website_basic_auth_password">पासवर्ड</string>
     <string name="website_basic_auth_invalid">उपयोगकर्ता नाम में कोलन और क्रेडेंशियल में नियंत्रण वर्ण नहीं हो सकते।</string>
+    <string name="website_download_location">दूसरा स्थान चुनें</string>
+    <string name="website_download_name">फ़ाइल का नाम</string>
+    <string name="website_download_unsupported">यह डाउनलोड प्रकार अभी समर्थित नहीं है। केवल HTTP/HTTPS लिंक समर्थित हैं।</string>
+    <string name="website_download_invalid_name">बिना स्लैश या नियंत्रण वर्णों वाला फ़ाइल नाम दर्ज करें।</string>
+    <string name="website_download_redirects">डाउनलोड रीडायरेक्ट अमान्य, असुरक्षित या बहुत अधिक हैं।</string>
+    <string name="website_download_http_error">डाउनलोड विफल (HTTP %1$d)।</string>
+    <string name="website_download_incomplete">डाउनलोड अधूरा था।</string>
 </resources>

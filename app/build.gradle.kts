@@ -199,6 +199,7 @@ dependencies {
     implementation(project(":fs-archive"))
     "fullImplementation"(project(":fs-archive-rar")) // full only; see src/libre/.../RarSupport.kt for libre
     implementation(project(":fs-network"))
+    implementation(libs.okhttp) // Already shipped by fs-network; website downloads share its TLS policy.
     implementation(project(":fs-smb"))
     implementation(project(":fs-restic"))
     implementation(project(":fs-zstd"))

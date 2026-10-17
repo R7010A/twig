@@ -930,4 +930,11 @@
     <string name="website_basic_auth_username">Kullanıcı adı</string>
     <string name="website_basic_auth_password">Parola</string>
     <string name="website_basic_auth_invalid">Kullanıcı adı iki nokta üst üste; kimlik bilgileri kontrol karakterleri içeremez.</string>
+    <string name="website_download_location">Başka konum seç</string>
+    <string name="website_download_name">Dosya adı</string>
+    <string name="website_download_unsupported">Bu indirme türü henüz desteklenmiyor. Yalnızca HTTP/HTTPS bağlantıları desteklenir.</string>
+    <string name="website_download_invalid_name">Eğik çizgi veya kontrol karakteri içermeyen bir dosya adı girin.</string>
+    <string name="website_download_redirects">İndirme yönlendirmesi geçersiz, güvensiz veya çok fazla yönlendirme var.</string>
+    <string name="website_download_http_error">İndirme başarısız (HTTP %1$d).</string>
+    <string name="website_download_incomplete">İndirme tamamlanmadı.</string>
 </resources>

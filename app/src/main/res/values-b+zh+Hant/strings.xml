@@ -929,4 +929,11 @@
     <string name="website_basic_auth_username">使用者名稱</string>
     <string name="website_basic_auth_password">密碼</string>
     <string name="website_basic_auth_invalid">使用者名稱不能包含冒號，使用者名稱和密碼不能包含控制字元。</string>
+    <string name="website_download_location">另選位置</string>
+    <string name="website_download_name">檔案名稱</string>
+    <string name="website_download_unsupported">暫不支援這種下載方式，目前僅支援 HTTP/HTTPS 連結。</string>
+    <string name="website_download_invalid_name">請輸入檔案名稱，不能包含斜線或控制字元。</string>
+    <string name="website_download_redirects">下載重新導向無效、不安全或次數過多。</string>
+    <string name="website_download_http_error">下載失敗（HTTP %1$d）。</string>
+    <string name="website_download_incomplete">檔案下載不完整。</string>
 </resources>

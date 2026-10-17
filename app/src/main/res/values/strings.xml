@@ -1000,4 +1000,11 @@
     <string name="website_basic_auth_username">Username</string>
     <string name="website_basic_auth_password">Password</string>
     <string name="website_basic_auth_invalid">The username cannot contain a colon; credentials cannot contain control characters.</string>
+    <string name="website_download_location">Choose another location</string>
+    <string name="website_download_name">File name</string>
+    <string name="website_download_unsupported">This download type is not supported yet. Only HTTP/HTTPS links are supported.</string>
+    <string name="website_download_invalid_name">Enter a file name without slashes or control characters.</string>
+    <string name="website_download_redirects">The download redirect is invalid or unsafe, or there are too many redirects.</string>
+    <string name="website_download_http_error">Download failed (HTTP %1$d).</string>
+    <string name="website_download_incomplete">The download was incomplete.</string>
 </resources>

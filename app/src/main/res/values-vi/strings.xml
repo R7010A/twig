@@ -929,4 +929,11 @@
     <string name="website_basic_auth_username">Tên người dùng</string>
     <string name="website_basic_auth_password">Mật khẩu</string>
     <string name="website_basic_auth_invalid">Tên người dùng không được chứa dấu hai chấm; thông tin đăng nhập không được chứa ký tự điều khiển.</string>
+    <string name="website_download_location">Chọn vị trí khác</string>
+    <string name="website_download_name">Tên tệp</string>
+    <string name="website_download_unsupported">Chưa hỗ trợ kiểu tải xuống này. Chỉ hỗ trợ liên kết HTTP/HTTPS.</string>
+    <string name="website_download_invalid_name">Nhập tên tệp không chứa dấu gạch chéo hoặc ký tự điều khiển.</string>
+    <string name="website_download_redirects">Chuyển hướng tải xuống không hợp lệ, không an toàn hoặc quá nhiều.</string>
+    <string name="website_download_http_error">Tải xuống thất bại (HTTP %1$d).</string>
+    <string name="website_download_incomplete">Tải xuống chưa hoàn tất.</string>
 </resources>

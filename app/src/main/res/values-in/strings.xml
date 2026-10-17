@@ -930,4 +930,11 @@
     <string name="website_basic_auth_username">Nama pengguna</string>
     <string name="website_basic_auth_password">Kata sandi</string>
     <string name="website_basic_auth_invalid">Nama pengguna tidak boleh mengandung titik dua; kredensial tidak boleh mengandung karakter kontrol.</string>
+    <string name="website_download_location">Pilih lokasi lain</string>
+    <string name="website_download_name">Nama berkas</string>
+    <string name="website_download_unsupported">Jenis unduhan ini belum didukung. Hanya tautan HTTP/HTTPS yang didukung.</string>
+    <string name="website_download_invalid_name">Masukkan nama berkas tanpa garis miring atau karakter kontrol.</string>
+    <string name="website_download_redirects">Pengalihan unduhan tidak valid, tidak aman, atau terlalu banyak.</string>
+    <string name="website_download_http_error">Unduhan gagal (HTTP %1$d).</string>
+    <string name="website_download_incomplete">Unduhan tidak lengkap.</string>
 </resources>

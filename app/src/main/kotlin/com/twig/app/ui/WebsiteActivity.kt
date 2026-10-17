@@ -61,6 +61,7 @@ class WebsiteActivity : AppCompatActivity() {
     private var fullscreenLayer: FrameLayout? = null
     private var fullscreenCallback: WebChromeClient.CustomViewCallback? = null
     private val certificateRequests = mutableMapOf<SslErrorHandler, Job>()
+    private val downloads = WebsiteDownloads(this)
     private var upload: ValueCallback<Array<Uri>>? = null
     private val picker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         upload?.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(result.resultCode, result.data))
@@ -146,6 +147,9 @@ class WebsiteActivity : AppCompatActivity() {
         b.web.onRefresh = { b.web.reload() }
         applyWebsiteOptions()
         CookieManager.getInstance().setAcceptCookie(true)
+        b.web.setDownloadListener { url, agent, disposition, mime, size ->
+            downloads.offer(site, url, agent, disposition, mime, size)
+        }
         b.web.webViewClient = object : WebViewClient() {
             override fun onReceivedHttpAuthRequest(view: WebView, handler: HttpAuthHandler, host: String, realm: String) {
                 val credentials = WebsiteCustomization.basicAuthFor(site, view.url ?: pendingMainUrl, host)
@@ -572,7 +576,13 @@ class WebsiteActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
     }
 
+    override fun onStop() {
+        downloads.stop()
+        super.onStop()
+    }
+
     override fun onDestroy() {
+        downloads.destroy()
         cancelCertificateRequests()
         hidePageFullscreen(restorePage = false)
         upload?.onReceiveValue(null)

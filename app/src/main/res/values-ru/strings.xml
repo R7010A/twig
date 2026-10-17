@@ -966,4 +966,11 @@
     <string name="website_basic_auth_username">Имя пользователя</string>
     <string name="website_basic_auth_password">Пароль</string>
     <string name="website_basic_auth_invalid">Имя пользователя не может содержать двоеточие; учетные данные не могут содержать управляющие символы.</string>
+    <string name="website_download_location">Выбрать другое место</string>
+    <string name="website_download_name">Имя файла</string>
+    <string name="website_download_unsupported">Этот тип загрузки пока не поддерживается. Поддерживаются только ссылки HTTP/HTTPS.</string>
+    <string name="website_download_invalid_name">Введите имя файла без косых черт и управляющих символов.</string>
+    <string name="website_download_redirects">Перенаправление недопустимо, небезопасно или перенаправлений слишком много.</string>
+    <string name="website_download_http_error">Ошибка загрузки (HTTP %1$d).</string>
+    <string name="website_download_incomplete">Файл загружен не полностью.</string>
 </resources>

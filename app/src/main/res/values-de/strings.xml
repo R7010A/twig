@@ -930,4 +930,11 @@
     <string name="website_basic_auth_username">Benutzername</string>
     <string name="website_basic_auth_password">Passwort</string>
     <string name="website_basic_auth_invalid">Der Benutzername darf keinen Doppelpunkt enthalten; Zugangsdaten dürfen keine Steuerzeichen enthalten.</string>
+    <string name="website_download_location">Anderen Speicherort wählen</string>
+    <string name="website_download_name">Dateiname</string>
+    <string name="website_download_unsupported">Dieser Downloadtyp wird noch nicht unterstützt. Nur HTTP/HTTPS-Links werden unterstützt.</string>
+    <string name="website_download_invalid_name">Einen Dateinamen ohne Schrägstriche oder Steuerzeichen eingeben.</string>
+    <string name="website_download_redirects">Die Download-Weiterleitung ist ungültig, unsicher oder zu häufig.</string>
+    <string name="website_download_http_error">Download fehlgeschlagen (HTTP %1$d).</string>
+    <string name="website_download_incomplete">Der Download war unvollständig.</string>
 </resources>

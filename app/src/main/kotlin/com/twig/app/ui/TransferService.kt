@@ -48,6 +48,10 @@ object Transfers {
     sealed class Work {
         abstract val items: List<XFile>
 
+        internal class Download(val task: WebsiteDownloadTask, val dest: XFile) : Work() {
+            override val items: List<XFile> = emptyList()
+        }
+
         class Copy(
             override val items: List<XFile>,
             val dest: XFile,
@@ -136,6 +140,7 @@ object Transfers {
 
         fun cancel() {
             cancelled.set(true)
+            (work as? Work.Download)?.task?.cancel()
             pendingConflict?.answer(null) // If we're stuck on the conflict dialog, release it so the transfer thread sees the cancel flag
         }
 
@@ -200,6 +205,7 @@ object Transfers {
             private var lastT = android.os.SystemClock.elapsedRealtime()
 
             override fun onFile(file: XFile) {
+                if (s.work is Work.Download) s.plan = CopyEngine.Plan(file.size, 1, 0)
                 s.fileName = file.name
                 s.fileProgress = 0
                 post(s)
@@ -244,6 +250,7 @@ object Transfers {
             post(s)
 
             when (val w = s.work) {
+                is Work.Download -> w.task.execute(ctx, w.dest, listener, isCancelled = { s.cancelled.get() })
                 is Work.Copy -> CopyEngine.transfer(
                     w.items, w.dest, w.move, listener,
                     { s.cancelled.get() }, resolverFor(s), plan.bytes,
@@ -398,7 +405,7 @@ class TransferService : Service() {
             .setSmallIcon(if (s.isCompress) R.drawable.ic_compress else R.drawable.ic_copy)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setProgress(1000, s.totalProgress, s.plan == null)
+            .setProgress(1000, s.totalProgress, s.plan == null || (s.work is Transfers.Work.Download && s.plan?.bytes == 0L))
             .setContentIntent(contentIntent())
             .addAction(
                 Notification.Action.Builder(

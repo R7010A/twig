@@ -930,4 +930,11 @@
     <string name="website_basic_auth_username">ユーザー名</string>
     <string name="website_basic_auth_password">パスワード</string>
     <string name="website_basic_auth_invalid">ユーザー名にコロンは使用できません。認証情報に制御文字は使用できません。</string>
+    <string name="website_download_location">別の保存先を選択</string>
+    <string name="website_download_name">ファイル名</string>
+    <string name="website_download_unsupported">この形式のダウンロードは未対応です。HTTP/HTTPS リンクのみ対応しています。</string>
+    <string name="website_download_invalid_name">スラッシュや制御文字を含まないファイル名を入力してください。</string>
+    <string name="website_download_redirects">ダウンロードのリダイレクトが無効、安全でない、または多すぎます。</string>
+    <string name="website_download_http_error">ダウンロード失敗（HTTP %1$d）。</string>
+    <string name="website_download_incomplete">ダウンロードが不完全です。</string>
 </resources>

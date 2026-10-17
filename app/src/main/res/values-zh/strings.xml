@@ -960,4 +960,11 @@
     <string name="website_basic_auth_username">用户名</string>
     <string name="website_basic_auth_password">密码</string>
     <string name="website_basic_auth_invalid">用户名不能包含冒号，用户名和密码不能包含控制字符。</string>
+    <string name="website_download_location">另选位置</string>
+    <string name="website_download_name">文件名</string>
+    <string name="website_download_unsupported">暂不支持这种下载方式，目前仅支持 HTTP/HTTPS 链接。</string>
+    <string name="website_download_invalid_name">请输入文件名，不能包含斜杠或控制字符。</string>
+    <string name="website_download_redirects">下载重定向无效、不安全或次数过多。</string>
+    <string name="website_download_http_error">下载失败（HTTP %1$d）。</string>
+    <string name="website_download_incomplete">文件下载不完整。</string>
 </resources>

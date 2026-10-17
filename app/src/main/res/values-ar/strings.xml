@@ -934,4 +934,11 @@
     <string name="website_basic_auth_username">اسم المستخدم</string>
     <string name="website_basic_auth_password">كلمة المرور</string>
     <string name="website_basic_auth_invalid">لا يمكن أن يحتوي اسم المستخدم على نقطتين، أو أن تحتوي بيانات الاعتماد على محارف تحكم.</string>
+    <string name="website_download_location">اختيار موقع آخر</string>
+    <string name="website_download_name">اسم الملف</string>
+    <string name="website_download_unsupported">نوع التنزيل هذا غير مدعوم بعد. يتم دعم روابط HTTP/HTTPS فقط.</string>
+    <string name="website_download_invalid_name">أدخل اسم ملف بدون شرطات مائلة أو محارف تحكم.</string>
+    <string name="website_download_redirects">إعادة توجيه التنزيل غير صالحة أو غير آمنة أو متكررة أكثر من اللازم.</string>
+    <string name="website_download_http_error">فشل التنزيل (HTTP %1$d).</string>
+    <string name="website_download_incomplete">التنزيل غير مكتمل.</string>
 </resources>
