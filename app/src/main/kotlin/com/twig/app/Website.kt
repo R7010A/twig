@@ -25,6 +25,8 @@ data class Website(
     val orientation: WebsiteOrientation = WebsiteOrientation.SYSTEM,
     val script: String = "",
     val style: String = "",
+    /** One CSS selector per line; applied independently from custom CSS. */
+    val hiddenElements: String = "",
     val userAgent: String = "",
     /** One Name: value per line; kept decrypted only in memory. */
     val headers: String = "",
@@ -64,6 +66,7 @@ object WebsiteStore {
                     openFullscreen = o.optBoolean("openFullscreen"),
                     orientation = WebsiteOrientation.fromKey(o.optString("orientation")),
                     script = o.optString("script"), style = o.optString("style"),
+                    hiddenElements = o.optString("hiddenElements"),
                     userAgent = o.optString("userAgent"), headers = openSecret(o.optString("headers")),
                     basicAuthUsername = openSecret(o.optString("basicAuthUsername")),
                     basicAuthPassword = openSecret(o.optString("basicAuthPassword")),
@@ -110,7 +113,7 @@ object WebsiteStore {
                 .put("hideNavigationBar", it.hideNavigationBar).put("disableTextSelection", it.disableTextSelection)
                 .put("lockScrollAxis", it.lockScrollAxis).put("desktopSite", it.desktopSite)
                 .put("openFullscreen", it.openFullscreen).put("orientation", it.orientation.key)
-                .put("script", it.script).put("style", it.style).put("userAgent", it.userAgent)
+                .put("script", it.script).put("style", it.style).put("hiddenElements", it.hiddenElements).put("userAgent", it.userAgent)
                 .put("headers", sealSecret(it.headers))
                 .put("basicAuthUsername", sealSecret(it.basicAuthUsername))
                 .put("basicAuthPassword", sealSecret(it.basicAuthPassword)))

@@ -174,6 +174,8 @@ class WebsiteCustomizationTest {
             .put("updatedStyle", WebsiteCustomization.styleScript(fixture.copy(style = "body { color: rgb(90, 80, 70); }")))
             .put("clearStyle", WebsiteCustomization.styleScript(fixture.copy(style = "")))
             .put("literalStyle", WebsiteCustomization.styleScript(fixture.copy(style = "body::after { content: '\"\\\\ </style> \u2028\u2029'; }")))
+            .put("hiddenOnly", WebsiteCustomization.styleScript(site.copy(hiddenElements = "#ad\ninvalid[\nbody { color: red; }\n#later\n#space\\ ")))
+            .put("keepCssClearHidden", WebsiteCustomization.styleScript(site.copy(style = "body { color: rgb(12, 34, 56); }")))
             .put("script", WebsiteCustomization.pageScript(fixture))
             .put("throwingScript", WebsiteCustomization.pageScript(fixture.copy(script = "throw new Error('expected test error');")))
             .put("invalidScript", WebsiteCustomization.pageScript(fixture.copy(script = "let = ;")))
@@ -232,6 +234,20 @@ class WebsiteCustomizationTest {
         }
     }
 
+    @Test fun `hidden selectors apply without custom CSS and removing them restores live without reload`() {
+        val configured = site.copy(hiddenElements = "#ad\n.banner")
+        Page(configured).use { page ->
+            page.web.webViewClient!!.onPageFinished(page.web, site.url)
+            assertTrue(page.shadow.lastEvaluatedJavascript.contains("__twig_hidden_elements_"))
+            assertTrue(page.shadow.lastEvaluatedJavascript.contains("#ad"))
+            page.edit(site)
+            assertTrue(page.shadow.lastEvaluatedJavascript.contains("if (!selectors.length)"))
+            assertTrue(page.shadow.lastEvaluatedJavascript.contains("const selectors = []"))
+            assertEquals(0, page.shadow.reloadInvocations)
+        }
+        assertEquals(listOf("#space\\ "), WebsiteCustomization.hiddenSelectors("#space\\ "))
+    }
+
     @Test fun `header edits reload with new headers while unchanged reopen preserves the live page`() {
         val configured = site.copy(headers = "X-Token: first")
         Page(configured).use { page ->
@@ -246,7 +262,7 @@ class WebsiteCustomizationTest {
         }
     }
 
-    @Test fun `editor validates headers and saves all four fields together`() {
+    @Test fun `editor validates headers and saves customizations and hidden selectors together`() {
         Page(site).use { page ->
             WebsiteDialogs.edit(page.activity, site)
             shadowOf(Looper.getMainLooper()).idle()
@@ -270,10 +286,11 @@ class WebsiteCustomizationTest {
             assertNotNull(field(R.string.website_headers).error)
             assertEquals(site, WebsiteStore.all(app).single())
             field(R.string.website_headers).setText("X-Auth: secret")
+            field(R.string.website_hidden_elements).setText("#ad\n.banner")
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick()
             assertFalse(dialog.isShowing)
             assertEquals(site.copy(userAgent = "Custom/2.0", script = "window.changed = true;",
-                style = "#ad { display: none; }", headers = "X-Auth: secret"), WebsiteStore.all(app).single())
+                style = "#ad { display: none; }", headers = "X-Auth: secret", hiddenElements = "#ad\n.banner"), WebsiteStore.all(app).single())
             val saved = WebsiteStore.all(app).single()
             WebsiteDialogs.edit(page.activity, saved)
             shadowOf(Looper.getMainLooper()).idle()
@@ -287,7 +304,7 @@ class WebsiteCustomizationTest {
     @Test fun `headers are encrypted on disk and backups reencrypt them for another device`() {
         val configured = site.copy(headers = "Authorization: Bearer unique-test-secret", script = "window.ok = true;",
             style = "body { color: green; }", userAgent = "Custom/1.0",
-            basicAuthUsername = "private-user", basicAuthPassword = "private-pass")
+            basicAuthUsername = "private-user", basicAuthPassword = "private-pass", hiddenElements = "#ad\n.banner")
         WebsiteStore.save(app, configured)
         val stored = WebsiteStore.preferences(app).getString("list", "")!!
         assertFalse(stored.contains("unique-test-secret"))

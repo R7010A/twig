@@ -951,4 +951,16 @@
     <string name="website_debug_style_scope">Die CSS-Vorschau gilt nur für den Ursprung der gespeicherten Website.</string>
     <string name="website_debug_pc_forced">Computer-Debugging: vom System erzwungen</string>
     <string name="website_debug_pc_forced_help">Dieser Android-Build ist %1$s. WebView erzwingt Web-Debugging und erlaubt Twig nicht, es zu deaktivieren.\n\nVerbindung über USB-Debugging und chrome://inspect/#devices in Chrome am Computer.</string>
+    <string name="website_debug_elements">Elemente</string>
+    <string name="website_debug_pick">Element wählen</string>
+    <string name="website_debug_pick_parent">Elternelement</string>
+    <string name="website_debug_copy_selector">Selektor kopieren</string>
+    <string name="website_debug_copy_html">HTML kopieren</string>
+    <string name="website_debug_pick_hint">Element wählen und dann auf die Seite tippen. Scrollen und Zoomen bleiben möglich; Prüftipps öffnen keine Links. Frames und Shadow-Bäume werden über ihr äußeres Hostelement gewählt.</string>
+    <string name="website_debug_selector">CSS-Selektor</string>
+    <string name="website_debug_matches">%1$d passende Elemente</string>
+    <string name="website_debug_html_truncated">gekürzt</string>
+    <string name="website_debug_hide_element">Element ausblenden</string>
+    <string name="website_hidden_elements">Ausgeblendete Elemente</string>
+    <string name="website_hidden_elements_hint">Ein CSS-Selektor pro Zeile, z. B. #ad oder .banner. Zeile entfernen, um passende Elemente wieder anzuzeigen.</string>
 </resources>

@@ -85,7 +85,8 @@ class WebsiteActivity : AppCompatActivity() {
         }
         site = saved
         debugger = WebsiteDebugPanel(this, b.debugHost, b.web, { site }) { updated ->
-            site = site.copy(script = updated.script, style = updated.style)
+            site = site.copy(script = updated.script, style = updated.style, hiddenElements = updated.hiddenElements)
+            customStyleApplied = WebsiteCustomization.hasStyles(site)
         }
         immersiveFullscreen = savedInstanceState?.getBoolean("immersive_fullscreen", site.openFullscreen)
             ?: site.openFullscreen
@@ -328,10 +329,10 @@ class WebsiteActivity : AppCompatActivity() {
 
     private fun applyCustomStyle() {
         val styled = debugger.styleSite(site)
-        if (styled.style.isEmpty() && !customStyleApplied) return
+        if (!WebsiteCustomization.hasStyles(styled) && !customStyleApplied) return
         if (WebsiteCustomization.sameOrigin(site.url, b.web.url)) {
             b.web.evaluateJavascript(WebsiteCustomization.styleScript(styled), null)
-            customStyleApplied = styled.style.isNotEmpty()
+            customStyleApplied = WebsiteCustomization.hasStyles(styled)
         }
     }
 
@@ -580,6 +581,7 @@ class WebsiteActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
+        if (::debugger.isInitialized) debugger.stopInspection()
         cancelCertificateRequests()
         if (::b.isInitialized) {
             b.web.onPause()

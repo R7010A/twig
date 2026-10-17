@@ -951,4 +951,16 @@
     <string name="website_debug_style_scope">A prévia CSS se aplica apenas à origem do site salvo.</string>
     <string name="website_debug_pc_forced">Depuração no computador: imposta pelo sistema</string>
     <string name="website_debug_pc_forced_help">Esta compilação Android é %1$s. O WebView força a depuração web e não permite que o Twig a desative.\n\nConecte via depuração USB e chrome://inspect/#devices no Chrome do computador.</string>
+    <string name="website_debug_elements">Elementos</string>
+    <string name="website_debug_pick">Selecionar elemento</string>
+    <string name="website_debug_pick_parent">Elemento pai</string>
+    <string name="website_debug_copy_selector">Copiar seletor</string>
+    <string name="website_debug_copy_html">Copiar HTML</string>
+    <string name="website_debug_pick_hint">Toque em Selecionar elemento e na página. Rolagem e zoom funcionam normalmente; toques de inspeção não abrem links. Frames e árvores Shadow selecionam o host externo.</string>
+    <string name="website_debug_selector">Seletor CSS</string>
+    <string name="website_debug_matches">Corresponde a %1$d elementos</string>
+    <string name="website_debug_html_truncated">truncado</string>
+    <string name="website_debug_hide_element">Ocultar elemento</string>
+    <string name="website_hidden_elements">Elementos ocultos</string>
+    <string name="website_hidden_elements_hint">Um seletor CSS por linha, como #ad ou .banner. Remova a linha para exibir novamente os elementos correspondentes.</string>
 </resources>

@@ -987,4 +987,16 @@
     <string name="website_debug_style_scope">Предпросмотр CSS применяется только к источнику сохранённого сайта.</string>
     <string name="website_debug_pc_forced">Отладка с компьютера: включена системой</string>
     <string name="website_debug_pc_forced_help">Тип сборки Android: %1$s. WebView принудительно включает веб-отладку и не позволяет Twig отключить её.\n\nПодключайтесь через отладку USB и chrome://inspect/#devices в Chrome на компьютере.</string>
+    <string name="website_debug_elements">Элементы</string>
+    <string name="website_debug_pick">Выбрать элемент</string>
+    <string name="website_debug_pick_parent">Родитель</string>
+    <string name="website_debug_copy_selector">Копировать селектор</string>
+    <string name="website_debug_copy_html">Копировать HTML</string>
+    <string name="website_debug_pick_hint">Нажмите «Выбрать элемент», затем коснитесь страницы. Прокрутка и масштабирование доступны; касание при выборе не открывает ссылки. Для фреймов и Shadow DOM выбирается внешний узел.</string>
+    <string name="website_debug_selector">Селектор CSS</string>
+    <string name="website_debug_matches">Совпадений: %1$d</string>
+    <string name="website_debug_html_truncated">усечено</string>
+    <string name="website_debug_hide_element">Скрыть элемент</string>
+    <string name="website_hidden_elements">Скрытые элементы</string>
+    <string name="website_hidden_elements_hint">Один CSS-селектор в строке, например #ad или .banner. Удалите строку, чтобы снова показать соответствующие элементы.</string>
 </resources>

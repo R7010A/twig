@@ -191,6 +191,97 @@ class WebsiteDebugTest {
         }
     }
 
+    @Test fun `element inspection reports metadata copies selectors and HTML and clears on tab changes`() {
+        Page().use { page ->
+            page.menu(R.string.website_debug)
+            page.click(R.string.website_debug_elements)
+            val web = page.web as WebsiteWebView
+            web.right = 1000
+            web.bottom = 1000
+            val copy = page.panel.findViewWithTag<View>(R.string.website_debug_copy_selector)
+            assertFalse(copy.isEnabled)
+            page.click(R.string.website_debug_pick)
+            assertNotNull(web.onPickElement)
+            val down = android.view.MotionEvent.obtain(0, 0, android.view.MotionEvent.ACTION_DOWN, 500f, 500f, 0)
+            val up = android.view.MotionEvent.obtain(0, 50, android.view.MotionEvent.ACTION_UP, 500f, 500f, 0)
+            try { web.dispatchTouchEvent(down); web.dispatchTouchEvent(up) } finally { down.recycle(); up.recycle() }
+            assertNull(web.onPickElement)
+            val value = JSONObject().put("tag", "a").put("id", "target").put("classes", "link")
+                .put("selector", "#target").put("matches", 1).put("html", "<a id=\"target\">Link</a>")
+                .put("truncated", false).put("hasParent", true)
+            page.shadow.lastEvaluatedJavascriptCallback.onReceiveValue(value.toString())
+            val info = page.panel.findViewWithTag<TextView>("website_element_info")
+            assertTrue(info.text.contains("#target"))
+            assertTrue(info.text.contains("id=\"target\""))
+            page.click(R.string.website_debug_copy_selector)
+            val clipboard = page.activity.getSystemService(android.content.ClipboardManager::class.java)
+            assertEquals("#target", clipboard.primaryClip!!.getItemAt(0).text.toString())
+            page.click(R.string.website_debug_copy_html)
+            assertEquals(value.getString("html"), clipboard.primaryClip!!.getItemAt(0).text.toString())
+            page.click(R.string.website_debug_pick_parent)
+            assertTrue(page.shadow.lastEvaluatedJavascript.contains(",\"parent\","))
+            page.shadow.lastEvaluatedJavascriptCallback.onReceiveValue(value.put("tag", "html").put("hasParent", false).toString())
+            assertFalse(page.panel.findViewWithTag<View>(R.string.website_debug_pick_parent).isEnabled)
+            page.click(R.string.website_style)
+            assertTrue(page.shadow.lastEvaluatedJavascript.contains(",\"clear\","))
+            assertFalse(copy.isEnabled)
+            assertNull(web.onPickElement)
+        }
+    }
+
+    @Test fun `hide element persists its selector independently of CSS and preserves other saved options`() {
+        val configured = site.copy(style = "body { color: blue; }", headers = "X-Token: saved",
+            basicAuthUsername = "alice", basicAuthPassword = "secret")
+        Page(configured).use { page ->
+            page.menu(R.string.website_debug)
+            val web = page.web as WebsiteWebView
+            val selected = JSONObject().put("tag", "div").put("id", "target").put("classes", "ad")
+                .put("selector", "#target").put("matches", 1).put("html", "<div id=\"target\">Ad</div>")
+                .put("truncated", false).put("hasParent", true)
+            fun hide() {
+                page.click(R.string.website_debug_elements)
+                page.click(R.string.website_debug_pick)
+                web.onPickElement!!.invoke(0.5f, 0.5f)
+                page.shadow.lastEvaluatedJavascriptCallback.onReceiveValue(selected.toString())
+                page.click(R.string.website_debug_hide_element)
+            }
+            val latest = configured.copy(name = "Changed")
+            WebsiteStore.save(app, latest)
+            hide()
+            assertEquals(latest.copy(hiddenElements = "#target"), WebsiteStore.all(app).single())
+            assertTrue(page.shadow.lastEvaluatedJavascript.contains("__twig_hidden_elements_"))
+            assertTrue(page.shadow.lastEvaluatedJavascript.contains("color: blue"))
+            hide()
+            assertEquals("#target", WebsiteStore.all(app).single().hiddenElements)
+            WebsiteStore.save(app, latest)
+            page.controller.newIntent(WebsiteActivity.intent(app, site.id))
+            assertTrue(page.shadow.lastEvaluatedJavascript.contains("const selectors = []"))
+            assertEquals(0, page.shadow.reloadInvocations)
+        }
+    }
+
+    @Test fun `navigation discards stale inspection callbacks and exported commands use the actual asset`() {
+        Page().use { page ->
+            page.menu(R.string.website_debug)
+            page.click(R.string.website_debug_elements)
+            val web = page.web as WebsiteWebView
+            page.click(R.string.website_debug_pick)
+            web.onPickElement!!.invoke(0.5f, 0.5f)
+            val stale = page.shadow.lastEvaluatedJavascriptCallback
+            page.web.webViewClient!!.onPageStarted(page.web, site.url, null)
+            val value = JSONObject().put("tag", "p").put("id", "stale-element").put("classes", "")
+                .put("selector", "#stale-element").put("matches", 1).put("html", "<p>old page</p>")
+                .put("truncated", false).put("hasParent", true)
+            stale.onReceiveValue(value.toString())
+            assertFalse(page.panel.findViewWithTag<TextView>("website_element_info").text.contains("stale-element"))
+            assertNull(web.onPickElement)
+            val inspector = WebsiteElementInspector(web) {}
+            val fixture = JSONObject().put("pick", inspector.command("pick", 0.5f, 0.5f))
+                .put("parent", inspector.command("parent")).put("clear", inspector.command("clear"))
+            File("build/reports/website-elements/scripts.json").apply { parentFile.mkdirs(); writeText(fixture.toString()) }
+        }
+    }
+
     @Test fun `userdebug and eng show a system-forced status instead of a misleading toggle`() {
         for (type in listOf("userdebug", "eng")) {
             ReflectionHelpers.setStaticField(Build::class.java, "TYPE", type)

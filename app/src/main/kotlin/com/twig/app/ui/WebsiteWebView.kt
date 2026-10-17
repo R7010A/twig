@@ -14,6 +14,15 @@ open class WebsiteWebView @JvmOverloads constructor(ctx: Context, attrs: Attribu
     var lockScrollAxis = false
     var onPullProgress: (Float) -> Unit = {}
     var onRefresh: () -> Unit = {}
+    /** Consume inspection taps before Chromium sees them; scrolling and pinching remain native. */
+    var onPickElement: ((Float, Float) -> Unit)? = null
+        set(value) {
+            if (field !== value) cancelPickGesture()
+            field = value
+        }
+    private var pickDown: MotionEvent? = null
+    private var pickForwarding = false
+    private var discardPickTail = false
     private val pageTopProbe by lazy(LazyThreadSafetyMode.NONE) {
         context.assets.open("website_scroll_top.js").bufferedReader().use { it.readText() }
     }
@@ -30,6 +39,12 @@ open class WebsiteWebView @JvmOverloads constructor(ctx: Context, attrs: Attribu
     private var pullDistance = 0f
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (event.actionMasked == MotionEvent.ACTION_DOWN) discardPickTail = false
+        if (discardPickTail) {
+            if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) discardPickTail = false
+            return true
+        }
+        if (onPickElement != null || pickDown != null) return dispatchPickTouch(event)
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 startX = event.x
@@ -96,6 +111,47 @@ open class WebsiteWebView @JvmOverloads constructor(ctx: Context, attrs: Attribu
             return handled
         }
         return super.dispatchTouchEvent(event)
+    }
+
+    private fun cancelPickGesture() {
+        val down = pickDown ?: return
+        if (pickForwarding) {
+            val cancel = MotionEvent.obtain(down).apply { action = MotionEvent.ACTION_CANCEL }
+            super.dispatchTouchEvent(cancel)
+            cancel.recycle()
+        }
+        down.recycle()
+        pickDown = null
+        pickForwarding = false
+        discardPickTail = true
+    }
+
+    private fun dispatchPickTouch(event: MotionEvent): Boolean {
+        if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+            cancelPickGesture()
+            discardPickTail = false
+            pickDown = MotionEvent.obtain(event)
+            pickForwarding = false
+            return true
+        }
+        val down = pickDown ?: return true
+        val distance = max(abs(event.x - down.x), abs(event.y - down.y))
+        if (!pickForwarding && (event.actionMasked == MotionEvent.ACTION_MOVE ||
+            event.actionMasked == MotionEvent.ACTION_POINTER_DOWN) && (event.pointerCount > 1 || distance > slop)) {
+            // Replay DOWN only once a pan/pinch is known. A tap never reaches page handlers.
+            super.dispatchTouchEvent(down)
+            pickForwarding = true
+        }
+        if (pickForwarding) super.dispatchTouchEvent(event)
+        if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) {
+            val pick = !pickForwarding && event.actionMasked == MotionEvent.ACTION_UP && distance <= slop
+            down.recycle()
+            pickDown = null
+            pickForwarding = false
+            if (pick && width > 0 && height > 0) onPickElement?.invoke(
+                (event.x / width).coerceIn(0f, 1f), (event.y / height).coerceIn(0f, 1f))
+        }
+        return true
     }
 
     /** WebView's own scroll offset misses fixed-header layouts with scrolling divs. */

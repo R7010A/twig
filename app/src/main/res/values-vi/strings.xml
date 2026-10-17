@@ -950,4 +950,16 @@
     <string name="website_debug_style_scope">Xem trước CSS chỉ áp dụng cho cùng nguồn của trang đã lưu.</string>
     <string name="website_debug_pc_forced">Gỡ lỗi qua máy tính: hệ thống bắt buộc bật</string>
     <string name="website_debug_pc_forced_help">Loại bản dựng Android là %1$s. WebView bắt buộc bật gỡ lỗi web và không cho phép Twig tắt.\n\nKết nối qua gỡ lỗi USB và chrome://inspect/#devices trong Chrome trên máy tính.</string>
+    <string name="website_debug_elements">Phần tử</string>
+    <string name="website_debug_pick">Chọn phần tử</string>
+    <string name="website_debug_pick_parent">Phần tử cha</string>
+    <string name="website_debug_copy_selector">Sao chép bộ chọn</string>
+    <string name="website_debug_copy_html">Sao chép HTML</string>
+    <string name="website_debug_pick_hint">Nhấn Chọn phần tử rồi chạm trang. Cuộn và thu phóng vẫn bình thường; chạm kiểm tra không mở liên kết. Khung và cây Shadow được chọn ở phần tử chủ bên ngoài.</string>
+    <string name="website_debug_selector">Bộ chọn CSS</string>
+    <string name="website_debug_matches">Khớp %1$d phần tử</string>
+    <string name="website_debug_html_truncated">đã cắt ngắn</string>
+    <string name="website_debug_hide_element">Ẩn phần tử</string>
+    <string name="website_hidden_elements">Phần tử đã ẩn</string>
+    <string name="website_hidden_elements_hint">Mỗi dòng một bộ chọn CSS, như #ad hoặc .banner. Xóa dòng để hiện lại các phần tử khớp.</string>
 </resources>

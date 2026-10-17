@@ -151,6 +151,7 @@ object WebsiteDialogs {
         val headers = field(R.string.website_headers, R.string.website_headers_hint, site?.headers.orEmpty(), true)
         val script = field(R.string.website_script, R.string.website_script_hint, site?.script.orEmpty(), true)
         val style = field(R.string.website_style, R.string.website_style_hint, site?.style.orEmpty(), true)
+        val hidden = field(R.string.website_hidden_elements, R.string.website_hidden_elements_hint, site?.hiddenElements.orEmpty(), true)
         advanced.addView(TextView(ctx).apply { setText(R.string.website_custom_scope) })
         fun advancedError(field: EditText, message: Int) {
             expandAdvanced(true)
@@ -195,7 +196,7 @@ object WebsiteDialogs {
                     orientation = orientation.findViewById<RadioButton>(orientation.checkedRadioButtonId).tag as WebsiteOrientation,
                     userAgent = agent, headers = headers.text.toString(),
                     basicAuthUsername = authUsername.text.toString(), basicAuthPassword = authPassword.text.toString(),
-                    script = script.text.toString(), style = style.text.toString(),
+                    script = script.text.toString(), style = style.text.toString(), hiddenElements = hidden.text.toString(),
                 )
                 try {
                     WebsiteStore.save(ctx, saved)

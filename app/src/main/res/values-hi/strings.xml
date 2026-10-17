@@ -951,4 +951,16 @@
     <string name="website_debug_style_scope">CSS पूर्वावलोकन केवल सहेजी गई वेबसाइट के समान मूल पर लागू होता है।</string>
     <string name="website_debug_pc_forced">कंप्यूटर डीबगिंग: सिस्टम द्वारा चालू</string>
     <string name="website_debug_pc_forced_help">यह Android बिल्ड %1$s है। WebView वेब डीबगिंग चालू रखता है और Twig को इसे बंद करने की अनुमति नहीं देता।\n\nUSB डीबगिंग और कंप्यूटर Chrome में chrome://inspect/#devices से कनेक्ट करें।</string>
+    <string name="website_debug_elements">एलिमेंट</string>
+    <string name="website_debug_pick">एलिमेंट चुनें</string>
+    <string name="website_debug_pick_parent">पैरेंट एलिमेंट</string>
+    <string name="website_debug_copy_selector">चयनकर्ता कॉपी करें</string>
+    <string name="website_debug_copy_html">HTML कॉपी करें</string>
+    <string name="website_debug_pick_hint">एलिमेंट चुनें दबाकर पेज पर टैप करें। स्क्रॉल और पिंच सामान्य रहेंगे; निरीक्षण टैप लिंक नहीं खोलते। फ़्रेम और Shadow ट्री के बाहरी होस्ट चुने जाते हैं।</string>
+    <string name="website_debug_selector">CSS चयनकर्ता</string>
+    <string name="website_debug_matches">%1$d एलिमेंट से मेल</string>
+    <string name="website_debug_html_truncated">छोटा किया गया</string>
+    <string name="website_debug_hide_element">एलिमेंट छिपाएँ</string>
+    <string name="website_hidden_elements">छिपे हुए एलिमेंट</string>
+    <string name="website_hidden_elements_hint">प्रति पंक्ति एक CSS चयनकर्ता, जैसे #ad या .banner। संबंधित एलिमेंट फिर दिखाने के लिए पंक्ति हटाएँ।</string>
 </resources>

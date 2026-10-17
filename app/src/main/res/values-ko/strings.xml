@@ -951,4 +951,16 @@
     <string name="website_debug_style_scope">CSS 미리보기는 저장된 사이트와 동일한 출처에만 적용됩니다.</string>
     <string name="website_debug_pc_forced">컴퓨터 디버깅: 시스템에서 강제 활성화</string>
     <string name="website_debug_pc_forced_help">이 Android 빌드 유형은 %1$s입니다. WebView가 웹 디버깅을 강제로 켜므로 Twig에서 끌 수 없습니다.\n\nUSB 디버깅과 컴퓨터 Chrome의 chrome://inspect/#devices로 연결하세요.</string>
+    <string name="website_debug_elements">요소</string>
+    <string name="website_debug_pick">요소 선택</string>
+    <string name="website_debug_pick_parent">부모 요소</string>
+    <string name="website_debug_copy_selector">선택자 복사</string>
+    <string name="website_debug_copy_html">HTML 복사</string>
+    <string name="website_debug_pick_hint">요소 선택을 누르고 페이지를 탭하세요. 스크롤과 핀치는 정상 작동하며 선택 중에는 링크가 열리지 않습니다. 프레임과 Shadow 트리는 외부 호스트를 선택합니다.</string>
+    <string name="website_debug_selector">CSS 선택자</string>
+    <string name="website_debug_matches">요소 %1$d개 일치</string>
+    <string name="website_debug_html_truncated">잘림</string>
+    <string name="website_debug_hide_element">요소 숨기기</string>
+    <string name="website_hidden_elements">숨긴 요소</string>
+    <string name="website_hidden_elements_hint">한 줄에 #ad 또는 .banner 같은 CSS 선택자를 입력하세요. 해당 줄을 삭제하면 일치하는 요소가 다시 표시됩니다.</string>
 </resources>

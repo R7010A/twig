@@ -951,4 +951,16 @@
     <string name="website_debug_style_scope">CSS önizlemesi yalnızca kayıtlı sitenin kaynağına uygulanır.</string>
     <string name="website_debug_pc_forced">Bilgisayardan hata ayıklama: sistem zorunlu kılıyor</string>
     <string name="website_debug_pc_forced_help">Bu Android derlemesi %1$s türündedir. WebView web hata ayıklamayı zorunlu olarak açar ve Twig kapatamaz.\n\nUSB hata ayıklama ve bilgisayardaki Chrome üzerinden chrome://inspect/#devices ile bağlanın.</string>
+    <string name="website_debug_elements">Öğeler</string>
+    <string name="website_debug_pick">Öğe seç</string>
+    <string name="website_debug_pick_parent">Üst öğe</string>
+    <string name="website_debug_copy_selector">Seçiciyi kopyala</string>
+    <string name="website_debug_copy_html">HTML kopyala</string>
+    <string name="website_debug_pick_hint">Öğe seç düğmesine ve sayfaya dokunun. Kaydırma ve yakınlaştırma normal çalışır; inceleme dokunuşları bağlantıları açmaz. Çerçeve ve Shadow ağaçlarında dış barındırıcı seçilir.</string>
+    <string name="website_debug_selector">CSS seçicisi</string>
+    <string name="website_debug_matches">%1$d öğeyle eşleşir</string>
+    <string name="website_debug_html_truncated">kısaltıldı</string>
+    <string name="website_debug_hide_element">Öğeyi gizle</string>
+    <string name="website_hidden_elements">Gizlenen öğeler</string>
+    <string name="website_hidden_elements_hint">Her satıra #ad veya .banner gibi bir CSS seçicisi girin. Eşleşen öğeleri yeniden göstermek için satırı silin.</string>
 </resources>

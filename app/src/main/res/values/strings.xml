@@ -1021,4 +1021,16 @@
     <string name="website_debug_style_scope">CSS preview applies only to the saved website origin.</string>
     <string name="website_debug_pc_forced">Computer debugging: forced by system</string>
     <string name="website_debug_pc_forced_help">This Android build is %1$s. WebView forces web debugging on and does not allow Twig to disable it.\n\nConnect via USB debugging and chrome://inspect/#devices in desktop Chrome.</string>
+    <string name="website_debug_elements">Elements</string>
+    <string name="website_debug_pick">Pick element</string>
+    <string name="website_debug_pick_parent">Parent element</string>
+    <string name="website_debug_copy_selector">Copy selector</string>
+    <string name="website_debug_copy_html">Copy HTML</string>
+    <string name="website_debug_pick_hint">Choose Pick element, then tap the page. Scroll and pinch normally; inspection taps do not activate links. Frames and shadow trees are selected as their outer host.</string>
+    <string name="website_debug_selector">CSS selector</string>
+    <string name="website_debug_matches">Matches %1$d element(s)</string>
+    <string name="website_debug_html_truncated">truncated</string>
+    <string name="website_debug_hide_element">Hide element</string>
+    <string name="website_hidden_elements">Hidden elements</string>
+    <string name="website_hidden_elements_hint">One CSS selector per line, e.g. #ad or .banner. Remove a line to show matching elements again.</string>
 </resources>

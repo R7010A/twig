@@ -951,4 +951,16 @@
     <string name="website_debug_style_scope">L’aperçu CSS concerne uniquement l’origine du site enregistré.</string>
     <string name="website_debug_pc_forced">Débogage par ordinateur : imposé par le système</string>
     <string name="website_debug_pc_forced_help">Cette version Android est de type %1$s. WebView impose le débogage web et ne permet pas à Twig de le désactiver.\n\nConnectez-vous via le débogage USB et chrome://inspect/#devices dans Chrome sur ordinateur.</string>
+    <string name="website_debug_elements">Éléments</string>
+    <string name="website_debug_pick">Choisir élément</string>
+    <string name="website_debug_pick_parent">Élément parent</string>
+    <string name="website_debug_copy_selector">Copier sélecteur</string>
+    <string name="website_debug_copy_html">Copier HTML</string>
+    <string name="website_debug_pick_hint">Choisissez un élément puis touchez la page. Le défilement et le zoom restent disponibles, sans ouvrir les liens pendant la sélection. Les cadres et arbres Shadow sont sélectionnés par leur hôte externe.</string>
+    <string name="website_debug_selector">Sélecteur CSS</string>
+    <string name="website_debug_matches">Correspond à %1$d éléments</string>
+    <string name="website_debug_html_truncated">tronqué</string>
+    <string name="website_debug_hide_element">Masquer élément</string>
+    <string name="website_hidden_elements">Éléments masqués</string>
+    <string name="website_hidden_elements_hint">Un sélecteur CSS par ligne, par exemple #ad ou .banner. Supprimez la ligne pour réafficher les éléments correspondants.</string>
 </resources>

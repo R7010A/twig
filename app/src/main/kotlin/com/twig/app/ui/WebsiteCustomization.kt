@@ -73,22 +73,48 @@ internal object WebsiteCustomization {
     private fun digest(value: String) = MessageDigest.getInstance("SHA-256")
         .digest(value.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
 
+    fun hiddenSelectors(text: String): List<String> = text.lineSequence().map { it.trimStart() }.filter { it.isNotBlank() }.distinct().toList()
+
+    fun hasStyles(site: Website) = site.style.isNotEmpty() || site.hiddenElements.isNotBlank()
+
     fun styleScript(site: Website): String = """
         (() => {
             ${guard(site)}
             const key = ${quote("__twig_user_style_" + site.id)};
             let style = document.getElementById(key);
             const css = ${quote(site.style)};
-            if (!css) { if (style) style.remove(); return; }
-            if (!style || style.tagName !== 'STYLE') {
-                if (style) style.remove();
-                style = document.createElement('style');
-                style.id = key;
+            function makeStyle(id) {
+                const value = document.createElement('style');
+                value.id = id;
                 const source = document.querySelector('style[nonce],script[nonce]');
-                if (source && source.nonce) style.nonce = source.nonce;
-                (document.head || document.documentElement).appendChild(style);
+                if (source && source.nonce) value.nonce = source.nonce;
+                (document.head || document.documentElement).appendChild(value);
+                return value;
             }
-            style.textContent = css;
+            if (!css) { if (style) style.remove(); }
+            else {
+                if (!style || style.tagName !== 'STYLE') {
+                    if (style) style.remove();
+                    style = makeStyle(key);
+                }
+                style.textContent = css;
+            }
+            const hiddenKey = ${quote("__twig_hidden_elements_" + site.id)};
+            let hidden = document.getElementById(hiddenKey);
+            const selectors = ${hiddenSelectors(site.hiddenElements).joinToString(",", "[", "]") { quote(it) }};
+            if (!selectors.length) { if (hidden) hidden.remove(); return; }
+            if (!hidden || hidden.tagName !== 'STYLE') {
+                if (hidden) hidden.remove();
+                hidden = makeStyle(hiddenKey);
+            }
+            hidden.textContent = '';
+            for (const selector of selectors) {
+                try {
+                    // Validate as a selector before building a rule. Invalid rows cannot inject CSS rules.
+                    document.querySelector(selector);
+                    hidden.sheet.insertRule(selector + ' { display: none !important; }', hidden.sheet.cssRules.length);
+                } catch (error) { console.warn('Twig hidden selector:', selector, error); }
+            }
         })();
     """.trimIndent()
 

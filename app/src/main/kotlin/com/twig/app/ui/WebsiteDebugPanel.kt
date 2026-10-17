@@ -1,12 +1,13 @@
 package com.twig.app.ui
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.graphics.Typeface
 import android.text.InputType
 import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.webkit.ConsoleMessage
-import android.webkit.WebView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -25,7 +26,7 @@ import java.util.ArrayDeque
 internal class WebsiteDebugPanel(
     private val activity: AppCompatActivity,
     private val host: LinearLayout,
-    private val web: WebView,
+    private val web: WebsiteWebView,
     private val currentSite: () -> Website,
     private val saved: (Website) -> Unit,
 ) {
@@ -39,6 +40,17 @@ internal class WebsiteDebugPanel(
     private var logs: TextView? = null
     private var logScroll: ScrollView? = null
     private var preview: String? = null
+    private var elementInfo: TextView? = null
+    private var pickButton: Button? = null
+    private var parentButton: Button? = null
+    private var copySelector: Button? = null
+    private var copyHtml: Button? = null
+    private var hideElement: Button? = null
+    private var element: WebsiteElementInspector.Selection? = null
+    private val inspector = WebsiteElementInspector(web) { selected ->
+        element = selected
+        renderElement()
+    }
     private var tab = R.string.website_debug_console
     private val pages = linkedMapOf<Int, View>()
     private val tabs = linkedMapOf<Int, TextView>()
@@ -57,6 +69,7 @@ internal class WebsiteDebugPanel(
     fun hide(): Boolean {
         if (!isOpen) return false
         hideKeyboard()
+        stopInspection()
         host.visibility = View.GONE
         web.requestFocus()
         return true
@@ -117,7 +130,7 @@ internal class WebsiteDebugPanel(
             }, LinearLayout.LayoutParams(dp(48), -1))
         }, LinearLayout.LayoutParams(-1, dp(36)))
         host.addView(row().apply {
-            for (label in listOf(R.string.website_debug_console, R.string.website_script, R.string.website_style)) {
+            for (label in listOf(R.string.website_debug_console, R.string.website_script, R.string.website_style, R.string.website_debug_elements)) {
                 val item = TextView(activity).apply {
                     tag = label
                     setText(label)
@@ -169,6 +182,36 @@ internal class WebsiteDebugPanel(
                 }, LinearLayout.LayoutParams(0, dp(40), 1f))
             })
         }
+        val elements = column().apply {
+            val info = TextView(activity).apply {
+                tag = "website_element_info"
+                typeface = Typeface.MONOSPACE
+                textSize = 12f
+                setTextIsSelectable(true)
+                setPadding(dp(8), dp(4), dp(8), dp(4))
+            }
+            elementInfo = info
+            fill(ScrollView(activity).apply { addView(info) })
+            addView(row().apply {
+                pickButton = button(R.string.website_debug_pick) { togglePicking() }
+                parentButton = button(R.string.website_debug_pick_parent) { inspector.parent() }
+                addView(pickButton, LinearLayout.LayoutParams(0, dp(40), 1f))
+                addView(parentButton, LinearLayout.LayoutParams(0, dp(40), 1f))
+                hideElement = button(R.string.website_debug_hide_element) { hideSelectedElement() }
+                addView(hideElement, LinearLayout.LayoutParams(0, dp(40), 1f))
+            })
+            addView(row().apply {
+                copySelector = button(R.string.website_debug_copy_selector) {
+                    element?.let { copy(R.string.website_debug_selector, it.selector) }
+                }
+                copyHtml = button(R.string.website_debug_copy_html) {
+                    element?.let { copy(R.string.website_debug_copy_html, it.html) }
+                }
+                addView(copySelector, LinearLayout.LayoutParams(0, dp(40), 1f))
+                addView(copyHtml, LinearLayout.LayoutParams(0, dp(40), 1f))
+            })
+        }
+        pages[R.string.website_debug_elements] = elements
         pages[R.string.website_debug_console] = console
         pages[R.string.website_script] = javascript
         pages[R.string.website_style] = style
@@ -177,6 +220,7 @@ internal class WebsiteDebugPanel(
     }
 
     private fun select(label: Int) {
+        if (label != R.string.website_debug_elements) stopInspection()
         tab = label
         pages.forEach { (key, page) -> page.visibility = if (key == label) View.VISIBLE else View.GONE }
         tabs.forEach { (key, view) ->
@@ -239,13 +283,15 @@ internal class WebsiteDebugPanel(
         if (WebsiteCustomization.sameOrigin(site.url, web.url)) web.evaluateJavascript(WebsiteCustomization.styleScript(site), null)
     }
 
-    private fun saveCustomization(script: String? = null, style: String? = null): Website? {
+    private fun saveCustomization(script: String? = null, style: String? = null, hiddenSelector: String? = null): Website? {
         val latest = WebsiteStore.all(activity).firstOrNull { it.id == currentSite().id }
         if (latest == null) {
             Toast.makeText(activity, R.string.website_missing, Toast.LENGTH_LONG).show()
             return null
         }
-        val updated = latest.copy(script = script ?: latest.script, style = style ?: latest.style)
+        val updated = latest.copy(script = script ?: latest.script, style = style ?: latest.style,
+            hiddenElements = if (hiddenSelector == null) latest.hiddenElements else
+                (WebsiteCustomization.hiddenSelectors(latest.hiddenElements) + hiddenSelector).distinct().joinToString("\n"))
         return try {
             WebsiteStore.save(activity, updated)
             saved(updated)
@@ -258,8 +304,66 @@ internal class WebsiteDebugPanel(
     }
 
     fun navigation(url: String) {
+        stopInspection()
         preview = null
         append("↻ $url")
+    }
+
+    private fun togglePicking() {
+        if (web.onPickElement != null) {
+            stopInspection()
+            return
+        }
+        stopInspection()
+        hideKeyboard()
+        web.onPickElement = { x, y ->
+            web.onPickElement = null
+            renderElement()
+            inspector.pick(x, y)
+        }
+        renderElement()
+    }
+
+    private fun hideSelectedElement() {
+        val selected = element ?: return
+        if (!WebsiteCustomization.sameOrigin(currentSite().url, web.url)) {
+            Toast.makeText(activity, R.string.website_debug_style_scope, Toast.LENGTH_LONG).show()
+            return
+        }
+        saveCustomization(hiddenSelector = selected.selector)?.let {
+            stopInspection()
+            applyStyle(styleSite(it))
+        }
+    }
+
+    private fun renderElement() {
+        pickButton?.setText(if (web.onPickElement != null) R.string.dialog_cancel else R.string.website_debug_pick)
+        parentButton?.isEnabled = element?.hasParent == true
+        copySelector?.isEnabled = element != null
+        copyHtml?.isEnabled = element != null
+        hideElement?.isEnabled = element != null && WebsiteCustomization.sameOrigin(currentSite().url, web.url)
+        elementInfo?.text = element?.let { selected -> buildString {
+            append(selected.tag)
+            if (selected.id.isNotEmpty()) append("\nid=\"${selected.id}\"")
+            if (selected.classes.isNotEmpty()) append("\nclass=\"${selected.classes}\"")
+            append("\n\n" + activity.getString(R.string.website_debug_selector))
+            append("\n" + activity.getString(R.string.website_debug_matches, selected.matches))
+            append("\n" + selected.selector)
+            append("\n\nHTML")
+            if (selected.truncated) append(" (" + activity.getString(R.string.website_debug_html_truncated) + ")")
+            append("\n" + selected.html)
+        } } ?: activity.getString(R.string.website_debug_pick_hint)
+    }
+
+    private fun copy(label: Int, value: String) {
+        activity.getSystemService(ClipboardManager::class.java)?.setPrimaryClip(
+            ClipData.newPlainText(activity.getString(label), value))
+        Toast.makeText(activity, R.string.info_copied, Toast.LENGTH_SHORT).show()
+    }
+
+    fun stopInspection() {
+        web.onPickElement = null
+        inspector.clear()
     }
 
     private fun hideKeyboard() {
@@ -268,6 +372,7 @@ internal class WebsiteDebugPanel(
     }
 
     fun destroy() {
+        stopInspection()
         host.removeCallbacks(renderTask)
         (host.parent as View).removeOnLayoutChangeListener(resize)
         entries.clear()

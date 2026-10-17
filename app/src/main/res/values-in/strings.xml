@@ -951,4 +951,16 @@
     <string name="website_debug_style_scope">Pratinjau CSS hanya berlaku untuk asal situs yang disimpan.</string>
     <string name="website_debug_pc_forced">Debug komputer: dipaksa oleh sistem</string>
     <string name="website_debug_pc_forced_help">Build Android ini adalah %1$s. WebView memaksa debug web aktif dan tidak mengizinkan Twig menonaktifkannya.\n\nHubungkan melalui debug USB dan chrome://inspect/#devices di Chrome komputer.</string>
+    <string name="website_debug_elements">Elemen</string>
+    <string name="website_debug_pick">Pilih elemen</string>
+    <string name="website_debug_pick_parent">Elemen induk</string>
+    <string name="website_debug_copy_selector">Salin selektor</string>
+    <string name="website_debug_copy_html">Salin HTML</string>
+    <string name="website_debug_pick_hint">Pilih elemen lalu ketuk halaman. Gulir dan cubit tetap normal; ketukan inspeksi tidak membuka tautan. Bingkai dan pohon Shadow dipilih sebagai host luarnya.</string>
+    <string name="website_debug_selector">Selektor CSS</string>
+    <string name="website_debug_matches">Cocok dengan %1$d elemen</string>
+    <string name="website_debug_html_truncated">dipotong</string>
+    <string name="website_debug_hide_element">Sembunyikan elemen</string>
+    <string name="website_hidden_elements">Elemen tersembunyi</string>
+    <string name="website_hidden_elements_hint">Satu selektor CSS per baris, misalnya #ad atau .banner. Hapus baris untuk menampilkan kembali elemen yang cocok.</string>
 </resources>

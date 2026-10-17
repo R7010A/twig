@@ -951,4 +951,16 @@
     <string name="website_debug_style_scope">L’anteprima CSS si applica solo all’origine del sito salvato.</string>
     <string name="website_debug_pc_forced">Debug dal computer: imposto dal sistema</string>
     <string name="website_debug_pc_forced_help">Questa build Android è %1$s. WebView impone il debug web e non consente a Twig di disattivarlo.\n\nConnettiti tramite debug USB e chrome://inspect/#devices in Chrome sul computer.</string>
+    <string name="website_debug_elements">Elementi</string>
+    <string name="website_debug_pick">Scegli elemento</string>
+    <string name="website_debug_pick_parent">Elemento padre</string>
+    <string name="website_debug_copy_selector">Copia selettore</string>
+    <string name="website_debug_copy_html">Copia HTML</string>
+    <string name="website_debug_pick_hint">Premi Scegli elemento e tocca la pagina. Scorrimento e zoom restano normali; i tocchi di ispezione non aprono link. Frame e alberi Shadow vengono selezionati tramite il loro host esterno.</string>
+    <string name="website_debug_selector">Selettore CSS</string>
+    <string name="website_debug_matches">Corrisponde a %1$d elementi</string>
+    <string name="website_debug_html_truncated">troncato</string>
+    <string name="website_debug_hide_element">Nascondi elemento</string>
+    <string name="website_hidden_elements">Elementi nascosti</string>
+    <string name="website_hidden_elements_hint">Un selettore CSS per riga, ad esempio #ad o .banner. Elimina la riga per mostrare di nuovo gli elementi corrispondenti.</string>
 </resources>

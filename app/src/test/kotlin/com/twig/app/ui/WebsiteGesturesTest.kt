@@ -30,7 +30,9 @@ class WebsiteGesturesTest {
         }
     }
     private fun web() = RecordingWebView(ApplicationProvider.getApplicationContext()).apply {
-        layout(0, 0, 1000, 1600)
+        // Robolectric WebView skips setFrame; supply the visible viewport directly.
+        right = 1000
+        bottom = 1600
     }
     private fun RecordingWebView.send(action: Int, x: Float, y: Float) {
         val event = MotionEvent.obtain(0, 100, action, x, y, 0)
@@ -187,6 +189,82 @@ class WebsiteGesturesTest {
         web.send(MotionEvent.ACTION_MOVE, 25f, 600f)
         web.send(MotionEvent.ACTION_UP, 25f, 600f)
         assertEquals(1, refreshes)
+    }
+
+    @Test fun `inspection taps return viewport fractions without delivering page events`() {
+        val web = web()
+        val picked = mutableListOf<Pair<Float, Float>>()
+        web.onPickElement = { x, y -> picked.add(x to y) }
+        web.send(MotionEvent.ACTION_DOWN, 250f, 800f)
+        web.send(MotionEvent.ACTION_UP, 250f, 800f)
+        assertTrue(web.delivered.isEmpty())
+        assertEquals(listOf(0.25f to 0.5f), picked)
+    }
+
+    @Test fun `inspection pans replay the native gesture without refreshing or locking its axis`() {
+        val web = web().apply { pullToRefresh = true; lockScrollAxis = true }
+        var refreshes = 0
+        var picks = 0
+        web.onRefresh = { refreshes++ }
+        web.onPickElement = { _, _ -> picks++ }
+        web.send(MotionEvent.ACTION_DOWN, 20f, 20f)
+        assertTrue(web.delivered.isEmpty())
+        web.send(MotionEvent.ACTION_MOVE, 300f, 600f)
+        web.send(MotionEvent.ACTION_UP, 350f, 650f)
+        assertEquals(listOf(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE, MotionEvent.ACTION_UP), web.delivered.map { it.action })
+        assertEquals(300f, web.delivered[1].x)
+        assertEquals(600f, web.delivered[1].y)
+        assertEquals(0, refreshes)
+        assertEquals(0, picks)
+    }
+
+    @Test fun `inspection pinches stay native and never select on the final finger release`() {
+        val web = web()
+        var picks = 0
+        web.onPickElement = { _, _ -> picks++ }
+        web.send(MotionEvent.ACTION_DOWN, 20f, 20f)
+        web.twoPointers(MotionEvent.ACTION_POINTER_DOWN or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT), 20f, 20f)
+        web.twoPointers(MotionEvent.ACTION_MOVE, 30f, 30f)
+        web.twoPointers(MotionEvent.ACTION_POINTER_UP or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT), 30f, 30f)
+        web.send(MotionEvent.ACTION_UP, 30f, 30f)
+        assertEquals(listOf(1, 2, 2, 2, 1), web.delivered.map { it.pointers })
+        assertEquals(0, picks)
+    }
+
+    @Test fun `leaving inspection cancels the native pan and swallows its remaining events`() {
+        val web = web()
+        web.onPickElement = { _, _ -> fail("No tap during a pan") }
+        web.send(MotionEvent.ACTION_DOWN, 20f, 20f)
+        web.send(MotionEvent.ACTION_MOVE, 200f, 300f)
+        web.onPickElement = null
+        web.send(MotionEvent.ACTION_MOVE, 300f, 400f)
+        web.send(MotionEvent.ACTION_UP, 300f, 400f)
+        assertEquals(listOf(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE, MotionEvent.ACTION_CANCEL), web.delivered.map { it.action })
+        web.send(MotionEvent.ACTION_DOWN, 25f, 25f)
+        web.send(MotionEvent.ACTION_UP, 25f, 25f)
+        assertEquals(listOf(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP), web.delivered.takeLast(2).map { it.action })
+    }
+
+    @Test fun `cancelling a pending inspection tap does not leak its UP to the page`() {
+        val web = web()
+        web.onPickElement = { _, _ -> fail("Cancelled selection") }
+        web.send(MotionEvent.ACTION_DOWN, 20f, 20f)
+        web.onPickElement = null
+        web.send(MotionEvent.ACTION_UP, 20f, 20f)
+        assertTrue(web.delivered.isEmpty())
+        web.send(MotionEvent.ACTION_DOWN, 30f, 30f)
+        web.send(MotionEvent.ACTION_UP, 30f, 30f)
+        assertEquals(2, web.delivered.size)
+    }
+
+    @Test fun `a distant release without MOVE is neither a page click nor an inspection tap`() {
+        val web = web()
+        var picks = 0
+        web.onPickElement = { _, _ -> picks++ }
+        web.send(MotionEvent.ACTION_DOWN, 20f, 20f)
+        web.send(MotionEvent.ACTION_UP, 500f, 500f)
+        assertTrue(web.delivered.isEmpty())
+        assertEquals(0, picks)
     }
 
 }

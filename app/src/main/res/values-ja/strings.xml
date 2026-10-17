@@ -951,4 +951,16 @@
     <string name="website_debug_style_scope">CSS プレビューは保存したサイトと同じオリジンにのみ適用されます。</string>
     <string name="website_debug_pc_forced">パソコンでデバッグ：システムで強制有効</string>
     <string name="website_debug_pc_forced_help">Android のビルドタイプは %1$s です。WebView がウェブデバッグを強制的に有効にするため、Twig から無効にはできません。\n\nUSB デバッグとパソコンの Chrome の chrome://inspect/#devices で接続できます。</string>
+    <string name="website_debug_elements">要素</string>
+    <string name="website_debug_pick">要素を選択</string>
+    <string name="website_debug_pick_parent">親要素</string>
+    <string name="website_debug_copy_selector">セレクターをコピー</string>
+    <string name="website_debug_copy_html">HTML をコピー</string>
+    <string name="website_debug_pick_hint">「要素を選択」を押してページをタップします。スクロールとピンチ操作は通常どおりで、選択中はリンクを開きません。iframe と Shadow DOM は外側のホストを選択します。</string>
+    <string name="website_debug_selector">CSS セレクター</string>
+    <string name="website_debug_matches">%1$d 個の要素に一致</string>
+    <string name="website_debug_html_truncated">省略あり</string>
+    <string name="website_debug_hide_element">要素を非表示</string>
+    <string name="website_hidden_elements">非表示の要素</string>
+    <string name="website_hidden_elements_hint">1 行に CSS セレクターを 1 つ入力します（例：#ad、.banner）。行を削除すると該当する要素を再表示します。</string>
 </resources>

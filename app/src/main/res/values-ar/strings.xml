@@ -955,4 +955,16 @@
     <string name="website_debug_style_scope">تطبق معاينة CSS فقط على أصل الموقع المحفوظ.</string>
     <string name="website_debug_pc_forced">تصحيح الكمبيوتر: مفروض من النظام</string>
     <string name="website_debug_pc_forced_help">نوع بناء Android هو %1$s. يفرض WebView تصحيح الويب ولا يسمح لـ Twig بتعطيله.\n\nاتصل عبر تصحيح USB وchrome://inspect/#devices في Chrome على الكمبيوتر.</string>
+    <string name="website_debug_elements">العناصر</string>
+    <string name="website_debug_pick">اختيار عنصر</string>
+    <string name="website_debug_pick_parent">العنصر الأب</string>
+    <string name="website_debug_copy_selector">نسخ المحدد</string>
+    <string name="website_debug_copy_html">نسخ HTML</string>
+    <string name="website_debug_pick_hint">اختر اختيار عنصر ثم المس الصفحة. التمرير والتكبير طبيعيان، ونقرات الفحص لا تفتح الروابط. يتم اختيار المضيف الخارجي للإطارات وأشجار الظل.</string>
+    <string name="website_debug_selector">محدد CSS</string>
+    <string name="website_debug_matches">يطابق %1$d عنصرًا</string>
+    <string name="website_debug_html_truncated">مقتطع</string>
+    <string name="website_debug_hide_element">إخفاء العنصر</string>
+    <string name="website_hidden_elements">العناصر المخفية</string>
+    <string name="website_hidden_elements_hint">محدد CSS واحد في كل سطر، مثل #ad أو .banner. احذف السطر لإظهار العناصر المطابقة مجددًا.</string>
 </resources>

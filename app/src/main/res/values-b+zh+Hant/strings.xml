@@ -950,4 +950,16 @@
     <string name="website_debug_style_scope">CSS 預覽僅適用於所儲存網站的同源頁面。</string>
     <string name="website_debug_pc_forced">電腦除錯：系統強制開啟</string>
     <string name="website_debug_pc_forced_help">目前系統建置類型為 %1$s。WebView 在此系統上強制開啟網頁除錯，Twig 無法透過應用程式介面關閉。\n\n電腦仍可透過 USB 偵錯與 Chrome 的 chrome://inspect/#devices 連線。</string>
+    <string name="website_debug_elements">元素</string>
+    <string name="website_debug_pick">選取元素</string>
+    <string name="website_debug_pick_parent">父元素</string>
+    <string name="website_debug_copy_selector">複製選擇器</string>
+    <string name="website_debug_copy_html">複製 HTML</string>
+    <string name="website_debug_pick_hint">先點「選取元素」，再點網頁。可正常捲動與雙指縮放，選取時不會觸發連結。iframe 與 Shadow DOM 先選其外層宿主。</string>
+    <string name="website_debug_selector">CSS 選擇器</string>
+    <string name="website_debug_matches">符合 %1$d 個元素</string>
+    <string name="website_debug_html_truncated">已截斷</string>
+    <string name="website_debug_hide_element">隱藏元素</string>
+    <string name="website_hidden_elements">隱藏元素</string>
+    <string name="website_hidden_elements_hint">每行一個 CSS 選擇器，例如 #ad 或 .banner。刪除對應行即可恢復顯示。</string>
 </resources>
