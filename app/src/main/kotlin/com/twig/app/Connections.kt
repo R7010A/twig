@@ -127,7 +127,7 @@ object Connections {
                     s,
                 ),
             )
-            "webdav" -> FsRegistry.register(WebDavFileSystem(DavConfig(conn.host, conn.user, conn.password), s))
+            "webdav" -> FsRegistry.register(WebDavFileSystem(DavConfig(conn.host, conn.user, conn.password, ServerCertificateTrust.forApp(ctx)), s))
             "jellyfin", "emby" -> FsRegistry.register(
                 JellyfinFileSystem(
                     JellyfinConfig(
@@ -140,6 +140,7 @@ object Connections {
                         token = conn.token, userId = conn.userId,
                         onAuth = { t, u -> rememberAuth(ctx, conn, t, u) },
                         labels = MediaLabels.of(ctx),
+                        certificateTrust = ServerCertificateTrust.forApp(ctx),
                     ),
                     s,
                 ),
@@ -149,6 +150,7 @@ object Connections {
                     S3Config(
                         endpoint = conn.host, accessKey = conn.user, secretKey = conn.password,
                         region = conn.region, bucket = conn.share, pathStyle = conn.pathStyle,
+                        certificateTrust = ServerCertificateTrust.forApp(ctx),
                     ),
                     s,
                 ),

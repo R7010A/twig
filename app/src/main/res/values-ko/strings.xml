@@ -901,6 +901,13 @@
     <string name="website_desktop_site">데스크톱 사이트</string>
     <string name="website_open_fullscreen">전체 화면으로 열기</string>
     <string name="website_enter_fullscreen">전체 화면 시작</string>
+
+    <!-- Per-server HTTPS certificate trust -->
+    <string name="certificate_untrusted">신뢰할 수 없는 서버 인증서</string>
+    <string name="certificate_changed">서버 인증서가 변경됨</string>
+    <string name="certificate_trust">이 인증서 신뢰</string>
+    <string name="certificate_details">서버: %1$s\n주체: %2$s\n발급자: %3$s\n유효 시작: %4$s\n유효 종료: %5$s\nSHA-256: %6$s\n\n서버와 지문을 확인한 경우에만 신뢰하세요.</string>
+    <string name="certificate_previous">이전에 신뢰한 SHA-256: %1$s</string>
     <string name="website_orientation">화면 방향</string>
     <string name="website_orientation_system">시스템 설정 따르기</string>
     <string name="website_orientation_free">자유 회전</string>

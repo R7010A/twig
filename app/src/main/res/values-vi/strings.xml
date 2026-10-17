@@ -900,6 +900,13 @@
     <string name="website_desktop_site">Trang web cho máy tính</string>
     <string name="website_open_fullscreen">Mở toàn màn hình</string>
     <string name="website_enter_fullscreen">Vào toàn màn hình</string>
+
+    <!-- Per-server HTTPS certificate trust -->
+    <string name="certificate_untrusted">Chứng chỉ máy chủ không đáng tin cậy</string>
+    <string name="certificate_changed">Chứng chỉ máy chủ đã thay đổi</string>
+    <string name="certificate_trust">Tin cậy chứng chỉ này</string>
+    <string name="certificate_details">Máy chủ: %1$s\nChủ thể: %2$s\nNhà phát hành: %3$s\nCó hiệu lực từ: %4$s\nHết hạn: %5$s\nSHA-256: %6$s\n\nChỉ tin cậy khi bạn nhận ra máy chủ và đã xác minh dấu vân tay.</string>
+    <string name="certificate_previous">SHA-256 đã tin cậy trước đây: %1$s</string>
     <string name="website_orientation">Hướng màn hình</string>
     <string name="website_orientation_system">Theo hệ thống</string>
     <string name="website_orientation_free">Xoay tự do</string>

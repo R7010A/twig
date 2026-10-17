@@ -14,6 +14,7 @@ import com.twig.fs.local.LocalFileSystem
 class TwigApp : Application() {
     override fun onCreate() {
         super.onCreate()
+        registerActivityLifecycleCallbacks(ServerCertificateTrust)
         AppCompatDelegate.setDefaultNightMode(Prefs.themeMode(this))
         // Read the decoding priority list once into memory: subtitle / lyrics
         // callers don't carry a Context.

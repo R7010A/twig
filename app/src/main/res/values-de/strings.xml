@@ -901,6 +901,13 @@
     <string name="website_desktop_site">Desktopwebsite</string>
     <string name="website_open_fullscreen">Im Vollbild öffnen</string>
     <string name="website_enter_fullscreen">Vollbild aktivieren</string>
+
+    <!-- Per-server HTTPS certificate trust -->
+    <string name="certificate_untrusted">Nicht vertrauenswürdiges Serverzertifikat</string>
+    <string name="certificate_changed">Serverzertifikat geändert</string>
+    <string name="certificate_trust">Diesem Zertifikat vertrauen</string>
+    <string name="certificate_details">Server: %1$s\nInhaber: %2$s\nAussteller: %3$s\nGültig ab: %4$s\nGültig bis: %5$s\nSHA-256: %6$s\n\nVertrauen Sie nur, wenn Sie den Server erkennen und den Fingerabdruck geprüft haben.</string>
+    <string name="certificate_previous">Zuvor vertrauter SHA-256: %1$s</string>
     <string name="website_orientation">Bildschirmausrichtung</string>
     <string name="website_orientation_system">Systemeinstellung</string>
     <string name="website_orientation_free">Freie Drehung</string>

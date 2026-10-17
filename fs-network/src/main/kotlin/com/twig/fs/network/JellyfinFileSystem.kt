@@ -77,6 +77,7 @@ data class JellyfinConfig(
      * Unknown ids fall back to the built-in English name.
      */
     val labels: Map<String, String> = emptyMap(),
+    val certificateTrust: CertificateTrust? = null,
 )
 
 /**
@@ -140,7 +141,7 @@ class JellyfinFileSystem(
         ?: throw FsException("Bad server URL: ${config.baseUrl}")
 
     /** Timeout choices match WebDAV: short connect (fail fast when unreachable), generous read/write (playback is a long-lived connection). */
-    private val http = OkHttpClient.Builder()
+    private val http = ServerTls.configure(OkHttpClient.Builder(), config.certificateTrust)
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
         .writeTimeout(0, TimeUnit.SECONDS)

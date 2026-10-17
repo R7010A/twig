@@ -905,6 +905,13 @@
     <string name="website_desktop_site">موقع سطح المكتب</string>
     <string name="website_open_fullscreen">فتح بملء الشاشة</string>
     <string name="website_enter_fullscreen">الدخول إلى ملء الشاشة</string>
+
+    <!-- Per-server HTTPS certificate trust -->
+    <string name="certificate_untrusted">شهادة خادم غير موثوقة</string>
+    <string name="certificate_changed">تغيرت شهادة الخادم</string>
+    <string name="certificate_trust">الوثوق بهذه الشهادة</string>
+    <string name="certificate_details">الخادم: %1$s\nالموضوع: %2$s\nالجهة المصدرة: %3$s\nصالحة من: %4$s\nصالحة حتى: %5$s\nSHA-256: %6$s\n\nثق فقط إذا كنت تعرف الخادم وتحققت من بصمته.</string>
+    <string name="certificate_previous">SHA-256 الموثوق سابقًا: %1$s</string>
     <string name="website_orientation">اتجاه الشاشة</string>
     <string name="website_orientation_system">اتباع النظام</string>
     <string name="website_orientation_free">دوران حر</string>

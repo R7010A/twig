@@ -971,6 +971,13 @@
     <string name="website_desktop_site">Desktop site</string>
     <string name="website_open_fullscreen">Open fullscreen</string>
     <string name="website_enter_fullscreen">Enter fullscreen</string>
+
+    <!-- Per-server HTTPS certificate trust -->
+    <string name="certificate_untrusted">Untrusted server certificate</string>
+    <string name="certificate_changed">Server certificate changed</string>
+    <string name="certificate_trust">Trust this certificate</string>
+    <string name="certificate_details">Server: %1$s\nSubject: %2$s\nIssuer: %3$s\nValid from: %4$s\nValid until: %5$s\nSHA-256: %6$s\n\nTrust this certificate only if you recognize this server and have verified its fingerprint.</string>
+    <string name="certificate_previous">Previously trusted SHA-256: %1$s</string>
     <string name="website_orientation">Screen orientation</string>
     <string name="website_orientation_system">Follow system</string>
     <string name="website_orientation_free">Free rotation</string>

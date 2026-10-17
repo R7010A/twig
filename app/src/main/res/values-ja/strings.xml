@@ -901,6 +901,13 @@
     <string name="website_desktop_site">PC 版サイト</string>
     <string name="website_open_fullscreen">全画面で開く</string>
     <string name="website_enter_fullscreen">全画面にする</string>
+
+    <!-- Per-server HTTPS certificate trust -->
+    <string name="certificate_untrusted">信頼されていないサーバー証明書</string>
+    <string name="certificate_changed">サーバー証明書が変更されました</string>
+    <string name="certificate_trust">この証明書を信頼</string>
+    <string name="certificate_details">サーバー：%1$s\n主体：%2$s\n発行者：%3$s\n有効期間開始：%4$s\n有効期間終了：%5$s\nSHA-256：%6$s\n\n接続先とフィンガープリントを確認してから信頼してください。</string>
+    <string name="certificate_previous">以前信頼した SHA-256：%1$s</string>
     <string name="website_orientation">画面の向き</string>
     <string name="website_orientation_system">システムに従う</string>
     <string name="website_orientation_free">自由に回転</string>

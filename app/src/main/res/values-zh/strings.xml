@@ -931,6 +931,13 @@
     <string name="website_desktop_site">桌面版网站</string>
     <string name="website_open_fullscreen">全屏打开</string>
     <string name="website_enter_fullscreen">进入全屏</string>
+
+    <!-- Per-server HTTPS certificate trust -->
+    <string name="certificate_untrusted">服务器证书不受信任</string>
+    <string name="certificate_changed">服务器证书已更换</string>
+    <string name="certificate_trust">信任此证书</string>
+    <string name="certificate_details">服务器：%1$s\n主体：%2$s\n颁发者：%3$s\n有效期起：%4$s\n有效期止：%5$s\nSHA-256：%6$s\n\n请确认这是你要连接的服务器，并核对指纹后再信任。</string>
+    <string name="certificate_previous">此前信任的 SHA-256：%1$s</string>
     <string name="website_orientation">屏幕方向</string>
     <string name="website_orientation_system">跟随系统</string>
     <string name="website_orientation_free">自由</string>

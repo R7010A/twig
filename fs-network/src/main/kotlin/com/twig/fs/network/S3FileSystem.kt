@@ -41,6 +41,7 @@ data class S3Config(
     val bucket: String = "",
     /** true = `endpoint/bucket/key`; false = `bucket.endpoint/key` (the AWS canonical form). */
     val pathStyle: Boolean = true,
+    val certificateTrust: CertificateTrust? = null,
 )
 
 /**
@@ -82,7 +83,7 @@ class S3FileSystem(
             (if (keyBase.isEmpty()) "" else "/$keyBase") + ")"
 
     /** Timeout values mirror [WebDavFileSystem]: short connect, generous read/write (large file transfers cannot be measured in 10-second units). */
-    private val http = OkHttpClient.Builder()
+    private val http = ServerTls.configure(OkHttpClient.Builder(), config.certificateTrust)
         .connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
         .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
         .writeTimeout(0, java.util.concurrent.TimeUnit.SECONDS)

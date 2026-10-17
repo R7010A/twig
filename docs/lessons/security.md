@@ -329,3 +329,30 @@ option.**
     the process restarted. Renderer-cache reuse is consistent with this symptom, though
     fresh network traffic was not measured. The user explicitly chose to retain cached
     images. The menu is consequently a load action, with no checkbox or disable operation.
+
+- **Explicit HTTPS certificate trust** (`ServerTls` / `ServerCertificateTrust`): WebDAV,
+  Jellyfin/Emby and S3 share one policy. Normal certificates use system chain and hostname
+  validation. An untrusted certificate needs explicit foreground confirmation; SHA-256
+  of the entire leaf certificate is pinned to the actual host and port, and every
+  replacement needs confirmation, even one issued by a public CA. Redirects have their
+  own destination identity. Pins live in `twig_certificates`, outside the backup whitelist.
+  TLS chain authentication is deferred to the hostname verifier because that is where
+  the actual destination is available: **never use the deferred trust manager or its
+  socket factory without that verifier, and never install either globally**. No request
+  headers or body may be sent until authentication succeeds. Leaving the foreground,
+  cancelling or timing out rejects the connection. A saved pin is readable by background
+  playback and transfers without showing another dialog. Real TLS handshake tests cover
+  refusal before credentials, repeat connections, replacements and redirect isolation.
+  - **Website WebViews use the same pin store for recoverable certificate errors**
+    (`WebsiteActivity.confirmCertificate`). Extract the encoded X.509 leaf from
+    `SslCertificate`, use the failing resource URL rather than the bookmark URL,
+    and defer `SslErrorHandler.proceed()` until the matching pin or explicit approval.
+    Missing certificate bytes fail closed. Prompts run off the UI thread and are
+    bound to their originating Activity; navigation, pause and destruction cancel
+    pending handlers. Clear WebView SSL preferences so its retained proceed decisions
+    are not the app's source of trust. Robolectric covers the callback and lifecycle
+    decisions; Chromium TLS/cache behavior still needs device verification.
+    **This is an exception policy, not complete WebView certificate pinning**:
+    WebView's [SSL error callback](https://developer.android.com/reference/android/webkit/WebViewClient.html#onReceivedSslError(android.webkit.WebView,android.webkit.SslErrorHandler,android.net.http.SslError))
+    only runs for recoverable certificate errors. A replacement certificate accepted
+    by the system has no such callback and follows Chromium's normal verification.

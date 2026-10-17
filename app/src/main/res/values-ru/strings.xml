@@ -937,6 +937,13 @@
     <string name="website_desktop_site">Версия для компьютера</string>
     <string name="website_open_fullscreen">Открывать на весь экран</string>
     <string name="website_enter_fullscreen">На весь экран</string>
+
+    <!-- Per-server HTTPS certificate trust -->
+    <string name="certificate_untrusted">Недоверенный сертификат сервера</string>
+    <string name="certificate_changed">Сертификат сервера изменился</string>
+    <string name="certificate_trust">Доверять сертификату</string>
+    <string name="certificate_details">Сервер: %1$s\nСубъект: %2$s\nИздатель: %3$s\nДействует с: %4$s\nДействует до: %5$s\nSHA-256: %6$s\n\nДоверяйте только знакомому серверу после проверки отпечатка.</string>
+    <string name="certificate_previous">Ранее доверенный SHA-256: %1$s</string>
     <string name="website_orientation">Ориентация экрана</string>
     <string name="website_orientation_system">Как в системе</string>
     <string name="website_orientation_free">Свободное вращение</string>

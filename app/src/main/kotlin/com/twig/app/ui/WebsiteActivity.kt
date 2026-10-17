@@ -8,6 +8,8 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Bitmap
+import android.net.http.SslCertificate
+import android.net.http.SslError
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -16,6 +18,7 @@ import android.view.MenuItem
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
+import android.webkit.SslErrorHandler
 import android.webkit.CookieManager
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -33,11 +36,15 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
+import com.twig.app.ServerCertificateTrust
+import com.twig.fs.network.ServerTls
 import com.twig.app.R
 import com.twig.app.Website
 import com.twig.app.WebsiteStore
 import com.twig.app.WebsiteOrientation
 import com.twig.app.databinding.ActivityWebsiteBinding
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -50,6 +57,7 @@ class WebsiteActivity : AppCompatActivity() {
     private var fullscreenFromToolbar = false
     private var fullscreenLayer: FrameLayout? = null
     private var fullscreenCallback: WebChromeClient.CustomViewCallback? = null
+    private val certificateRequests = mutableMapOf<SslErrorHandler, Job>()
     private var upload: ValueCallback<Array<Uri>>? = null
     private val picker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         upload?.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(result.resultCode, result.data))
@@ -117,6 +125,7 @@ class WebsiteActivity : AppCompatActivity() {
             } else view.setPadding(0, 0, 0, 0)
             insets
         }
+        b.web.clearSslPreferences()
         b.web.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
@@ -135,6 +144,15 @@ class WebsiteActivity : AppCompatActivity() {
         applyWebsiteOptions()
         CookieManager.getInstance().setAcceptCookie(true)
         b.web.webViewClient = object : WebViewClient() {
+            override fun onReceivedSslError(view: WebView, handler: SslErrorHandler, error: SslError) {
+                confirmCertificate(view, handler, error)
+            }
+
+            override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
+                cancelCertificateRequests()
+                view.clearSslPreferences()
+            }
+
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 val scheme = request.url.scheme?.lowercase()
                 if (scheme == "https" || scheme == "http") return false
@@ -409,11 +427,66 @@ class WebsiteActivity : AppCompatActivity() {
         if (hasFocus) applySystemBars()
     }
 
+    /** Authenticate the actual failing request, including subresources and redirects. */
+    private fun confirmCertificate(view: WebView, handler: SslErrorHandler, error: SslError) {
+        // WebView caches proceed decisions itself. Our fingerprint store must remain
+        // the authority rather than Chromium remembering a broader SSL exception.
+        view.clearSslPreferences()
+        val uri = Uri.parse(error.url)
+        val host = uri.host?.lowercase(java.util.Locale.ROOT)?.removeSurrounding("[", "]")
+        val port = if (uri.port == -1) 443 else uri.port
+        val certificate = runCatching {
+            val encoded = SslCertificate.saveState(error.certificate)?.getByteArray("x509-certificate")
+                ?: return@runCatching null
+            java.security.cert.CertificateFactory.getInstance("X.509")
+                .generateCertificate(encoded.inputStream()) as java.security.cert.X509Certificate
+        }.getOrNull()
+        if (uri.scheme != "https" || host.isNullOrEmpty() || port !in 1..65535 ||
+            certificate == null || !lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) {
+            handler.cancel()
+            return
+        }
+        val authority = if (host.contains(':')) "[$host]:$port" else "$host:$port"
+        val trust = ServerCertificateTrust.forApp(this)
+        val fingerprint = ServerTls.fingerprint(certificate)
+        val previous = trust.remembered(authority)
+        if (previous == fingerprint) {
+            handler.proceed()
+            view.clearSslPreferences()
+            return
+        }
+        val job = lifecycleScope.launch(start = kotlinx.coroutines.CoroutineStart.LAZY) {
+            var proceeded = false
+            try {
+                val accepted = runInterruptible(Dispatchers.IO) { trust.confirm(authority, certificate, previous) }
+                if (accepted && lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) {
+                    handler.proceed()
+                    proceeded = true
+                    view.clearSslPreferences()
+                }
+            } finally {
+                if (certificateRequests.remove(handler) != null && !proceeded) handler.cancel()
+            }
+        }
+        certificateRequests[handler] = job
+        job.start()
+    }
+
+    private fun cancelCertificateRequests() {
+        val pending = certificateRequests.toMap()
+        certificateRequests.clear()
+        pending.forEach { (handler, job) ->
+            handler.cancel()
+            job.cancel()
+        }
+    }
+
     private fun persistCookies() {
         lifecycleScope.launch(Dispatchers.IO) { CookieManager.getInstance().flush() }
     }
 
     override fun onPause() {
+        cancelCertificateRequests()
         if (::b.isInitialized) {
             b.web.onPause()
             persistCookies()
@@ -423,7 +496,10 @@ class WebsiteActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (::b.isInitialized) b.web.onResume()
+        if (::b.isInitialized) {
+            b.web.clearSslPreferences()
+            b.web.onResume()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -435,6 +511,7 @@ class WebsiteActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        cancelCertificateRequests()
         hidePageFullscreen(restorePage = false)
         upload?.onReceiveValue(null)
         upload = null

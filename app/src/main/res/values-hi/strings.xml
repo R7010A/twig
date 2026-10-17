@@ -901,6 +901,13 @@
     <string name="website_desktop_site">डेस्कटॉप साइट</string>
     <string name="website_open_fullscreen">पूर्ण स्क्रीन में खोलें</string>
     <string name="website_enter_fullscreen">पूर्ण स्क्रीन शुरू करें</string>
+
+    <!-- Per-server HTTPS certificate trust -->
+    <string name="certificate_untrusted">अविश्वसनीय सर्वर प्रमाणपत्र</string>
+    <string name="certificate_changed">सर्वर प्रमाणपत्र बदल गया</string>
+    <string name="certificate_trust">इस प्रमाणपत्र पर भरोसा करें</string>
+    <string name="certificate_details">सर्वर: %1$s\nविषय: %2$s\nजारीकर्ता: %3$s\nमान्य आरंभ: %4$s\nमान्य अंत: %5$s\nSHA-256: %6$s\n\nसर्वर को पहचानने और फ़िंगरप्रिंट सत्यापित करने पर ही भरोसा करें।</string>
+    <string name="certificate_previous">पहले विश्वसनीय SHA-256: %1$s</string>
     <string name="website_orientation">स्क्रीन की दिशा</string>
     <string name="website_orientation_system">सिस्टम के अनुसार</string>
     <string name="website_orientation_free">स्वतंत्र घुमाव</string>

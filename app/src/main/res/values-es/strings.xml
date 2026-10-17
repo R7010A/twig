@@ -901,6 +901,13 @@
     <string name="website_desktop_site">Sitio de escritorio</string>
     <string name="website_open_fullscreen">Abrir a pantalla completa</string>
     <string name="website_enter_fullscreen">Entrar en pantalla completa</string>
+
+    <!-- Per-server HTTPS certificate trust -->
+    <string name="certificate_untrusted">Certificado del servidor no confiable</string>
+    <string name="certificate_changed">El certificado del servidor ha cambiado</string>
+    <string name="certificate_trust">Confiar en este certificado</string>
+    <string name="certificate_details">Servidor: %1$s\nTitular: %2$s\nEmisor: %3$s\nVálido desde: %4$s\nVálido hasta: %5$s\nSHA-256: %6$s\n\nConfíe solo si reconoce el servidor y ha verificado su huella.</string>
+    <string name="certificate_previous">SHA-256 anterior: %1$s</string>
     <string name="website_orientation">Orientación de pantalla</string>
     <string name="website_orientation_system">Seguir el sistema</string>
     <string name="website_orientation_free">Rotación libre</string>

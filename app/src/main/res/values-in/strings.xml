@@ -901,6 +901,13 @@
     <string name="website_desktop_site">Situs desktop</string>
     <string name="website_open_fullscreen">Buka layar penuh</string>
     <string name="website_enter_fullscreen">Masuk layar penuh</string>
+
+    <!-- Per-server HTTPS certificate trust -->
+    <string name="certificate_untrusted">Sertifikat server tidak tepercaya</string>
+    <string name="certificate_changed">Sertifikat server berubah</string>
+    <string name="certificate_trust">Percayai sertifikat ini</string>
+    <string name="certificate_details">Server: %1$s\nSubjek: %2$s\nPenerbit: %3$s\nBerlaku dari: %4$s\nBerlaku hingga: %5$s\nSHA-256: %6$s\n\nPercayai hanya jika Anda mengenali server dan telah memverifikasi sidik jarinya.</string>
+    <string name="certificate_previous">SHA-256 sebelumnya: %1$s</string>
     <string name="website_orientation">Orientasi layar</string>
     <string name="website_orientation_system">Ikuti sistem</string>
     <string name="website_orientation_free">Rotasi bebas</string>

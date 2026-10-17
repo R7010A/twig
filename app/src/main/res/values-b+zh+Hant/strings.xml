@@ -900,6 +900,13 @@
     <string name="website_desktop_site">電腦版網站</string>
     <string name="website_open_fullscreen">全螢幕開啟</string>
     <string name="website_enter_fullscreen">進入全螢幕</string>
+
+    <!-- Per-server HTTPS certificate trust -->
+    <string name="certificate_untrusted">伺服器憑證不受信任</string>
+    <string name="certificate_changed">伺服器憑證已更換</string>
+    <string name="certificate_trust">信任此憑證</string>
+    <string name="certificate_details">伺服器：%1$s\n主體：%2$s\n簽發者：%3$s\n有效期起：%4$s\n有效期止：%5$s\nSHA-256：%6$s\n\n請確認這是你要連線的伺服器，並核對指紋後再信任。</string>
+    <string name="certificate_previous">先前信任的 SHA-256：%1$s</string>
     <string name="website_orientation">螢幕方向</string>
     <string name="website_orientation_system">跟隨系統</string>
     <string name="website_orientation_free">自由</string>

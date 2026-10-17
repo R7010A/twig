@@ -901,6 +901,13 @@
     <string name="website_desktop_site">Masaüstü sitesi</string>
     <string name="website_open_fullscreen">Tam ekran aç</string>
     <string name="website_enter_fullscreen">Tam ekrana geç</string>
+
+    <!-- Per-server HTTPS certificate trust -->
+    <string name="certificate_untrusted">Güvenilmeyen sunucu sertifikası</string>
+    <string name="certificate_changed">Sunucu sertifikası değişti</string>
+    <string name="certificate_trust">Bu sertifikaya güven</string>
+    <string name="certificate_details">Sunucu: %1$s\nKonu: %2$s\nVeren: %3$s\nBaşlangıç: %4$s\nBitiş: %5$s\nSHA-256: %6$s\n\nYalnızca sunucuyu tanıyor ve parmak izini doğruladıysanız güvenin.</string>
+    <string name="certificate_previous">Önceki SHA-256: %1$s</string>
     <string name="website_orientation">Ekran yönü</string>
     <string name="website_orientation_system">Sistemi izle</string>
     <string name="website_orientation_free">Serbest döndürme</string>

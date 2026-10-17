@@ -27,6 +27,7 @@ data class DavConfig(
     val baseUrl: String,
     val user: String = "",
     val password: String = "",
+    val certificateTrust: CertificateTrust? = null,
 )
 
 /**
@@ -57,7 +58,7 @@ class WebDavFileSystem(
      * Connect timeout stays short (failure to connect should fail fast); read
      * and write are relaxed.
      */
-    private val http = OkHttpClient.Builder()
+    private val http = ServerTls.configure(OkHttpClient.Builder(), config.certificateTrust)
         .connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
         .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
         .writeTimeout(0, java.util.concurrent.TimeUnit.SECONDS)

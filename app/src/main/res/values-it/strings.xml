@@ -901,6 +901,13 @@
     <string name="website_desktop_site">Sito desktop</string>
     <string name="website_open_fullscreen">Apri a schermo intero</string>
     <string name="website_enter_fullscreen">Passa a schermo intero</string>
+
+    <!-- Per-server HTTPS certificate trust -->
+    <string name="certificate_untrusted">Certificato del server non attendibile</string>
+    <string name="certificate_changed">Certificato del server cambiato</string>
+    <string name="certificate_trust">Considera attendibile</string>
+    <string name="certificate_details">Server: %1$s\nSoggetto: %2$s\nEmittente: %3$s\nValido dal: %4$s\nValido fino al: %5$s\nSHA-256: %6$s\n\nAccetta solo se riconosci il server e hai verificato la sua impronta.</string>
+    <string name="certificate_previous">SHA-256 precedente: %1$s</string>
     <string name="website_orientation">Orientamento schermo</string>
     <string name="website_orientation_system">Segui il sistema</string>
     <string name="website_orientation_free">Rotazione libera</string>

@@ -901,6 +901,13 @@
     <string name="website_desktop_site">Version pour ordinateur</string>
     <string name="website_open_fullscreen">Ouvrir en plein écran</string>
     <string name="website_enter_fullscreen">Passer en plein écran</string>
+
+    <!-- Per-server HTTPS certificate trust -->
+    <string name="certificate_untrusted">Certificat du serveur non approuvé</string>
+    <string name="certificate_changed">Le certificat du serveur a changé</string>
+    <string name="certificate_trust">Approuver ce certificat</string>
+    <string name="certificate_details">Serveur : %1$s\nSujet : %2$s\nÉmetteur : %3$s\nValide du : %4$s\nValide au : %5$s\nSHA-256 : %6$s\n\nApprouvez uniquement si vous reconnaissez le serveur et avez vérifié son empreinte.</string>
+    <string name="certificate_previous">SHA-256 précédemment approuvé : %1$s</string>
     <string name="website_orientation">Orientation de l’écran</string>
     <string name="website_orientation_system">Suivre le système</string>
     <string name="website_orientation_free">Rotation libre</string>
