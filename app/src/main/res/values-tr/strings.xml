@@ -901,4 +901,10 @@
     <string name="website_desktop_site">Masaüstü sitesi</string>
     <string name="website_open_fullscreen">Tam ekran aç</string>
     <string name="website_enter_fullscreen">Tam ekrana geç</string>
+    <string name="website_orientation">Ekran yönü</string>
+    <string name="website_orientation_system">Sistemi izle</string>
+    <string name="website_orientation_free">Serbest döndürme</string>
+    <string name="website_orientation_locked">Geçerli yönü kilitle</string>
+    <string name="website_orientation_landscape">Yatay</string>
+    <string name="website_orientation_portrait">Dikey</string>
 </resources>

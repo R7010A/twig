@@ -901,4 +901,10 @@
     <string name="website_desktop_site">डेस्कटॉप साइट</string>
     <string name="website_open_fullscreen">पूर्ण स्क्रीन में खोलें</string>
     <string name="website_enter_fullscreen">पूर्ण स्क्रीन शुरू करें</string>
+    <string name="website_orientation">स्क्रीन की दिशा</string>
+    <string name="website_orientation_system">सिस्टम के अनुसार</string>
+    <string name="website_orientation_free">स्वतंत्र घुमाव</string>
+    <string name="website_orientation_locked">वर्तमान दिशा लॉक करें</string>
+    <string name="website_orientation_landscape">लैंडस्केप</string>
+    <string name="website_orientation_portrait">पोर्ट्रेट</string>
 </resources>

@@ -21,7 +21,16 @@ data class Website(
     val desktopSite: Boolean = false,
     /** Open in immersive display without adding an application Back-navigation step. */
     val openFullscreen: Boolean = false,
+    val orientation: WebsiteOrientation = WebsiteOrientation.SYSTEM,
 )
+
+enum class WebsiteOrientation(val key: String) {
+    SYSTEM("system"), FREE("free"), LOCKED("locked"), LANDSCAPE("landscape"), PORTRAIT("portrait");
+
+    companion object {
+        fun fromKey(key: String) = entries.firstOrNull { it.key == key } ?: SYSTEM
+    }
+}
 
 object WebsiteStore {
     fun preferences(ctx: Context) = ctx.getSharedPreferences("twig_websites", Context.MODE_PRIVATE)
@@ -41,6 +50,7 @@ object WebsiteStore {
                     disableTextSelection = o.optBoolean("disableTextSelection"),
                     lockScrollAxis = o.optBoolean("lockScrollAxis"), desktopSite = o.optBoolean("desktopSite"),
                     openFullscreen = o.optBoolean("openFullscreen"),
+                    orientation = WebsiteOrientation.fromKey(o.optString("orientation")),
                 )
             }
         }.getOrDefault(emptyList())
@@ -63,7 +73,7 @@ object WebsiteStore {
                 .put("pullToRefresh", it.pullToRefresh).put("hideStatusBar", it.hideStatusBar)
                 .put("hideNavigationBar", it.hideNavigationBar).put("disableTextSelection", it.disableTextSelection)
                 .put("lockScrollAxis", it.lockScrollAxis).put("desktopSite", it.desktopSite)
-                .put("openFullscreen", it.openFullscreen))
+                .put("openFullscreen", it.openFullscreen).put("orientation", it.orientation.key))
         }
         preferences(ctx).edit().putString("list", items.toString()).apply()
     }

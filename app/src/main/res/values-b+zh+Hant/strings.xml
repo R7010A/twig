@@ -900,4 +900,10 @@
     <string name="website_desktop_site">電腦版網站</string>
     <string name="website_open_fullscreen">全螢幕開啟</string>
     <string name="website_enter_fullscreen">進入全螢幕</string>
+    <string name="website_orientation">螢幕方向</string>
+    <string name="website_orientation_system">跟隨系統</string>
+    <string name="website_orientation_free">自由</string>
+    <string name="website_orientation_locked">鎖定</string>
+    <string name="website_orientation_landscape">橫向</string>
+    <string name="website_orientation_portrait">直向</string>
 </resources>

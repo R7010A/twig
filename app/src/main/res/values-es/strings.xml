@@ -901,4 +901,10 @@
     <string name="website_desktop_site">Sitio de escritorio</string>
     <string name="website_open_fullscreen">Abrir a pantalla completa</string>
     <string name="website_enter_fullscreen">Entrar en pantalla completa</string>
+    <string name="website_orientation">Orientación de pantalla</string>
+    <string name="website_orientation_system">Seguir el sistema</string>
+    <string name="website_orientation_free">Rotación libre</string>
+    <string name="website_orientation_locked">Bloquear orientación actual</string>
+    <string name="website_orientation_landscape">Horizontal</string>
+    <string name="website_orientation_portrait">Vertical</string>
 </resources>

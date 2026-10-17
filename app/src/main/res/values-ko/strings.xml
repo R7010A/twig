@@ -901,4 +901,10 @@
     <string name="website_desktop_site">데스크톱 사이트</string>
     <string name="website_open_fullscreen">전체 화면으로 열기</string>
     <string name="website_enter_fullscreen">전체 화면 시작</string>
+    <string name="website_orientation">화면 방향</string>
+    <string name="website_orientation_system">시스템 설정 따르기</string>
+    <string name="website_orientation_free">자유 회전</string>
+    <string name="website_orientation_locked">현재 방향 고정</string>
+    <string name="website_orientation_landscape">가로</string>
+    <string name="website_orientation_portrait">세로</string>
 </resources>

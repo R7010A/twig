@@ -937,4 +937,10 @@
     <string name="website_desktop_site">Версия для компьютера</string>
     <string name="website_open_fullscreen">Открывать на весь экран</string>
     <string name="website_enter_fullscreen">На весь экран</string>
+    <string name="website_orientation">Ориентация экрана</string>
+    <string name="website_orientation_system">Как в системе</string>
+    <string name="website_orientation_free">Свободное вращение</string>
+    <string name="website_orientation_locked">Зафиксировать текущую ориентацию</string>
+    <string name="website_orientation_landscape">Альбомная</string>
+    <string name="website_orientation_portrait">Портретная</string>
 </resources>

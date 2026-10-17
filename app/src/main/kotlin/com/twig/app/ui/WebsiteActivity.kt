@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Bitmap
@@ -35,6 +36,7 @@ import androidx.lifecycle.lifecycleScope
 import com.twig.app.R
 import com.twig.app.Website
 import com.twig.app.WebsiteStore
+import com.twig.app.WebsiteOrientation
 import com.twig.app.databinding.ActivityWebsiteBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -315,6 +317,15 @@ class WebsiteActivity : AppCompatActivity() {
     }
 
     private fun applyWebsiteOptions() {
+        val orientation = when (site.orientation) {
+            WebsiteOrientation.SYSTEM -> ActivityInfo.SCREEN_ORIENTATION_USER
+            WebsiteOrientation.FREE -> ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
+            WebsiteOrientation.LOCKED -> ActivityInfo.SCREEN_ORIENTATION_LOCKED
+            WebsiteOrientation.LANDSCAPE -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            WebsiteOrientation.PORTRAIT -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
+        // Do not recapture a locked orientation when unrelated display options change.
+        if (requestedOrientation != orientation) requestedOrientation = orientation
         title = site.name
         b.toolbar.title = site.name
         b.toolbar.visibility = if (site.fullscreen || immersiveFullscreen) View.GONE else View.VISIBLE

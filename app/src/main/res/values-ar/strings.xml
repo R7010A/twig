@@ -905,4 +905,10 @@
     <string name="website_desktop_site">موقع سطح المكتب</string>
     <string name="website_open_fullscreen">فتح بملء الشاشة</string>
     <string name="website_enter_fullscreen">الدخول إلى ملء الشاشة</string>
+    <string name="website_orientation">اتجاه الشاشة</string>
+    <string name="website_orientation_system">اتباع النظام</string>
+    <string name="website_orientation_free">دوران حر</string>
+    <string name="website_orientation_locked">قفل الاتجاه الحالي</string>
+    <string name="website_orientation_landscape">أفقي</string>
+    <string name="website_orientation_portrait">عمودي</string>
 </resources>

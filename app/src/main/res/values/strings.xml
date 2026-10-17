@@ -971,4 +971,10 @@
     <string name="website_desktop_site">Desktop site</string>
     <string name="website_open_fullscreen">Open fullscreen</string>
     <string name="website_enter_fullscreen">Enter fullscreen</string>
+    <string name="website_orientation">Screen orientation</string>
+    <string name="website_orientation_system">Follow system</string>
+    <string name="website_orientation_free">Free rotation</string>
+    <string name="website_orientation_locked">Lock current orientation</string>
+    <string name="website_orientation_landscape">Landscape</string>
+    <string name="website_orientation_portrait">Portrait</string>
 </resources>

@@ -900,4 +900,10 @@
     <string name="website_desktop_site">Trang web cho máy tính</string>
     <string name="website_open_fullscreen">Mở toàn màn hình</string>
     <string name="website_enter_fullscreen">Vào toàn màn hình</string>
+    <string name="website_orientation">Hướng màn hình</string>
+    <string name="website_orientation_system">Theo hệ thống</string>
+    <string name="website_orientation_free">Xoay tự do</string>
+    <string name="website_orientation_locked">Khóa hướng hiện tại</string>
+    <string name="website_orientation_landscape">Ngang</string>
+    <string name="website_orientation_portrait">Dọc</string>
 </resources>

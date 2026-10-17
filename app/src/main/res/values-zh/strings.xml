@@ -931,4 +931,10 @@
     <string name="website_desktop_site">桌面版网站</string>
     <string name="website_open_fullscreen">全屏打开</string>
     <string name="website_enter_fullscreen">进入全屏</string>
+    <string name="website_orientation">屏幕方向</string>
+    <string name="website_orientation_system">跟随系统</string>
+    <string name="website_orientation_free">自由</string>
+    <string name="website_orientation_locked">锁定</string>
+    <string name="website_orientation_landscape">横屏</string>
+    <string name="website_orientation_portrait">竖屏</string>
 </resources>

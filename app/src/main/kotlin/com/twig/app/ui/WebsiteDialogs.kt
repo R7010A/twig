@@ -9,12 +9,17 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
 import android.widget.ScrollView
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import android.widget.TextView
+import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import com.twig.app.R
 import com.twig.app.Website
 import com.twig.app.WebsiteStore
+import com.twig.app.WebsiteOrientation
 
 object WebsiteDialogs {
     fun edit(ctx: Context, site: Website? = null) {
@@ -50,6 +55,25 @@ object WebsiteDialogs {
         val selection = option(R.string.website_disable_text_selection, site?.disableTextSelection ?: false)
         val scrollAxis = option(R.string.website_lock_scroll_axis, site?.lockScrollAxis ?: false)
         val desktop = option(R.string.website_desktop_site, site?.desktopSite ?: false)
+        form.addView(TextView(ctx).apply { setText(R.string.website_orientation) })
+        val orientation = RadioGroup(ctx).apply {
+            tag = R.string.website_orientation
+            val labels = listOf(
+                WebsiteOrientation.SYSTEM to R.string.website_orientation_system,
+                WebsiteOrientation.FREE to R.string.website_orientation_free,
+                WebsiteOrientation.LOCKED to R.string.website_orientation_locked,
+                WebsiteOrientation.LANDSCAPE to R.string.website_orientation_landscape,
+                WebsiteOrientation.PORTRAIT to R.string.website_orientation_portrait,
+            )
+            for ((mode, label) in labels) addView(RadioButton(ctx).apply {
+                id = View.generateViewId()
+                tag = mode
+                setText(label)
+            })
+            val selected = site?.orientation ?: WebsiteOrientation.SYSTEM
+            check(findViewWithTag<RadioButton>(selected).id)
+        }
+        form.addView(orientation)
         val dialog = AlertDialog.Builder(ctx)
             .setTitle(if (site == null) R.string.website_add else R.string.website_edit)
             .setView(ScrollView(ctx).apply { addView(form) })
@@ -70,6 +94,7 @@ object WebsiteDialogs {
                     hideStatusBar = statusBar.isChecked, hideNavigationBar = navigationBar.isChecked,
                     pullToRefresh = pullToRefresh.isChecked, disableTextSelection = selection.isChecked,
                     lockScrollAxis = scrollAxis.isChecked, desktopSite = desktop.isChecked,
+                    orientation = orientation.findViewById<RadioButton>(orientation.checkedRadioButtonId).tag as WebsiteOrientation,
                 )
                 WebsiteStore.save(ctx, saved)
                 if (site != null && site.url != saved.url) WebsiteIcons.forget(ctx, site)

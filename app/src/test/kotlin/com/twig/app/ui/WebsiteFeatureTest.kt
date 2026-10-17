@@ -307,7 +307,8 @@ class WebsiteFeatureTest {
     @Test fun `configuration backup restores bookmarks and fullscreen preferences`() {
         val site = Website(name = "Example", url = "https://example.com", fullscreen = true,
             hideStatusBar = false, hideNavigationBar = true, pullToRefresh = true,
-            disableTextSelection = true, lockScrollAxis = true, desktopSite = true, openFullscreen = true)
+            disableTextSelection = true, lockScrollAxis = true, desktopSite = true, openFullscreen = true,
+            orientation = com.twig.app.WebsiteOrientation.LANDSCAPE)
         WebsiteStore.save(app, site)
         val out = ByteArrayOutputStream()
         Backup.export(app, out, null)

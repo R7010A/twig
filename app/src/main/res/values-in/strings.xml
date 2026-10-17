@@ -901,4 +901,10 @@
     <string name="website_desktop_site">Situs desktop</string>
     <string name="website_open_fullscreen">Buka layar penuh</string>
     <string name="website_enter_fullscreen">Masuk layar penuh</string>
+    <string name="website_orientation">Orientasi layar</string>
+    <string name="website_orientation_system">Ikuti sistem</string>
+    <string name="website_orientation_free">Rotasi bebas</string>
+    <string name="website_orientation_locked">Kunci orientasi saat ini</string>
+    <string name="website_orientation_landscape">Lanskap</string>
+    <string name="website_orientation_portrait">Potret</string>
 </resources>

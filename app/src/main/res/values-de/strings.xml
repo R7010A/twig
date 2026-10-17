@@ -901,4 +901,10 @@
     <string name="website_desktop_site">Desktopwebsite</string>
     <string name="website_open_fullscreen">Im Vollbild öffnen</string>
     <string name="website_enter_fullscreen">Vollbild aktivieren</string>
+    <string name="website_orientation">Bildschirmausrichtung</string>
+    <string name="website_orientation_system">Systemeinstellung</string>
+    <string name="website_orientation_free">Freie Drehung</string>
+    <string name="website_orientation_locked">Aktuelle Ausrichtung sperren</string>
+    <string name="website_orientation_landscape">Querformat</string>
+    <string name="website_orientation_portrait">Hochformat</string>
 </resources>

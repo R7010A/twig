@@ -901,4 +901,10 @@
     <string name="website_desktop_site">PC 版サイト</string>
     <string name="website_open_fullscreen">全画面で開く</string>
     <string name="website_enter_fullscreen">全画面にする</string>
+    <string name="website_orientation">画面の向き</string>
+    <string name="website_orientation_system">システムに従う</string>
+    <string name="website_orientation_free">自由に回転</string>
+    <string name="website_orientation_locked">現在の向きを固定</string>
+    <string name="website_orientation_landscape">横向き</string>
+    <string name="website_orientation_portrait">縦向き</string>
 </resources>
