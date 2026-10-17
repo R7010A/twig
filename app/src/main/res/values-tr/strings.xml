@@ -963,4 +963,7 @@
     <string name="website_debug_hide_element">Öğeyi gizle</string>
     <string name="website_hidden_elements">Gizlenen öğeler</string>
     <string name="website_hidden_elements_hint">Her satıra #ad veya .banner gibi bir CSS seçicisi girin. Eşleşen öğeleri yeniden göstermek için satırı silin.</string>
+    <string name="website_blocked_requests">İstek engelleme</string>
+    <string name="website_blocked_requests_hint">Her satıra bir alan adı veya URL; * desteklenir. Alan adları alt alanları içerir. URL kuralları URL’nin tamamıyla eşleşir. Örnek: ads.example.com veya https://example.com/ads/*. Yalnızca kaynak istekleri; mevcut içeriği yenileyin.</string>
+    <string name="website_blocked_requests_invalid">Geçersiz kural. Alan adı veya HTTP(S) URL girin; * kullanılabilir.</string>
 </resources>

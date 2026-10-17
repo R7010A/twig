@@ -963,4 +963,7 @@
     <string name="website_debug_hide_element">Sembunyikan elemen</string>
     <string name="website_hidden_elements">Elemen tersembunyi</string>
     <string name="website_hidden_elements_hint">Satu selektor CSS per baris, misalnya #ad atau .banner. Hapus baris untuk menampilkan kembali elemen yang cocok.</string>
+    <string name="website_blocked_requests">Pemblokiran permintaan</string>
+    <string name="website_blocked_requests_hint">Satu domain atau URL per baris; mendukung *. Domain mencakup subdomain. Aturan URL mencocokkan seluruh URL. Contoh: ads.example.com atau https://example.com/ads/*. Hanya sumber daya; muat ulang konten yang ada.</string>
+    <string name="website_blocked_requests_invalid">Aturan tidak valid. Masukkan domain atau URL HTTP(S), boleh memakai *.</string>
 </resources>

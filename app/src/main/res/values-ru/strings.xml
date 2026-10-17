@@ -999,4 +999,7 @@
     <string name="website_debug_hide_element">Скрыть элемент</string>
     <string name="website_hidden_elements">Скрытые элементы</string>
     <string name="website_hidden_elements_hint">Один CSS-селектор в строке, например #ad или .banner. Удалите строку, чтобы снова показать соответствующие элементы.</string>
+    <string name="website_blocked_requests">Блокировка запросов</string>
+    <string name="website_blocked_requests_hint">Домен или URL на каждой строке; поддерживается *. Домены включают поддомены. Правила URL сопоставляются с полным URL. Пример: ads.example.com или https://example.com/ads/*. Только ресурсы; обновите уже загруженное содержимое.</string>
+    <string name="website_blocked_requests_invalid">Недопустимое правило. Введите домен или HTTP(S) URL; допускается *.</string>
 </resources>

@@ -963,4 +963,7 @@
     <string name="website_debug_hide_element">Ocultar elemento</string>
     <string name="website_hidden_elements">Elementos ocultos</string>
     <string name="website_hidden_elements_hint">Un selector CSS por línea, como #ad o .banner. Elimina la línea para volver a mostrar los elementos coincidentes.</string>
+    <string name="website_blocked_requests">Bloqueo de solicitudes</string>
+    <string name="website_blocked_requests_hint">Un dominio o URL por línea; admite *. Los dominios incluyen subdominios. Las reglas URL coinciden con la URL completa. Ejemplo: ads.example.com o https://example.com/ads/*. Solo recursos; recarga el contenido existente.</string>
+    <string name="website_blocked_requests_invalid">Regla no válida. Introduce un dominio o URL HTTP(S); se permite *.</string>
 </resources>

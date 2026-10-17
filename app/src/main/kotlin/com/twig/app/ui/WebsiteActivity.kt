@@ -23,6 +23,7 @@ import android.webkit.ConsoleMessage
 import android.webkit.CookieManager
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceResponse
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.HttpAuthHandler
@@ -49,11 +50,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.ByteArrayInputStream
 
 /** Shares WebView's persistent website data across tree entries and launcher shortcuts. */
 class WebsiteActivity : AppCompatActivity() {
     private lateinit var b: ActivityWebsiteBinding
     private lateinit var site: Website
+    @Volatile private var requestBlocker = WebsiteRequestBlocker.EMPTY
     private var mobileUserAgent = ""
     private lateinit var debugger: WebsiteDebugPanel
     private var remoteDebugMenu: MenuItem? = null
@@ -84,6 +87,7 @@ class WebsiteActivity : AppCompatActivity() {
             return
         }
         site = saved
+        requestBlocker = WebsiteRequestBlocker.parse(saved.blockedRequests) ?: WebsiteRequestBlocker.EMPTY
         debugger = WebsiteDebugPanel(this, b.debugHost, b.web, { site }) { updated ->
             site = site.copy(script = updated.script, style = updated.style, hiddenElements = updated.hiddenElements)
             customStyleApplied = WebsiteCustomization.hasStyles(site)
@@ -175,6 +179,12 @@ class WebsiteActivity : AppCompatActivity() {
             downloads.offer(site, url, agent, disposition, mime, size)
         }
         b.web.webViewClient = object : WebViewClient() {
+            override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
+                // Called off the UI thread. Read only the immutable rule snapshot, never views or preferences.
+                if (request.isForMainFrame || !requestBlocker.blocks(request.url.toString())) return null
+                return WebResourceResponse("text/plain", "UTF-8", 403, "Blocked", emptyMap(), ByteArrayInputStream(ByteArray(0)))
+            }
+
             override fun onReceivedHttpAuthRequest(view: WebView, handler: HttpAuthHandler, host: String, realm: String) {
                 val credentials = WebsiteCustomization.basicAuthFor(site, view.url ?: pendingMainUrl, host)
                 if (credentials != null && handler.useHttpAuthUsernamePassword()) {
@@ -311,6 +321,7 @@ class WebsiteActivity : AppCompatActivity() {
             fullscreenFromToolbar = false
         }
         site = saved
+        requestBlocker = WebsiteRequestBlocker.parse(saved.blockedRequests) ?: WebsiteRequestBlocker.EMPTY
         if (changedUrl || changedDesktop || changedAgent || changedHeaders || changedScript || changedAuth) hidePageFullscreen()
         applyWebsiteOptions()
         when {

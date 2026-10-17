@@ -96,6 +96,28 @@ class WebsiteCustomizationTest {
             override fun getRequestHeaders() = emptyMap<String, String>()
         }
 
+    @Test fun `resource blocking returns an empty response without blocking navigation and updates in a live task`() {
+        val configured = site.copy(blockedRequests = "ads.test\nhttps://twig.test/api/track*")
+        Page(configured).use { page ->
+            val client = requireNotNull(page.web.webViewClient)
+            for (url in listOf("https://ads.test/ad.png", "https://cdn.ads.test/ad.js", "https://twig.test/api/track?id=1")) {
+                val response = client.shouldInterceptRequest(page.web, request(url, main = false, method = "POST"))
+                assertNotNull(url, response)
+                assertEquals(403, response!!.statusCode)
+                assertEquals(-1, response.data.read())
+            }
+            assertNull(client.shouldInterceptRequest(page.web, request("https://ads.test/", main = true)))
+            assertNull(client.shouldInterceptRequest(page.web, request("https://twig.test/content.png", main = false)))
+            assertFalse(client.shouldOverrideUrlLoading(page.web, request("https://ads.test/")))
+            page.edit(configured.copy(blockedRequests = "other.test"))
+            assertNull(client.shouldInterceptRequest(page.web, request("https://ads.test/ad.js", main = false)))
+            assertNotNull(client.shouldInterceptRequest(page.web, request("https://other.test/ad.js", main = false)))
+            page.edit(site)
+            assertNull(client.shouldInterceptRequest(page.web, request("https://other.test/ad.js", main = false)))
+            assertEquals(0, page.shadow.reloadInvocations)
+        }
+    }
+
     @Test fun `native HTTP auth supplies saved credentials only on the bookmark site and stops rejected retries`() {
         val configured = site.copy(basicAuthUsername = "alice", basicAuthPassword = "p:a ss")
         Page(configured).use { page ->
@@ -287,10 +309,17 @@ class WebsiteCustomizationTest {
             assertEquals(site, WebsiteStore.all(app).single())
             field(R.string.website_headers).setText("X-Auth: secret")
             field(R.string.website_hidden_elements).setText("#ad\n.banner")
+            field(R.string.website_blocked_requests).setText("bad domain")
+            advancedHeader.performClick()
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick()
+            assertTrue(dialog.isShowing)
+            assertEquals(View.VISIBLE, advanced.visibility)
+            assertNotNull(field(R.string.website_blocked_requests).error)
+            field(R.string.website_blocked_requests).setText("ads.test\nhttps://twig.test/ads/*")
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick()
             assertFalse(dialog.isShowing)
             assertEquals(site.copy(userAgent = "Custom/2.0", script = "window.changed = true;",
-                style = "#ad { display: none; }", headers = "X-Auth: secret", hiddenElements = "#ad\n.banner"), WebsiteStore.all(app).single())
+                style = "#ad { display: none; }", headers = "X-Auth: secret", hiddenElements = "#ad\n.banner", blockedRequests = "ads.test\nhttps://twig.test/ads/*"), WebsiteStore.all(app).single())
             val saved = WebsiteStore.all(app).single()
             WebsiteDialogs.edit(page.activity, saved)
             shadowOf(Looper.getMainLooper()).idle()
@@ -304,7 +333,7 @@ class WebsiteCustomizationTest {
     @Test fun `headers are encrypted on disk and backups reencrypt them for another device`() {
         val configured = site.copy(headers = "Authorization: Bearer unique-test-secret", script = "window.ok = true;",
             style = "body { color: green; }", userAgent = "Custom/1.0",
-            basicAuthUsername = "private-user", basicAuthPassword = "private-pass", hiddenElements = "#ad\n.banner")
+            basicAuthUsername = "private-user", basicAuthPassword = "private-pass", hiddenElements = "#ad\n.banner", blockedRequests = "ads.test")
         WebsiteStore.save(app, configured)
         val stored = WebsiteStore.preferences(app).getString("list", "")!!
         assertFalse(stored.contains("unique-test-secret"))

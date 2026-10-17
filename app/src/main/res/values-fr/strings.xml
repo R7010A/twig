@@ -963,4 +963,7 @@
     <string name="website_debug_hide_element">Masquer élément</string>
     <string name="website_hidden_elements">Éléments masqués</string>
     <string name="website_hidden_elements_hint">Un sélecteur CSS par ligne, par exemple #ad ou .banner. Supprimez la ligne pour réafficher les éléments correspondants.</string>
+    <string name="website_blocked_requests">Blocage des requêtes</string>
+    <string name="website_blocked_requests_hint">Un domaine ou une URL par ligne ; * accepté. Les domaines incluent les sous-domaines. Les règles URL correspondent à toute l’URL. Exemple : ads.example.com ou https://example.com/ads/*. Ressources uniquement ; rechargez le contenu existant.</string>
+    <string name="website_blocked_requests_invalid">Règle invalide. Saisissez un domaine ou une URL HTTP(S), avec * si nécessaire.</string>
 </resources>

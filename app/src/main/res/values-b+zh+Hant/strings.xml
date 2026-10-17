@@ -962,4 +962,7 @@
     <string name="website_debug_hide_element">隱藏元素</string>
     <string name="website_hidden_elements">隱藏元素</string>
     <string name="website_hidden_elements_hint">每行一個 CSS 選擇器，例如 #ad 或 .banner。刪除對應行即可恢復顯示。</string>
+    <string name="website_blocked_requests">請求攔截</string>
+    <string name="website_blocked_requests_hint">每行一個網域或網址，支援 * 萬用字元。網域包含子網域，網址規則比對完整 URL。例如 ads.example.com 或 https://example.com/ads/*。僅攔截資源請求；已載入的內容需重新整理。</string>
+    <string name="website_blocked_requests_invalid">規則無效。請輸入網域或 HTTP(S) 網址，可包含 * 萬用字元。</string>
 </resources>

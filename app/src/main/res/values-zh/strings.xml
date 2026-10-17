@@ -993,4 +993,7 @@
     <string name="website_debug_hide_element">隐藏元素</string>
     <string name="website_hidden_elements">隐藏元素</string>
     <string name="website_hidden_elements_hint">每行一个 CSS 选择器，例如 #ad 或 .banner。删除对应行即可恢复显示。</string>
+    <string name="website_blocked_requests">请求拦截</string>
+    <string name="website_blocked_requests_hint">每行一个域名或网址，支持 * 通配符。域名包含子域名，网址规则匹配完整 URL。例如 ads.example.com 或 https://example.com/ads/*。仅拦截资源请求；已加载的内容需刷新。</string>
+    <string name="website_blocked_requests_invalid">规则无效。请输入域名或 HTTP(S) 网址，可包含 * 通配符。</string>
 </resources>

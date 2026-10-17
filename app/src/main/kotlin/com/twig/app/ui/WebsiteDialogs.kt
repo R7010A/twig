@@ -152,6 +152,7 @@ object WebsiteDialogs {
         val script = field(R.string.website_script, R.string.website_script_hint, site?.script.orEmpty(), true)
         val style = field(R.string.website_style, R.string.website_style_hint, site?.style.orEmpty(), true)
         val hidden = field(R.string.website_hidden_elements, R.string.website_hidden_elements_hint, site?.hiddenElements.orEmpty(), true)
+        val blocked = field(R.string.website_blocked_requests, R.string.website_blocked_requests_hint, site?.blockedRequests.orEmpty(), true)
         advanced.addView(TextView(ctx).apply { setText(R.string.website_custom_scope) })
         fun advancedError(field: EditText, message: Int) {
             expandAdvanced(true)
@@ -186,6 +187,10 @@ object WebsiteDialogs {
                     advancedError(headers, R.string.website_headers_invalid)
                     return@setOnClickListener
                 }
+                if (WebsiteRequestBlocker.parse(blocked.text.toString()) == null) {
+                    advancedError(blocked, R.string.website_blocked_requests_invalid)
+                    return@setOnClickListener
+                }
                 val label = name.text.toString().trim().ifEmpty { android.net.Uri.parse(address).host.orEmpty() }
                 val saved = (site ?: Website(name = label, url = address)).copy(
                     name = label, url = address, fullscreen = fullscreen.isChecked,
@@ -197,6 +202,7 @@ object WebsiteDialogs {
                     userAgent = agent, headers = headers.text.toString(),
                     basicAuthUsername = authUsername.text.toString(), basicAuthPassword = authPassword.text.toString(),
                     script = script.text.toString(), style = style.text.toString(), hiddenElements = hidden.text.toString(),
+                    blockedRequests = blocked.text.toString(),
                 )
                 try {
                     WebsiteStore.save(ctx, saved)

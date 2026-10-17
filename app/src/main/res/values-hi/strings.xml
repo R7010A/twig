@@ -963,4 +963,7 @@
     <string name="website_debug_hide_element">एलिमेंट छिपाएँ</string>
     <string name="website_hidden_elements">छिपे हुए एलिमेंट</string>
     <string name="website_hidden_elements_hint">प्रति पंक्ति एक CSS चयनकर्ता, जैसे #ad या .banner। संबंधित एलिमेंट फिर दिखाने के लिए पंक्ति हटाएँ।</string>
+    <string name="website_blocked_requests">अनुरोध अवरोधन</string>
+    <string name="website_blocked_requests_hint">हर पंक्ति में एक डोमेन या URL; * समर्थित है। डोमेन में उपडोमेन शामिल हैं। URL नियम पूरे URL से मेल खाते हैं। उदाहरण: ads.example.com या https://example.com/ads/*। केवल संसाधन अनुरोध; मौजूदा सामग्री फिर लोड करें।</string>
+    <string name="website_blocked_requests_invalid">अमान्य नियम। डोमेन या HTTP(S) URL दर्ज करें; * का उपयोग कर सकते हैं।</string>
 </resources>

@@ -963,4 +963,7 @@
     <string name="website_debug_hide_element">要素を非表示</string>
     <string name="website_hidden_elements">非表示の要素</string>
     <string name="website_hidden_elements_hint">1 行に CSS セレクターを 1 つ入力します（例：#ad、.banner）。行を削除すると該当する要素を再表示します。</string>
+    <string name="website_blocked_requests">リクエストのブロック</string>
+    <string name="website_blocked_requests_hint">1行に1つのドメインまたはURL。*に対応。ドメインにはサブドメインも含まれます。URLルールはURL全体に一致します。例: ads.example.com または https://example.com/ads/*。リソースのみ対象。読み込み済みの内容は再読み込みしてください。</string>
+    <string name="website_blocked_requests_invalid">無効なルールです。ドメインまたはHTTP(S) URLを入力してください。*を使用できます。</string>
 </resources>

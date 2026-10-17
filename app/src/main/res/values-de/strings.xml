@@ -963,4 +963,7 @@
     <string name="website_debug_hide_element">Element ausblenden</string>
     <string name="website_hidden_elements">Ausgeblendete Elemente</string>
     <string name="website_hidden_elements_hint">Ein CSS-Selektor pro Zeile, z. B. #ad oder .banner. Zeile entfernen, um passende Elemente wieder anzuzeigen.</string>
+    <string name="website_blocked_requests">Anfragen blockieren</string>
+    <string name="website_blocked_requests_hint">Eine Domain oder URL pro Zeile; * erlaubt. Domains umfassen Subdomains. URL-Regeln gelten für die gesamte URL. Beispiel: ads.example.com oder https://example.com/ads/*. Nur Ressourcenanfragen; vorhandene Inhalte neu laden.</string>
+    <string name="website_blocked_requests_invalid">Ungültige Regel. Domain oder HTTP(S)-URL eingeben; * ist erlaubt.</string>
 </resources>
