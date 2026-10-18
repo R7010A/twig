@@ -997,4 +997,8 @@
     <string name="website_blocked_requests_hint">每行一个域名或网址，支持 * 通配符。域名包含子域名，网址规则匹配完整 URL。例如 ads.example.com 或 https://example.com/ads/*。仅拦截资源请求；已加载的内容需刷新。</string>
     <string name="website_blocked_requests_invalid">规则无效。请输入域名或 HTTP(S) 网址，可包含 * 通配符。</string>
     <string name="website_double_tap_toolbar">双击隐藏/显示工具栏</string>
+    <string name="website_allow_background_running">后台运行</string>
+    <string name="website_background_channel">网站后台运行</string>
+    <string name="website_background_close">关闭后台网站</string>
+    <string name="website_background_failed">无法保持网站后台运行。</string>
 </resources>

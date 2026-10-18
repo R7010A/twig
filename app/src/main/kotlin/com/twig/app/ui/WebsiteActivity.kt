@@ -62,6 +62,8 @@ class WebsiteActivity : AppCompatActivity() {
     private var remoteDebugMenu: MenuItem? = null
     private var customStyleApplied = false
     private var pendingMainUrl: String? = null
+    private var backgroundNotificationRequested = false
+    private val backgroundNotificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
     private var toolbarVisibleOverride: Boolean? = null
     private var immersiveFullscreen = false
     private var fullscreenFromToolbar = false
@@ -88,11 +90,15 @@ class WebsiteActivity : AppCompatActivity() {
             return
         }
         site = saved
+        lifecycle.addObserver(object : androidx.lifecycle.DefaultLifecycleObserver {
+            override fun onResume(owner: androidx.lifecycle.LifecycleOwner) { syncBackgroundRunning() }
+        })
         requestBlocker = WebsiteRequestBlocker.parse(saved.blockedRequests) ?: WebsiteRequestBlocker.EMPTY
         debugger = WebsiteDebugPanel(this, b.debugHost, b.web, { site }) { updated ->
             site = site.copy(script = updated.script, style = updated.style, hiddenElements = updated.hiddenElements)
             customStyleApplied = WebsiteCustomization.hasStyles(site)
         }
+        backgroundNotificationRequested = savedInstanceState?.getBoolean("background_notification_requested") ?: false
         toolbarVisibleOverride = savedInstanceState?.takeIf { it.containsKey("toolbar_visible_override") }
             ?.getBoolean("toolbar_visible_override")
         b.web.onDoubleTapToolbar = {
@@ -474,8 +480,27 @@ class WebsiteActivity : AppCompatActivity() {
             useWideViewPort = true
             loadWithOverviewMode = site.desktopSite
         }
+        syncBackgroundRunning()
         applySystemBars()
         ViewCompat.requestApplyInsets(b.root)
+    }
+
+    internal fun backgroundRunningDisabled() {
+        if (::site.isInitialized) site = site.copy(allowBackgroundRunning = false)
+        if (::b.isInitialized && !lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) b.web.onPause()
+    }
+
+    private fun syncBackgroundRunning() {
+        if (!::site.isInitialized) return
+        val allowed = WebsiteStore.all(this).firstOrNull { it.id == site.id }?.allowBackgroundRunning == true
+        if (allowed != site.allowBackgroundRunning) site = site.copy(allowBackgroundRunning = allowed)
+        WebsiteBackground.update(this, site)
+        if (site.allowBackgroundRunning && lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED) &&
+            Build.VERSION.SDK_INT >= 33 && !backgroundNotificationRequested &&
+            checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            backgroundNotificationRequested = true
+            backgroundNotificationPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 
     private fun applySystemBars() {
@@ -608,7 +633,8 @@ class WebsiteActivity : AppCompatActivity() {
         if (::debugger.isInitialized) debugger.stopInspection()
         cancelCertificateRequests()
         if (::b.isInitialized) {
-            b.web.onPause()
+            // Keep opted-in WebViews running; their foreground service protects the host from cached-app freezing.
+            if (!::site.isInitialized || !site.allowBackgroundRunning) b.web.onPause()
             persistCookies()
         }
         super.onPause()
@@ -633,6 +659,7 @@ class WebsiteActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean("background_notification_requested", backgroundNotificationRequested)
         toolbarVisibleOverride?.let { outState.putBoolean("toolbar_visible_override", it) }
         outState.putBoolean("immersive_fullscreen", immersiveFullscreen)
         outState.putBoolean("fullscreen_from_toolbar", fullscreenFromToolbar)
@@ -657,6 +684,7 @@ class WebsiteActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        WebsiteBackground.release(this)
         WebsiteRemoteDebug.stop(this)
         if (::debugger.isInitialized) debugger.destroy()
         downloads.destroy()

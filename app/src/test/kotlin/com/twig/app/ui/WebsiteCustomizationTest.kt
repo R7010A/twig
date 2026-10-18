@@ -333,7 +333,7 @@ class WebsiteCustomizationTest {
     @Test fun `headers are encrypted on disk and backups reencrypt them for another device`() {
         val configured = site.copy(headers = "Authorization: Bearer unique-test-secret", script = "window.ok = true;",
             style = "body { color: green; }", userAgent = "Custom/1.0",
-            basicAuthUsername = "private-user", basicAuthPassword = "private-pass", hiddenElements = "#ad\n.banner", blockedRequests = "ads.test")
+            basicAuthUsername = "private-user", basicAuthPassword = "private-pass", hiddenElements = "#ad\n.banner", blockedRequests = "ads.test", allowBackgroundRunning = true)
         WebsiteStore.save(app, configured)
         val stored = WebsiteStore.preferences(app).getString("list", "")!!
         assertFalse(stored.contains("unique-test-secret"))

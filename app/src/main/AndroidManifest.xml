@@ -207,6 +207,16 @@
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
 
+        <!-- Explicitly opted-in website sessions outlive their visible Activity. -->
+        <service
+            android:name=".ui.WebsiteBackgroundService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Keeps explicitly enabled website sessions active for user-requested page tasks and connections while the app is in the background" />
+        </service>
+
         <!-- "Open with Twig": catches other apps' ACTION_VIEW and routes to the
              internal viewer / archive mount. Headless relay (transparent theme),
              finishes immediately after dispatching. Only registers the MIME types

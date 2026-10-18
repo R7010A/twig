@@ -114,6 +114,7 @@ class WebsiteFeatureTest {
             {"id":"normal","name":"Normal","url":"https://example.org"}
         ]""").commit()
         val sites = WebsiteStore.all(app)
+        assertFalse(sites[0].allowBackgroundRunning)
         assertTrue(sites[0].doubleTapToolbar)
         assertTrue(sites[0].fullscreen)
         assertTrue(sites[0].hideStatusBar)
@@ -264,6 +265,7 @@ class WebsiteFeatureTest {
         val options = listOf(R.string.website_open_fullscreen to site.openFullscreen,
             R.string.website_fullscreen to site.fullscreen,
             R.string.website_double_tap_toolbar to site.doubleTapToolbar,
+            R.string.website_allow_background_running to site.allowBackgroundRunning,
             R.string.website_hide_status_bar to site.hideStatusBar,
             R.string.website_hide_navigation_bar to site.hideNavigationBar,
             R.string.website_pull_to_refresh to site.pullToRefresh,
@@ -278,7 +280,7 @@ class WebsiteFeatureTest {
         dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).performClick()
         assertEquals(site.copy(fullscreen = false, hideStatusBar = true, hideNavigationBar = false,
             pullToRefresh = true, disableTextSelection = false, lockScrollAxis = true, desktopSite = false,
-            openFullscreen = true, doubleTapToolbar = false),
+            openFullscreen = true, doubleTapToolbar = false, allowBackgroundRunning = true),
             WebsiteStore.all(app).single())
         controller.pause().stop().destroy()
     }

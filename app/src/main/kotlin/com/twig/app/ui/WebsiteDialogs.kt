@@ -73,6 +73,7 @@ object WebsiteDialogs {
         val openFullscreen = option(R.string.website_open_fullscreen, site?.openFullscreen ?: false)
         val fullscreen = option(R.string.website_fullscreen, site?.fullscreen ?: false)
         val doubleTap = option(R.string.website_double_tap_toolbar, site?.doubleTapToolbar ?: true)
+        val backgroundRunning = option(R.string.website_allow_background_running, site?.allowBackgroundRunning ?: false)
         val statusBar = option(R.string.website_hide_status_bar, site?.hideStatusBar ?: false)
         val navigationBar = option(R.string.website_hide_navigation_bar, site?.hideNavigationBar ?: false)
         val pullToRefresh = option(R.string.website_pull_to_refresh, site?.pullToRefresh ?: false)
@@ -195,7 +196,7 @@ object WebsiteDialogs {
                 val label = name.text.toString().trim().ifEmpty { android.net.Uri.parse(address).host.orEmpty() }
                 val saved = (site ?: Website(name = label, url = address)).copy(
                     name = label, url = address, fullscreen = fullscreen.isChecked, doubleTapToolbar = doubleTap.isChecked,
-                    openFullscreen = openFullscreen.isChecked,
+                    openFullscreen = openFullscreen.isChecked, allowBackgroundRunning = backgroundRunning.isChecked,
                     hideStatusBar = statusBar.isChecked, hideNavigationBar = navigationBar.isChecked,
                     pullToRefresh = pullToRefresh.isChecked, disableTextSelection = selection.isChecked,
                     lockScrollAxis = scrollAxis.isChecked, desktopSite = desktop.isChecked,

@@ -547,6 +547,11 @@ add its symptom here.
   the Properties ripple disappearing on the first tap with folder counts enabled,
   fast pane swipes also clicking a node, website refresh firing midway through a fixed-header page,
   webpage video fullscreen buttons doing nothing, website fullscreen adding an extra Back step.
+- **[Website background execution](docs/lessons/website-background.md)** — skipping
+  WebView.onPause does not protect a cached host process from Android freezing. Opted-in
+  website sessions hold a general foreground service until closed; register from
+  the Lifecycle RESUMED event, share ownership across pages, and never restart stale pages.
+  *Explains*: website music stopping after backgrounding and resuming when the page returns.
 - **[Text handling and editing](docs/lessons/text-handling.md)** — one decoding entry
   point (`TextCodec`), where order is priority; write back in the encoding the file was
   read with and never silently substitute `?`.

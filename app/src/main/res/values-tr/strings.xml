@@ -967,4 +967,8 @@
     <string name="website_blocked_requests_hint">Her satıra bir alan adı veya URL; * desteklenir. Alan adları alt alanları içerir. URL kuralları URL’nin tamamıyla eşleşir. Örnek: ads.example.com veya https://example.com/ads/*. Yalnızca kaynak istekleri; mevcut içeriği yenileyin.</string>
     <string name="website_blocked_requests_invalid">Geçersiz kural. Alan adı veya HTTP(S) URL girin; * kullanılabilir.</string>
     <string name="website_double_tap_toolbar">Araç çubuğunu gizlemek/göstermek için çift dokunun</string>
+    <string name="website_allow_background_running">Arka planda çalıştır</string>
+    <string name="website_background_channel">Arka planda çalışan web siteleri</string>
+    <string name="website_background_close">Arka plan sitelerini kapat</string>
+    <string name="website_background_failed">Web siteleri arka planda çalışır tutulamadı.</string>
 </resources>
