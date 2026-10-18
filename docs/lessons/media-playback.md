@@ -347,6 +347,6 @@
   edge-to-edge blurred background and per-view insets. Share only the window policy
   and safe-inset calculation with `StatusBarFullscreen`; installing its root-padding
   listener would duplicate the music page's bottom controls/drawer insets. Fullscreen
-  ignores status-bar and top-cutout padding, including transient status-bar reveals.
+  ignores status-bar and cutout padding on all edges, including transient status-bar reveals.
   Normal mode still reserves visible status-bar space. Reinstall listeners after
   orientation reinflation and request fresh insets when focus returns.

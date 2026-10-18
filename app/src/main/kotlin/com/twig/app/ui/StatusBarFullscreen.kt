@@ -11,8 +11,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.twig.app.R
 
-/** Status-bar-only fullscreen uses the top cutout area without reserving an empty band.
- * Side cutouts, navigation and keyboard still have insets; normal mode is system-fitted. */
+/** Status-bar-only fullscreen uses the cutout area in either orientation without an empty band.
+ * Navigation and keyboard still have insets; normal mode is system-fitted. */
 class StatusBarFullscreen(private val activity: Activity, private val root: View) {
     private var enabled = false
     private val background = root.background
@@ -64,14 +64,13 @@ class StatusBarFullscreen(private val activity: Activity, private val root: View
             }
         }
 
-        /** A hidden status bar and top cutout contribute no top gap, including while bars peek in. */
+        /** Fullscreen ignores cutout and status-bar gaps on every edge, including transient bar reveals. */
         fun contentInsets(insets: WindowInsetsCompat, fullscreen: Boolean, includeKeyboard: Boolean = false): androidx.core.graphics.Insets {
             val barTypes = WindowInsetsCompat.Type.navigationBars() or
                 (if (includeKeyboard) WindowInsetsCompat.Type.ime() else 0) or
                 (if (fullscreen) 0 else WindowInsetsCompat.Type.statusBars())
-            val bars = insets.getInsets(barTypes)
-            val safe = insets.getInsets(barTypes or WindowInsetsCompat.Type.displayCutout())
-            return androidx.core.graphics.Insets.of(safe.left, if (fullscreen) bars.top else safe.top, safe.right, safe.bottom)
+            return insets.getInsets(barTypes or
+                (if (fullscreen) 0 else WindowInsetsCompat.Type.displayCutout()))
         }
     }
 

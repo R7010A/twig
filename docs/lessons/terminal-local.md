@@ -223,7 +223,7 @@
     `/system/etc/mkshrc` itself or the session loses its normal prompt.
 
 - **Status-bar fullscreen and cutouts (2026-10-12)**: TerminalActivity uses the same
-  `StatusBarFullscreen` layout policy as the file panes: no top cutout padding, while
-  side cutouts, navigation and keyboard insets remain applied. Keep the terminal-size
+  `StatusBarFullscreen` layout policy as the file panes: no cutout padding, while
+  navigation and keyboard insets remain applied. Keep the terminal-size
   freeze before focus-loss relayouts and the thaw after fullscreen is reapplied;
   changing window insets must not bypass `TermSizeFreezeLayout`.
