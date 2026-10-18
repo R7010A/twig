@@ -149,6 +149,23 @@ class AndroidDataAccess(private val ctx: Context) {
         }
         fun supports(file: XFile) = Build.VERSION.SDK_INT >= 30 && file.scheme == "file" && documentId(file.path) != null
         fun isRoot(file: XFile) = supports(file) && documentId(file.path)?.substringAfter(':') == "Android/data"
+        /** Package folders can arrive as local paths or document URIs after a whole-data grant. */
+        fun appPackage(file: XFile): String? {
+            if (!file.isDir) return null
+            val id = when (file.scheme) {
+                "file" -> documentId(file.path)
+                SafFileSystem.SCHEME -> runCatching {
+                    val uri = Uri.parse(file.path)
+                    if (uri.authority == AUTHORITY) DocumentsContract.getDocumentId(uri) else null
+                }.getOrNull()
+                else -> null
+            } ?: return null
+            val relative = id.substringAfter(':', "")
+            if (!relative.startsWith("Android/data/")) return null
+            return relative.removePrefix("Android/data/").takeIf {
+                it.isNotEmpty() && '/' !in it && it != "." && it != ".."
+            }
+        }
         fun initialUri(file: XFile): Uri = DocumentsContract.buildDocumentUri(
             AUTHORITY, documentId(file.path)!!.substringBefore(':') + ":Android/data")
     }

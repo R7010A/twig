@@ -910,10 +910,12 @@ class FileAdapter(
                     // Directories on media servers are all virtual (albums / artists / libraries…), give them a distinguishable icon
                     val mediaIcon = FileIcons.mediaDirIcon(file)
                     b.icon.setImageResource(mediaIcon ?: R.drawable.ic_folder)
-                    // Third-party app-authorised document tree roots: the whole tree is that app's data; use its icon
-                    // (the row name is also swapped for the app name, see PaneViewModel.safRoots). The icon is filled in
-                    // asynchronously; the folder-icon assignment above is its placeholder.
-                    if (com.twig.app.SafFileSystem.isTreeRoot(file)) {
+                    // Android/data package folders reuse the installed-app icon cache; missing apps keep the folder icon.
+                    val appPackage = com.twig.app.AndroidDataAccess.appPackage(file)
+                    if (appPackage != null) {
+                        FileIcons.bindApp(b.icon, appPackage)
+                    } else if (com.twig.app.SafFileSystem.isTreeRoot(file)) {
+                        // Other providers' granted roots represent the provider app's data.
                         com.twig.app.SafFileSystem.providerApp(ctx, file)?.let {
                             FileIcons.bindApp(b.icon, it.pkg)
                         }
@@ -922,7 +924,7 @@ class FileAdapter(
                     // most directories don't have covers, and stretching to thumbnail size at bind time would make every
                     // folder icon on screen look huge ("they look big" was reported before).
                     // Movie / series posters are 2:3 portraits, so once stretched the row also grows accordingly.
-                    if (thumbs && Thumbs.canThumb(file)) {
+                    if (appPackage == null && thumbs && Thumbs.canThumb(file)) {
                         // ★ Vertical margins must match the file branch: skip them and adjacent covers touch directly.
                         // Series / collections / playlists / media libraries **are all directories** going through this
                         // branch — movies are files, taking the branch below, hence the symptom "only the movie library has spacing".
