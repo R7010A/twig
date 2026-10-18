@@ -96,7 +96,7 @@
         </LinearLayout>
 
         <LinearLayout android:id="@+id/as_move" style="@style/StripItem">
-            <ImageView style="@style/StripIcon" android:src="@drawable/ic_move"
+            <ImageView android:id="@+id/as_move_icon" style="@style/StripIcon" android:src="@drawable/ic_move"
                 android:contentDescription="@null" />
             <TextView style="@style/StripLabel" android:text="@string/strip_move" />
         </LinearLayout>
@@ -120,7 +120,7 @@
         </LinearLayout>
 
         <LinearLayout android:id="@+id/as_compare" style="@style/StripItem">
-            <ImageView style="@style/StripIcon" android:src="@drawable/ic_compare"
+            <ImageView android:id="@+id/as_compare_icon" style="@style/StripIcon" android:src="@drawable/ic_compare"
                 android:contentDescription="@null" />
             <TextView style="@style/StripLabel" android:text="@string/strip_compare" />
         </LinearLayout>

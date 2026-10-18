@@ -377,7 +377,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         activePane()?.let { p -> com.twig.app.ui.Transfers.consumeFinished()?.let { p.finishTransfer(it) } }
         invalidateOptionsMenu() // terminal sessions may have been added/removed in another Activity; refresh the entry's visibility
         val land = isLandscape()
-        for (s in listOf(b.stripMid, b.stripLeft, b.stripRight)) applyStripTop(s, land)
+        for (s in listOf(b.stripMid, b.stripLeft, b.stripRight)) applyStripState(s, land)
         // Sharing may have been turned off via the notification bar's "stop" button (the UI wasn't even present); sync once on returning to foreground
         syncShareIcon()
         WebShare.onStateChanged = { runOnUiThread { syncShareIcon() } }
@@ -515,7 +515,10 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         for (s in listOf(b.stripMid, b.stripLeft, b.stripRight)) s.asShareIcon.setImageResource(res)
     }
 
-    private fun applyStripTop(s: ActionStripBinding, land: Boolean) {
+    private fun applyStripState(s: ActionStripBinding, land: Boolean) {
+        val direction = if (activeIndex == 0) 1f else -1f
+        s.asMoveIcon.scaleX = direction
+        s.asCompareIcon.scaleX = direction
         s.asTop.visibility = if (land) View.VISIBLE else View.GONE
         s.asTopDivider.visibility = if (land) View.VISIBLE else View.GONE
         if (!land) return
@@ -596,7 +599,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         // Landscape's height can't fit a full single column, so the strip becomes two columns (width doubles)
         for (s in listOf(b.stripMid, b.stripLeft, b.stripRight)) {
             applyStripColumns(s, land)
-            applyStripTop(s, land)
+            applyStripState(s, land)
         }
         b.panes.showPane(activeIndex, animateSwitch && !land)
         paneAt(0)?.setActive(activeIndex == 0)
