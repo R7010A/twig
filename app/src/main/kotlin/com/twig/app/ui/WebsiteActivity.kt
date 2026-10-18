@@ -62,6 +62,7 @@ class WebsiteActivity : AppCompatActivity() {
     private var remoteDebugMenu: MenuItem? = null
     private var customStyleApplied = false
     private var pendingMainUrl: String? = null
+    private var toolbarVisibleOverride: Boolean? = null
     private var immersiveFullscreen = false
     private var fullscreenFromToolbar = false
     private var fullscreenLayer: FrameLayout? = null
@@ -92,6 +93,12 @@ class WebsiteActivity : AppCompatActivity() {
             site = site.copy(script = updated.script, style = updated.style, hiddenElements = updated.hiddenElements)
             customStyleApplied = WebsiteCustomization.hasStyles(site)
         }
+        toolbarVisibleOverride = savedInstanceState?.takeIf { it.containsKey("toolbar_visible_override") }
+            ?.getBoolean("toolbar_visible_override")
+        b.web.onDoubleTapToolbar = {
+            toolbarVisibleOverride = b.toolbar.visibility != View.VISIBLE
+            applyWebsiteOptions()
+        }
         immersiveFullscreen = savedInstanceState?.getBoolean("immersive_fullscreen", site.openFullscreen)
             ?: site.openFullscreen
         fullscreenFromToolbar = immersiveFullscreen &&
@@ -115,6 +122,7 @@ class WebsiteActivity : AppCompatActivity() {
             }
         }
         b.toolbar.menu.add(R.string.website_enter_fullscreen).setOnMenuItemClickListener {
+            toolbarVisibleOverride = null
             immersiveFullscreen = true
             fullscreenFromToolbar = true
             applyWebsiteOptions()
@@ -311,6 +319,8 @@ class WebsiteActivity : AppCompatActivity() {
         }
         if (saved == site) return
         val changedUrl = saved.url != site.url
+        if (saved.fullscreen != site.fullscreen || saved.openFullscreen != site.openFullscreen ||
+            saved.doubleTapToolbar != site.doubleTapToolbar) toolbarVisibleOverride = null
         val changedDesktop = saved.desktopSite != site.desktopSite
         val changedAgent = saved.userAgent != site.userAgent
         val changedHeaders = saved.headers != site.headers
@@ -358,12 +368,14 @@ class WebsiteActivity : AppCompatActivity() {
             return
         }
         if (immersiveFullscreen && fullscreenFromToolbar) {
+            val wasHidden = b.toolbar.visibility != View.VISIBLE
+            toolbarVisibleOverride = null
             immersiveFullscreen = false
             fullscreenFromToolbar = false
             applyWebsiteOptions()
             // Consume Back only when it actually brings the toolbar back. If the
             // bookmark now hides it permanently, do not add an invisible Back step.
-            if (!site.fullscreen) return
+            if (wasHidden && b.toolbar.visibility == View.VISIBLE) return
         }
         // System navigation already handles revealing hidden bars. A bookmark's
         // display mode must not add another Back stage before history/finish.
@@ -450,7 +462,8 @@ class WebsiteActivity : AppCompatActivity() {
         if (requestedOrientation != orientation) requestedOrientation = orientation
         title = site.name
         b.toolbar.title = site.name
-        b.toolbar.visibility = if (site.fullscreen || immersiveFullscreen) View.GONE else View.VISIBLE
+        b.toolbar.visibility = if (toolbarVisibleOverride ?: !(site.fullscreen || immersiveFullscreen)) View.VISIBLE else View.GONE
+        b.web.doubleTapToolbar = site.doubleTapToolbar
         b.web.pullToRefresh = site.pullToRefresh
         b.web.lockScrollAxis = site.lockScrollAxis
         b.web.settings.apply {
@@ -620,6 +633,7 @@ class WebsiteActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        toolbarVisibleOverride?.let { outState.putBoolean("toolbar_visible_override", it) }
         outState.putBoolean("immersive_fullscreen", immersiveFullscreen)
         outState.putBoolean("fullscreen_from_toolbar", fullscreenFromToolbar)
         if (::site.isInitialized) {

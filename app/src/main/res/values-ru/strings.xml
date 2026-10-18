@@ -1002,4 +1002,5 @@
     <string name="website_blocked_requests">Блокировка запросов</string>
     <string name="website_blocked_requests_hint">Домен или URL на каждой строке; поддерживается *. Домены включают поддомены. Правила URL сопоставляются с полным URL. Пример: ads.example.com или https://example.com/ads/*. Только ресурсы; обновите уже загруженное содержимое.</string>
     <string name="website_blocked_requests_invalid">Недопустимое правило. Введите домен или HTTP(S) URL; допускается *.</string>
+    <string name="website_double_tap_toolbar">Двойное касание скрывает/показывает панель инструментов</string>
 </resources>

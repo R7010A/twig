@@ -1036,4 +1036,5 @@
     <string name="website_blocked_requests">Request blocking</string>
     <string name="website_blocked_requests_hint">One domain or URL per line; supports *. Domains include subdomains. URL rules match the entire URL. Example: ads.example.com or https://example.com/ads/*. Applies to resource requests only; refresh to reload existing content.</string>
     <string name="website_blocked_requests_invalid">Invalid rule. Enter a domain or an HTTP(S) URL, optionally containing *.</string>
+    <string name="website_double_tap_toolbar">Double-tap to hide/show toolbar</string>
 </resources>

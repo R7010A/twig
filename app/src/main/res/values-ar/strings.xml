@@ -970,4 +970,5 @@
     <string name="website_blocked_requests">حظر الطلبات</string>
     <string name="website_blocked_requests_hint">نطاق أو رابط لكل سطر؛ يدعم *. تشمل النطاقات النطاقات الفرعية. تطابق قواعد الروابط الرابط كاملاً. مثال: ads.example.com أو https://example.com/ads/*. لطلبات الموارد فقط؛ أعد تحميل المحتوى الموجود.</string>
     <string name="website_blocked_requests_invalid">قاعدة غير صالحة. أدخل نطاقاً أو رابط HTTP(S)، ويمكن استخدام *.</string>
+    <string name="website_double_tap_toolbar">النقر مرتين لإخفاء أو إظهار شريط الأدوات</string>
 </resources>

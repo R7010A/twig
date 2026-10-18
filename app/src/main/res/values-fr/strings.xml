@@ -966,4 +966,5 @@
     <string name="website_blocked_requests">Blocage des requêtes</string>
     <string name="website_blocked_requests_hint">Un domaine ou une URL par ligne ; * accepté. Les domaines incluent les sous-domaines. Les règles URL correspondent à toute l’URL. Exemple : ads.example.com ou https://example.com/ads/*. Ressources uniquement ; rechargez le contenu existant.</string>
     <string name="website_blocked_requests_invalid">Règle invalide. Saisissez un domaine ou une URL HTTP(S), avec * si nécessaire.</string>
+    <string name="website_double_tap_toolbar">Toucher deux fois pour masquer/afficher la barre d’outils</string>
 </resources>

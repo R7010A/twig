@@ -56,6 +56,52 @@ class WebsiteFullscreenTest {
     }
     private class Request(val view: View, var hidden: Int = 0)
 
+    @Test fun `double tapping toggles toolbar independently from system bars and preserves page across recreation`() {
+        Page(Website(name = "Toolbar", url = "https://example.com", fullscreen = true,
+            hideStatusBar = false, hideNavigationBar = true)).use { page ->
+            val web = page.web as WebsiteWebView
+            val toolbar = page.activity.findViewById<Toolbar>(R.id.toolbar)
+            assertTrue(web.doubleTapToolbar)
+            assertEquals(View.GONE, toolbar.visibility)
+            web.loadUrl("https://example.com/draft")
+            val flags = page.activity.window.decorView.systemUiVisibility
+            web.onDoubleTapToolbar()
+            assertEquals(View.VISIBLE, toolbar.visibility)
+            assertEquals(flags, page.activity.window.decorView.systemUiVisibility)
+            assertEquals("https://example.com/draft", shadowOf(web).lastLoadedUrl)
+            assertEquals(0, shadowOf(web).reloadInvocations)
+            page.controller.recreate()
+            val restored = page.controller.get()
+            assertEquals(View.VISIBLE, restored.findViewById<Toolbar>(R.id.toolbar).visibility)
+            restored.findViewById<WebsiteWebView>(R.id.web).onDoubleTapToolbar()
+            assertEquals(View.GONE, restored.findViewById<Toolbar>(R.id.toolbar).visibility)
+        }
+    }
+
+    @Test fun `showing toolbar by double tap in toolbar fullscreen does not add an invisible back step`() {
+        Page().use { page ->
+            page.enterFromToolbar()
+            val web = page.web as WebsiteWebView
+            web.onDoubleTapToolbar()
+            assertEquals(View.VISIBLE, page.activity.findViewById<Toolbar>(R.id.toolbar).visibility)
+            page.activity.onBackPressedDispatcher.onBackPressed()
+            assertTrue(page.activity.isFinishing)
+        }
+    }
+
+    @Test fun `disabling double tap restores the configured toolbar without reloading`() {
+        Page().use { page ->
+            val web = page.web as WebsiteWebView
+            web.onDoubleTapToolbar()
+            assertEquals(View.GONE, page.activity.findViewById<Toolbar>(R.id.toolbar).visibility)
+            WebsiteStore.save(app, page.site.copy(doubleTapToolbar = false))
+            page.controller.newIntent(WebsiteActivity.intent(app, page.site.id))
+            assertFalse(web.doubleTapToolbar)
+            assertEquals(View.VISIBLE, page.activity.findViewById<Toolbar>(R.id.toolbar).visibility)
+            assertEquals(0, shadowOf(web).reloadInvocations)
+        }
+    }
+
     @Test fun `fullscreen attaches the engine view and exits back to the same page`() {
         Page().use { page ->
             page.web.loadUrl("https://example.com/watch/current")

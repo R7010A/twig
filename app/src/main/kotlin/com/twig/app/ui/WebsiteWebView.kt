@@ -10,6 +10,20 @@ import kotlin.math.max
 
 /** Single-finger axis locking and optional refresh; pinch gestures stay with WebView. */
 open class WebsiteWebView @JvmOverloads constructor(ctx: Context, attrs: AttributeSet? = null) : WebView(ctx, attrs) {
+    var doubleTapToolbar = false
+        set(value) {
+            if (field != value) {
+                lastTapTime = -1L
+                if (toolbarTap) { cancelPickGesture(); toolbarTap = false }
+            }
+            field = value
+        }
+    var onDoubleTapToolbar: () -> Unit = {}
+    private var lastTapTime = -1L
+    private var lastTapX = 0f
+    private var lastTapY = 0f
+    private var toolbarTap = false
+    private val doubleTapSlop = ViewConfiguration.get(ctx).scaledDoubleTapSlop
     var pullToRefresh = false
     var lockScrollAxis = false
     var onPullProgress: (Float) -> Unit = {}
@@ -17,7 +31,7 @@ open class WebsiteWebView @JvmOverloads constructor(ctx: Context, attrs: Attribu
     /** Consume inspection taps before Chromium sees them; scrolling and pinching remain native. */
     var onPickElement: ((Float, Float) -> Unit)? = null
         set(value) {
-            if (field !== value) cancelPickGesture()
+            if (field !== value) { cancelPickGesture(); toolbarTap = false; lastTapTime = -1L }
             field = value
         }
     private var pickDown: MotionEvent? = null
@@ -44,7 +58,29 @@ open class WebsiteWebView @JvmOverloads constructor(ctx: Context, attrs: Attribu
             if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) discardPickTail = false
             return true
         }
-        if (onPickElement != null || pickDown != null) return dispatchPickTouch(event)
+        if (onPickElement != null) return dispatchPickTouch(event) { x, y -> onPickElement?.invoke(x, y) }
+        if (doubleTapToolbar && event.actionMasked == MotionEvent.ACTION_DOWN) {
+            val dx = event.x - lastTapX
+            val dy = event.y - lastTapY
+            toolbarTap = lastTapTime >= 0 && event.eventTime - lastTapTime in 0..ViewConfiguration.getDoubleTapTimeout().toLong() &&
+                dx * dx + dy * dy <= doubleTapSlop.toFloat() * doubleTapSlop
+            lastTapTime = -1L
+        }
+        if (toolbarTap || pickDown != null) {
+            val handled = dispatchPickTouch(event) { _, _ ->
+                if (event.eventTime - event.downTime < ViewConfiguration.getLongPressTimeout()) onDoubleTapToolbar()
+            }
+            if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) toolbarTap = false
+            return handled
+        }
+        if (doubleTapToolbar && event.actionMasked == MotionEvent.ACTION_UP && !multiTouch && axis == 0 &&
+            max(abs(event.x - startX), abs(event.y - startY)) <= slop &&
+            event.eventTime - event.downTime < ViewConfiguration.getLongPressTimeout()) {
+            lastTapTime = event.eventTime
+            lastTapX = event.x
+            lastTapY = event.y
+        }
+        if (event.actionMasked == MotionEvent.ACTION_CANCEL || event.actionMasked == MotionEvent.ACTION_POINTER_DOWN) lastTapTime = -1L
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 startX = event.x
@@ -126,7 +162,7 @@ open class WebsiteWebView @JvmOverloads constructor(ctx: Context, attrs: Attribu
         discardPickTail = true
     }
 
-    private fun dispatchPickTouch(event: MotionEvent): Boolean {
+    private fun dispatchPickTouch(event: MotionEvent, onTap: (Float, Float) -> Unit): Boolean {
         if (event.actionMasked == MotionEvent.ACTION_DOWN) {
             cancelPickGesture()
             discardPickTail = false
@@ -148,7 +184,7 @@ open class WebsiteWebView @JvmOverloads constructor(ctx: Context, attrs: Attribu
             down.recycle()
             pickDown = null
             pickForwarding = false
-            if (pick && width > 0 && height > 0) onPickElement?.invoke(
+            if (pick && width > 0 && height > 0) onTap(
                 (event.x / width).coerceIn(0f, 1f), (event.y / height).coerceIn(0f, 1f))
         }
         return true

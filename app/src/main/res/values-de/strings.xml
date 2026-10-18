@@ -966,4 +966,5 @@
     <string name="website_blocked_requests">Anfragen blockieren</string>
     <string name="website_blocked_requests_hint">Eine Domain oder URL pro Zeile; * erlaubt. Domains umfassen Subdomains. URL-Regeln gelten für die gesamte URL. Beispiel: ads.example.com oder https://example.com/ads/*. Nur Ressourcenanfragen; vorhandene Inhalte neu laden.</string>
     <string name="website_blocked_requests_invalid">Ungültige Regel. Domain oder HTTP(S)-URL eingeben; * ist erlaubt.</string>
+    <string name="website_double_tap_toolbar">Doppeltippen blendet die Werkzeugleiste ein/aus</string>
 </resources>

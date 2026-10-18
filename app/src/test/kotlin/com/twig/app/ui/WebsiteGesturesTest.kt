@@ -49,6 +49,73 @@ class WebsiteGesturesTest {
         event.recycle()
     }
 
+    private fun RecordingWebView.timed(action: Int, down: Long, time: Long, x: Float = 100f, y: Float = 100f) {
+        val event = MotionEvent.obtain(down, time, action, x, y, 0)
+        dispatchTouchEvent(event)
+        event.recycle()
+    }
+    private fun RecordingWebView.tap(time: Long, x: Float = 100f) {
+        timed(MotionEvent.ACTION_DOWN, time, time, x)
+        timed(MotionEvent.ACTION_UP, time, time + 30, x)
+    }
+
+    @Test fun `double tap toolbar consumes second tap while disabled option leaves native events untouched`() {
+        for (enabled in listOf(false, true)) {
+            var toggles = 0
+            val web = web().apply { doubleTapToolbar = enabled; onDoubleTapToolbar = { toggles++ } }
+            web.tap(100)
+            web.tap(200)
+            assertEquals(if (enabled) 1 else 0, toggles)
+            assertEquals(if (enabled) 2 else 4, web.delivered.size)
+            web.tap(300)
+            web.tap(400)
+            assertEquals(if (enabled) 2 else 0, toggles)
+        }
+    }
+
+    @Test fun `separate taps long presses drags and pinches never toggle toolbar`() {
+        var toggles = 0
+        fun fresh() = web().apply { doubleTapToolbar = true; onDoubleTapToolbar = { toggles++ } }
+        fresh().apply { tap(100); tap(1000) }
+        fresh().apply { tap(100); tap(200, 800f) }
+        fresh().apply {
+            tap(100)
+            timed(MotionEvent.ACTION_DOWN, 200, 200)
+            timed(MotionEvent.ACTION_UP, 200, 1200)
+        }
+        fresh().apply {
+            tap(100)
+            timed(MotionEvent.ACTION_DOWN, 200, 200)
+            timed(MotionEvent.ACTION_MOVE, 200, 220, y = 300f)
+            timed(MotionEvent.ACTION_UP, 200, 250, y = 300f)
+            assertEquals(listOf(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP, MotionEvent.ACTION_DOWN,
+                MotionEvent.ACTION_MOVE, MotionEvent.ACTION_UP), delivered.map { it.action })
+        }
+        fresh().apply {
+            tap(0)
+            timed(MotionEvent.ACTION_DOWN, 70, 70)
+            twoPointers(MotionEvent.ACTION_POINTER_DOWN or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT), 100f, 100f)
+            timed(MotionEvent.ACTION_UP, 70, 150)
+            assertTrue(delivered.any { it.pointers == 2 })
+        }
+        assertEquals(0, toggles)
+    }
+
+    @Test fun `element picking takes precedence over toolbar double taps`() {
+        var picks = 0
+        var toggles = 0
+        val web = web().apply {
+            doubleTapToolbar = true
+            onDoubleTapToolbar = { toggles++ }
+            onPickElement = { _, _ -> picks++ }
+        }
+        web.tap(100)
+        web.tap(200)
+        assertEquals(2, picks)
+        assertEquals(0, toggles)
+        assertTrue(web.delivered.isEmpty())
+    }
+
     @Test fun `vertical gesture cannot drift horizontally including on release`() {
         val web = web().apply { lockScrollAxis = true }
         web.send(MotionEvent.ACTION_DOWN, 20f, 20f)

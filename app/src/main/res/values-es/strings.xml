@@ -966,4 +966,5 @@
     <string name="website_blocked_requests">Bloqueo de solicitudes</string>
     <string name="website_blocked_requests_hint">Un dominio o URL por línea; admite *. Los dominios incluyen subdominios. Las reglas URL coinciden con la URL completa. Ejemplo: ads.example.com o https://example.com/ads/*. Solo recursos; recarga el contenido existente.</string>
     <string name="website_blocked_requests_invalid">Regla no válida. Introduce un dominio o URL HTTP(S); se permite *.</string>
+    <string name="website_double_tap_toolbar">Doble toque para ocultar/mostrar la barra de herramientas</string>
 </resources>

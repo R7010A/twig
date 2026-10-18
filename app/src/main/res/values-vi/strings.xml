@@ -965,4 +965,5 @@
     <string name="website_blocked_requests">Chặn yêu cầu</string>
     <string name="website_blocked_requests_hint">Mỗi dòng một tên miền hoặc URL; hỗ trợ *. Tên miền bao gồm tên miền phụ. Quy tắc URL khớp toàn bộ URL. Ví dụ: ads.example.com hoặc https://example.com/ads/*. Chỉ chặn tài nguyên; tải lại nội dung đã có.</string>
     <string name="website_blocked_requests_invalid">Quy tắc không hợp lệ. Nhập tên miền hoặc URL HTTP(S), có thể dùng *.</string>
+    <string name="website_double_tap_toolbar">Chạm hai lần để ẩn/hiện thanh công cụ</string>
 </resources>

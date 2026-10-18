@@ -108,12 +108,13 @@ class WebsiteFeatureTest {
         controller.pause().stop().destroy()
     }
 
-    @Test fun `old fullscreen records preserve hidden system bars while new options default off`() {
+    @Test fun `old records preserve display options and enable toolbar double tap by default`() {
         WebsiteStore.preferences(app).edit().putString("list", """[
             {"id":"old","name":"Old","url":"https://example.com","fullscreen":true},
             {"id":"normal","name":"Normal","url":"https://example.org"}
         ]""").commit()
         val sites = WebsiteStore.all(app)
+        assertTrue(sites[0].doubleTapToolbar)
         assertTrue(sites[0].fullscreen)
         assertTrue(sites[0].hideStatusBar)
         assertTrue(sites[0].hideNavigationBar)
@@ -262,6 +263,7 @@ class WebsiteFeatureTest {
         val dialog = org.robolectric.shadows.ShadowDialog.getLatestDialog() as androidx.appcompat.app.AlertDialog
         val options = listOf(R.string.website_open_fullscreen to site.openFullscreen,
             R.string.website_fullscreen to site.fullscreen,
+            R.string.website_double_tap_toolbar to site.doubleTapToolbar,
             R.string.website_hide_status_bar to site.hideStatusBar,
             R.string.website_hide_navigation_bar to site.hideNavigationBar,
             R.string.website_pull_to_refresh to site.pullToRefresh,
@@ -276,7 +278,7 @@ class WebsiteFeatureTest {
         dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).performClick()
         assertEquals(site.copy(fullscreen = false, hideStatusBar = true, hideNavigationBar = false,
             pullToRefresh = true, disableTextSelection = false, lockScrollAxis = true, desktopSite = false,
-            openFullscreen = true),
+            openFullscreen = true, doubleTapToolbar = false),
             WebsiteStore.all(app).single())
         controller.pause().stop().destroy()
     }

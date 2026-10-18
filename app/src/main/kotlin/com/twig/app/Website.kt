@@ -15,6 +15,7 @@ data class Website(
     /** Legacy field: now only controls the toolbar; old records hid all three bars. */
     val fullscreen: Boolean = false,
     val pullToRefresh: Boolean = false,
+    val doubleTapToolbar: Boolean = true,
     val hideStatusBar: Boolean = fullscreen,
     val hideNavigationBar: Boolean = fullscreen,
     val disableTextSelection: Boolean = false,
@@ -61,6 +62,7 @@ object WebsiteStore {
                 Website(
                     id = o.getString("id"), name = o.getString("name"), url = o.getString("url"),
                     fullscreen = fullscreen, pullToRefresh = o.optBoolean("pullToRefresh"),
+                    doubleTapToolbar = o.optBoolean("doubleTapToolbar", true),
                     hideStatusBar = o.optBoolean("hideStatusBar", fullscreen),
                     hideNavigationBar = o.optBoolean("hideNavigationBar", fullscreen),
                     disableTextSelection = o.optBoolean("disableTextSelection"),
@@ -111,7 +113,7 @@ object WebsiteStore {
         sites.forEach {
             items.put(JSONObject().put("id", it.id).put("name", it.name)
                 .put("url", it.url).put("fullscreen", it.fullscreen)
-                .put("pullToRefresh", it.pullToRefresh).put("hideStatusBar", it.hideStatusBar)
+                .put("doubleTapToolbar", it.doubleTapToolbar).put("pullToRefresh", it.pullToRefresh).put("hideStatusBar", it.hideStatusBar)
                 .put("hideNavigationBar", it.hideNavigationBar).put("disableTextSelection", it.disableTextSelection)
                 .put("lockScrollAxis", it.lockScrollAxis).put("desktopSite", it.desktopSite)
                 .put("openFullscreen", it.openFullscreen).put("orientation", it.orientation.key)
