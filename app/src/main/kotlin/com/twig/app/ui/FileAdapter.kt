@@ -49,7 +49,7 @@ import com.twig.core.XFile
  * Grid view ([gridMode], independent of the thumbnails toggle):
  * - 0: tree-style list; 1/2: eligible files render as grid cells (media-only / all files),
  *   directories and expandable items (archives) still take a full row, tree expansion logic
- *   is unchanged.
+ *   is unchanged. Websites use cells only in all-files mode.
  * Thumbnails (when [thumbs] is on): the tree-row icon is replaced with a larger thumbnail;
  * grid cells are filled with thumbnails; when off, cells show only the type icon.
  */
@@ -87,11 +87,14 @@ class FileAdapter(
         position in currentList.indices &&
             currentList[position] !is PaneViewModel.InfoNode && !isCell(currentList[position])
 
-    private fun isCell(n: PaneViewModel.Node): Boolean =
-        gridMode > 0 && n is PaneViewModel.FileNode &&
+    private fun isCell(n: PaneViewModel.Node): Boolean = when (n) {
+        is PaneViewModel.WebsiteNode -> gridMode == 2
+        is PaneViewModel.FileNode -> gridMode > 0 &&
             n.label == null && !n.file.isDir && !n.expandable &&
             !n.file.scheme.startsWith("git") &&
             (gridMode == 2 || Thumbs.canThumb(n.file))
+        else -> false
+    }
 
     /** Key of the most recently selected node (synced from State by PaneFragment); used to position the highlight frame. */
     var currentKey: String? = null
@@ -256,7 +259,7 @@ class FileAdapter(
         when (holder) {
             is VH -> holder.bind(getItem(position))
             is InfoVH -> holder.bind(getItem(position) as PaneViewModel.InfoNode)
-            is CellVH -> holder.bind(getItem(position) as PaneViewModel.FileNode)
+            is CellVH -> holder.bind(getItem(position))
         }
     }
 
@@ -350,14 +353,18 @@ class FileAdapter(
     /** Grid cell: square thumbnail + corner grey checkbox, file name is toggleable. Indentation is omitted; the parent is the directory row above. */
     inner class CellVH(private val b: ItemThumbCellBinding) : RecyclerView.ViewHolder(b.root) {
         fun bindDefaultAppIcon(node: PaneViewModel.FileNode) { FileIcons.bind(b.thumb, node.file) }
-        fun bind(node: PaneViewModel.FileNode) {
+        fun bind(node: PaneViewModel.Node) {
             val ctx = b.root.context
             val dpi = ctx.resources.displayMetrics.density
             val edge = if (cellPx > 0) cellPx else (92 * dpi).toInt()
             b.thumbBox.layoutParams = b.thumbBox.layoutParams.apply { height = edge }
             if (gridNames) {
                 b.cellName.visibility = View.VISIBLE
-                b.cellName.text = node.file.name
+                b.cellName.text = when (node) {
+                    is PaneViewModel.WebsiteNode -> node.site.name
+                    is PaneViewModel.FileNode -> node.file.name
+                    else -> return
+                }
                 b.cellName.setTextSize(TypedValue.COMPLEX_UNIT_SP, metaSp + 0.5f)
             } else {
                 b.cellName.visibility = View.GONE
@@ -367,8 +374,23 @@ class FileAdapter(
             b.thumb.scaleType = ImageView.ScaleType.FIT_CENTER
             val pad = edge / 5
             b.thumb.setPadding(pad, pad, pad, pad)
+            if (node is PaneViewModel.WebsiteNode) {
+                WebsiteIcons.bind(b.thumb, node.site)
+                b.root.isActivated = false
+                b.cellCheck.visibility = View.GONE
+                b.infoToggle.visibility = View.GONE
+                b.cellCheck.setOnClickListener(null)
+                b.infoToggle.setOnClickListener(null)
+                b.root.setOnTouchListener(null)
+                b.root.setOnClickListener { onClick(node) }
+                b.root.setOnLongClickListener { onLongClick(node); true }
+                return
+            }
+            node as PaneViewModel.FileNode
             FileIcons.bind(b.thumb, node.file, onTyped(this, node.file))
             if (thumbs) Thumbs.bind(b.thumb, node.file)
+            b.cellCheck.visibility = View.VISIBLE
+            b.infoToggle.visibility = View.VISIBLE
 
             bindSelection(node)
             b.cellCheck.setOnClickListener { toggleSelection(node) }
