@@ -212,6 +212,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
             if (uri != null) {
                 val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 runCatching { contentResolver.takePersistableUriPermission(uri, flags) }
+                AndroidDataAccess.instance?.refresh()
                 refreshTrees()
                 activePane()?.viewModel?.expandGroup("saf")
             }

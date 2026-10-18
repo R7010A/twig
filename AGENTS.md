@@ -516,7 +516,8 @@ add its symptom here.
   slice it: ask the tree who contains a row instead of computing a parent. The grant is
   persistable, so SAF entries are *local* (real fd, pread), not outsiders.
   *Explains*: music opening in the single-track player, no thumbnails or PDF previews, the
-  green highlight disappearing on "Up", "why is there no *go to the containing folder* here".
+  green highlight disappearing on "Up", "why is there no *go to the containing folder* here",
+  a local-to-SAF copy creating an empty document but writing to a bogus local path.
 - **[Removable storage](docs/lessons/removable-storage.md)** — `getStorageVolumes()` does
   return invisible volumes, the event channels do not fire for them (the foreground UI
   polls), filter by `isPrimary` rather than `isRemovable`, and `/mnt/media_rw` needs

@@ -6,6 +6,7 @@ import android.os.StatFs
 import android.provider.DocumentsContract
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.twig.app.AndroidDataAccess
 import com.twig.app.AppsFileSystem
 import com.twig.app.CompareSession
 import com.twig.app.CompareStore
@@ -130,8 +131,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /** Per-group action item, e.g. "Add server…". */
-    data class ActionNode(val id: String, val label: String) : Node {
-        override val depth: Int get() = 1
+    data class ActionNode(val id: String, val label: String, override val depth: Int = 1) : Node {
         override val key: String get() = "a:$id"
     }
 
@@ -250,6 +250,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         val restoring: Boolean = false,
         /** Preferred target row when restoring position (the file last opened); when it doesn't resolve, the UI falls back to [currentKey]. */
         val scrollKey: String? = null,
+        val dataAccessFor: XFile? = null,
     )
 
     // ---- State ----
@@ -895,6 +896,16 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Rebuild the tree only (groups re-read saved connections / SAF grants), without re-listing directories. */
     fun refreshTree() = rebuild()
+
+    fun dismissDataAccessRequest() { _state.value = _state.value.copy(dataAccessFor = null) }
+
+    fun revealGrantedDataFolder(file: XFile) {
+        // Cached parent listings may predate this grant (and must not keep hiding the new entry).
+        val root = file.path.substringBefore("/Android/data") + "/Android/data"
+        children.keys.filter { it.startsWith("f:file:$root") }.forEach { children.remove(it) }
+        DirectoryCounts.invalidate(XFile("file", root, true))
+        revealPath(file)
+    }
 
     /**
      * When non-null the tree only keeps this one root — used by the picker's
@@ -2429,7 +2440,11 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
      */
     private fun listChildren(file: XFile, rowKey: String? = null): Listing =
         if (file.isDir) {
-            val kids = FsRegistry.of(file).list(file)
+            val listed = runCatching { FsRegistry.of(file).list(file) }
+            val granted = if (AndroidDataAccess.isRoot(file))
+                AndroidDataAccess.instance?.grantedFolders(file).orEmpty() else emptyList()
+            val kids = if (granted.isEmpty()) listed.getOrThrow()
+                else (listed.getOrDefault(emptyList()).filter { entry -> granted.none { it.name == entry.name } } + granted)
             Listing(
                 children = kids,
                 resticRepo = if (ResticRepo.looksLikeRepo(kids)) fileKey(file) else null,
@@ -2724,6 +2739,10 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                 addFile(rows, XFile(s, "/", isDir = true, displayName = live, canWrite = false), depth + 1)
             }
             visible(children[key]).forEach { addFile(rows, it, depth + 1, keyPrefix = keyPrefix) }
+            if (AndroidDataAccess.isRoot(file)) {
+                rows += ActionNode(AndroidDataAccess.ACTION_PREFIX + file.path,
+                    str(R.string.android_data_grant), depth + 1)
+            }
             if (resticRepos.contains(fileKey(file))) addRestic(rows, file, depth + 1)
         }
     }
@@ -2874,7 +2893,8 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                 val docUri = DocumentsContract.buildDocumentUriUsingTree(perm.uri, docId)
                 // The document id can be "primary:DCIM" or a real path; last-segment cut on both separators.
                 val tail = docId.substringAfterLast('/').substringAfterLast(':').ifEmpty { docId }
-                val file = XFile("saf", docUri.toString(), isDir = true, displayName = tail)
+                val file = XFile("saf", docUri.toString(), isDir = true, displayName = tail,
+                    canRead = perm.isReadPermission, canWrite = perm.isWritePermission)
                 Triple(file, SafFileSystem.providerApp(app, file)?.label, tail)
             }.getOrNull()
         }
@@ -2945,6 +2965,8 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                 passwordFor = file,
                 error = if (t.wrong) str(R.string.archive_wrong_pw) else null,
             )
+        } else if (file != null && AndroidDataAccess.supports(file)) {
+            _state.value = _state.value.copy(dataAccessFor = file)
         } else {
             emitError(t.message)
         }

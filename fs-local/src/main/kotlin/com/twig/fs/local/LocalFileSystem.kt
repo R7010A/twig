@@ -1,6 +1,7 @@
 package com.twig.fs.local
 
 import com.twig.core.FileSystem
+import com.twig.core.FsRegistry
 import com.twig.core.FsException
 import com.twig.core.XFile
 import com.twig.core.RandomSource
@@ -14,10 +15,8 @@ import java.io.OutputStream
 /**
  * Local storage file system, based on java.io.File.
  *
- * Phase 1 uses the File API directly (requires runtime storage permission).
- * Phase 1.5 plan: on Android 10+ without MANAGE_EXTERNAL_STORAGE, fall back to
- * SAF / DocumentFile. When that lands, just add a new SafFileSystem registered
- * under a different scheme, or split internally here; the UI won't notice.
+ * Android can supply a document-access route for explicitly authorized folders.
+ * Routed listings and creations may return entries belonging to that provider.
  *
  * @param rootDir the root directory this file system exposes (defaults to external storage root).
  */
@@ -35,6 +34,7 @@ class LocalFileSystem(
         get() = if (noElevation.get() == true) null else elevation
 
     override fun resolve(path: String): XFile {
+        documents(path)?.let { return it.resolve(path) }
         val f = File(path)
         if (!f.exists()) {
             if (maybeHidden(f)) fallback?.stat(path)?.let { return it }
@@ -45,12 +45,14 @@ class LocalFileSystem(
 
     /** A real stat, with the privileged fallback for paths we cannot see ourselves. */
     override fun stat(path: String): XFile? {
+        documents(path)?.let { return it.stat(path) }
         val f = File(path)
         if (f.exists()) return toXFile(f)
         return if (maybeHidden(f)) fallback?.stat(path) else null
     }
 
     override fun list(dir: XFile): List<XFile> {
+        documents(dir)?.let { return it.list(dir) }
         val f = File(dir.path)
         // isDirectory needs a successful stat(2); on a path we may traverse but not
         // inspect it comes back false, which is indistinguishable from "not a
@@ -73,6 +75,7 @@ class LocalFileSystem(
      * Entries omit permissions and are only suitable for scan results, not access checks.
      */
     fun listForSize(dir: XFile, readEntry: (File) -> XFile): List<XFile> {
+        documents(dir)?.let { return it.list(dir) }
         val children = File(dir.path).listFiles()
             ?: return elevated(dir.path)
                 ?: throw FsException("Cannot read directory (permission?): ${dir.path}")
@@ -92,6 +95,15 @@ class LocalFileSystem(
         while (pending.isNotEmpty() && !stopped()) {
             val (parent, depth) = pending.removeFirst()
             if (depth >= maxDepth) continue
+            val provider = documents(parent)
+            if (provider != null) {
+                for (file in provider.list(parent)) {
+                    if (stopped()) return
+                    visit(file)
+                    if (file.isDir && depth + 1 < maxDepth) pending.addLast(file to (depth + 1))
+                }
+                continue
+            }
             val children = File(parent.path).listFiles()
             if (children == null) {
                 fallback?.walk(File(parent.path).absolutePath, maxDepth - depth, stopped, visit)
@@ -112,14 +124,19 @@ class LocalFileSystem(
 
     private fun elevated(path: String): List<XFile>? = fallback?.list(path)
 
+    private fun documents(path: String): FileSystem? = documentAccess?.invoke(path)
+    private fun documents(file: XFile): FileSystem? =
+        if (file.scheme == scheme) documents(file.path) else FsRegistry.of(file)
+
     override fun openInput(file: XFile): InputStream =
-        runCatching { File(file.path).inputStream() }.getOrElse { e ->
+        documents(file)?.openInput(file) ?: runCatching { File(file.path).inputStream() }.getOrElse { e ->
             fallback?.openInput(file.path) ?: throw e
         }
 
     override fun randomAccessEfficient(): Boolean = true
 
     override fun openRandom(file: XFile): RandomSource {
+        documents(file)?.let { return it.openRandom(file) }
         val raf = try {
             java.io.RandomAccessFile(file.path, "r")
         } catch (e: IOException) {
@@ -144,6 +161,7 @@ class LocalFileSystem(
      * syscall per byte.
      */
     override fun openOutput(file: XFile, append: Boolean): OutputStream {
+        documents(file)?.let { return it.openOutput(file, append) }
         val f = File(file.path)
         f.parentFile?.let { if (!it.exists()) it.mkdirs() }
         val out = runCatching { java.io.FileOutputStream(f, append) as OutputStream }.getOrElse { e ->
@@ -165,6 +183,7 @@ class LocalFileSystem(
     }
 
     override fun mkdir(parent: XFile, name: String): XFile {
+        documents(parent)?.let { return it.mkdir(parent, name) }
         val dir = File(parent.path, name)
         if (!dir.exists() && !dir.mkdirs()) {
             if (fallback?.mkdir(dir.path) != true) {
@@ -176,6 +195,7 @@ class LocalFileSystem(
     }
 
     override fun delete(file: XFile) {
+        documents(file)?.let { it.delete(file); return }
         val f = File(file.path)
         if (!deleteRecursively(f) && fallback?.delete(file.path) != true) {
             throw FsException("Delete failed: ${file.path}")
@@ -184,6 +204,7 @@ class LocalFileSystem(
     }
 
     override fun rename(file: XFile, newName: String): XFile {
+        documents(file)?.let { return it.rename(file, newName) }
         val src = File(file.path)
         val dst = File(src.parentFile, newName)
         // ★ POSIX rename(2) atomically replaces the existing target, and
@@ -207,6 +228,7 @@ class LocalFileSystem(
     }
 
     override fun exists(file: XFile): Boolean {
+        documents(file)?.let { return it.exists(file) }
         val f = File(file.path)
         if (f.exists()) return true
         if (!maybeHidden(f)) return false
@@ -231,9 +253,15 @@ class LocalFileSystem(
     }
 
     override fun setModifiedTime(file: XFile, time: Long): Boolean =
-        File(file.path).setLastModified(time) || fallback?.setModifiedTime(file.path, time) == true
+        documents(file)?.setModifiedTime(file, time)
+            ?: (File(file.path).setLastModified(time) || fallback?.setModifiedTime(file.path, time) == true)
+
+    override fun createFile(parent: XFile, name: String): XFile =
+        documents(parent)?.createFile(parent, name) ?: super.createFile(parent, name)
 
     override fun moveWithin(src: XFile, destDir: XFile, newName: String): Boolean {
+        // Let CopyEngine stream across independently authorized trees; never try a direct rename.
+        if (documents(src) != null || documents(destDir) != null) return false
         // Same-volume rename is the O(1) optimal move; cross-volume renameTo fails,
         // return false to fall back to the copy engine.
         val from = File(src.path)
@@ -296,6 +324,9 @@ class LocalFileSystem(
 
     companion object {
         const val SCHEME = "file"
+
+        /** Optional persisted document-tree routes, supplied by the Android layer; no Android dependency here. */
+        @Volatile var documentAccess: ((String) -> FileSystem?)? = null
 
         /**
          * Notification hook for local file writes / deletes / renames (path is

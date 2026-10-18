@@ -1,6 +1,7 @@
 package com.twig.app.ui
 
 import android.content.ComponentName
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.ResolveInfo
 import android.os.Build
@@ -17,6 +18,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.fragment.app.Fragment
@@ -28,6 +30,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.twig.app.AppsFileSystem
+import com.twig.app.AndroidDataAccess
 import com.twig.app.CompareStore
 import com.twig.app.ConnectionStore
 import com.twig.app.Connections
@@ -112,6 +115,67 @@ class PaneFragment : Fragment() {
 
     val viewModel: PaneViewModel by viewModels()
     private lateinit var adapter: FileAdapter
+
+    private var pendingDataPath: String? = null
+    private val dataPicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val requested = pendingDataPath?.let { XFile("file", it, true) }
+        pendingDataPath = null
+        val data = result.data
+        val uri = data?.data
+        if (result.resultCode != Activity.RESULT_OK || uri == null || requested == null) return@registerForActivityResult
+        val access = AndroidDataAccess.instance ?: return@registerForActivityResult
+        val ctx = context ?: return@registerForActivityResult
+        val flags = data.flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        if (!access.accepts(uri, requested) || flags and Intent.FLAG_GRANT_READ_URI_PERMISSION == 0) {
+            toast(getString(R.string.android_data_wrong_folder)); return@registerForActivityResult
+        }
+        val persisted = runCatching {
+            ctx.contentResolver.takePersistableUriPermission(uri, flags)
+            access.refresh()
+        }
+        if (persisted.isFailure) {
+            toast(getString(R.string.saf_failed, persisted.exceptionOrNull()?.message ?: ""))
+            return@registerForActivityResult
+        }
+        val path = access.grantedPath(uri) ?: return@registerForActivityResult
+        lifecycleScope.launch {
+            val folder = withContext(Dispatchers.IO) { runCatching { FsRegistry.of("file").stat(path) }.getOrNull() }
+            if (folder == null) toast(getString(R.string.android_data_wrong_folder))
+            else {
+                pendingScrollToCurrent = true
+                viewModel.revealGrantedDataFolder(folder)
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        pendingDataPath = savedInstanceState?.getString("android_data_request")
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("android_data_request", pendingDataPath)
+    }
+
+    private fun askDataAccess(file: XFile) {
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.android_data_grant)
+            .setMessage(getString(R.string.android_data_saf_explanation, file.path))
+            .setNegativeButton(R.string.dialog_cancel, null)
+            .setPositiveButton(R.string.dialog_ok) { _, _ ->
+                pendingDataPath = file.path
+                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
+                        Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION)
+                    putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, AndroidDataAccess.initialUri(file))
+                }
+                runCatching { dataPicker.launch(intent) }.onFailure {
+                    pendingDataPath = null
+                    toast(getString(R.string.saf_failed, it.message ?: ""))
+                }
+            }.show()
+    }
     private var pendingScrollToCurrent = false // Scroll once to the current directory after restoring the previous position.
 
     // inotify watches on already-expanded local directories (real-time sync when external apps add/remove files).
@@ -143,7 +207,9 @@ class PaneFragment : Fragment() {
                     is PaneViewModel.FileNode ->
                         if (node.expandable) viewModel.toggle(node) else open(node.file)
                     is PaneViewModel.ActionNode ->
-                        if (node.id.startsWith("add_")) host?.onAddServer(node.id.removePrefix("add_"))
+                        if (node.id.startsWith(AndroidDataAccess.ACTION_PREFIX))
+                            askDataAccess(XFile("file", node.id.removePrefix(AndroidDataAccess.ACTION_PREFIX), true))
+                        else if (node.id.startsWith("add_")) host?.onAddServer(node.id.removePrefix("add_"))
                     is PaneViewModel.ResticNode -> when {
                         node.connecting -> Unit // Unlocking in progress — don't show the password dialog again / don't stack another unlock.
                         node.unlocked -> viewModel.toggleRestic(node)
@@ -288,6 +354,10 @@ class PaneFragment : Fragment() {
         host?.onClipTargetChanged() // Paste target = currentDir, refresh that line on the bar to follow.
         s.error?.let { toast(it) }
         s.passwordFor?.let { askArchivePassword(it) }
+        s.dataAccessFor?.let { file ->
+            viewModel.dismissDataAccessRequest()
+            askDataAccess(file)
+        }
         s.confirmMaterialize?.let { askMaterializeConfirm(it) }
         syncObservers(s.rows)
     }
