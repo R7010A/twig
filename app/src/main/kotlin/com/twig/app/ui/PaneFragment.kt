@@ -588,7 +588,11 @@ class PaneFragment : Fragment() {
      * (which is for letting other devices connect to this one).
      */
     private fun shareFile(file: XFile) {
-        val r = runCatching { OpenFiles.share(requireContext(), file) }
+        shareFiles(listOf(file))
+    }
+
+    private fun shareFiles(files: List<XFile>) {
+        val r = runCatching { OpenFiles.share(requireContext(), files) }
         if (r.isFailure) toast(getString(R.string.open_no_app))
     }
 
@@ -1741,6 +1745,9 @@ class PaneFragment : Fragment() {
      */
     private fun showBatchMenu(targets: List<XFile>) {
         val actions = ArrayList<MenuAct>()
+        if (targets.none { it.isDir }) {
+            actions.item(getString(R.string.action_share), R.drawable.ic_share) { shareFiles(targets) }
+        }
         if (targets.any { it.isDir || Thumbs.canThumb(it) }) {
             actions.item(getString(R.string.action_refresh_thumb), R.drawable.ic_file_image) {
                 refreshThumb(targets)
