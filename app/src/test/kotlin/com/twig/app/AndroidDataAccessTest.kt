@@ -136,6 +136,8 @@ class AndroidDataAccessTest {
         val access = AndroidDataAccess.instance!!
         fun uri(id: String) = DocumentsContract.buildTreeDocumentUri(AndroidDataAccess.AUTHORITY, id)
         val data = root.copy(path = root.parentPath)
+        assertEquals("primary:Android/data", DocumentsContract.getDocumentId(AndroidDataAccess.initialUri(data)))
+        assertEquals(packageId, DocumentsContract.getDocumentId(AndroidDataAccess.initialUri(root)))
         assertTrue(access.accepts(tree, root))
         assertTrue(access.accepts(tree, data))
         assertTrue(access.accepts(uri("primary:Android/data"), root))
@@ -187,6 +189,31 @@ class AndroidDataAccessTest {
         assertEquals(root.path, vm.currentDir?.path)
         assertTrue(vm.state.value.rows.filterIsInstance<com.twig.app.ui.PaneViewModel.FileNode>()
             .any { it.file.scheme == "saf" && it.file.name == "hello.txt" })
+    }
+
+    @Test fun `blocked data root stays expanded with an explicit authorization action`() = runTest(dispatcher) {
+        val data = root.copy(path = root.parentPath)
+        FsRegistry.register(object : com.twig.core.FileSystem by fs {
+            override fun list(dir: XFile): List<XFile> {
+                if (dir.path == data.path) throw com.twig.core.FsException("blocked")
+                return fs.list(dir)
+            }
+        })
+        val vm = com.twig.app.ui.PaneViewModel(app).apply { io = dispatcher; lockRoot = data }
+        vm.refreshTree()
+        repeat(2) {
+            vm.toggle(vm.state.value.rows.first())
+            val rows = vm.state.value.rows
+            assertTrue((rows.first() as com.twig.app.ui.PaneViewModel.FileNode).expanded)
+            assertTrue(rows.any { it is com.twig.app.ui.PaneViewModel.ActionNode && it.id == AndroidDataAccess.ACTION_PREFIX + data.path })
+            assertNull(vm.state.value.dataAccessFor)
+            assertNull(vm.state.value.error)
+            vm.dismissDataAccessRequest() // Cancelling a picker must not remove the action.
+            assertEquals(rows, vm.state.value.rows)
+            vm.toggle(vm.state.value.rows.first())
+        }
+        try { FsRegistry.of(data).list(data); fail("a blocked directory must still fail outside browsing") }
+        catch (_: com.twig.core.FsException) { }
     }
 
     private class Provider(val base: File) : ContentProvider() {

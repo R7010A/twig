@@ -883,6 +883,5 @@
     <string name="info_app_shortcuts_limited">O Android restringe o acesso aos atalhos dinâmicos de outros apps. Apenas os atalhos declarados pelo app são exibidos.</string>
     <string name="android_data_grant">Autorizar acesso a Android/data…</string>
     <string name="android_data_wrong_folder">Esta pasta não permite acessar o local solicitado. Selecione Android/data ou a pasta do aplicativo correspondente.</string>
-    <string name="android_data_saf_explanation">O Android restringe o acesso a %1$s. Primeiro, tente selecionar a pasta Android/data inteira no seletor do sistema. Se isso for bloqueado, selecione a pasta do aplicativo correspondente. Se nenhuma das opções for permitida, use root ou Shizuku.</string>
     <string name="pin_shortcut_failed">Não foi possível adicionar o atalho</string>
 </resources>

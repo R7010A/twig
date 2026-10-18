@@ -159,23 +159,33 @@ class PaneFragment : Fragment() {
     }
 
     private fun askDataAccess(file: XFile) {
+        if (!AndroidDataAccess.isRoot(file)) {
+            launchDataPicker(file)
+            return
+        }
         AlertDialog.Builder(requireContext())
             .setTitle(R.string.android_data_grant)
-            .setMessage(getString(R.string.android_data_saf_explanation, file.path))
+            .setItems(arrayOf(getString(R.string.android_data_whole), getString(R.string.android_data_app))) { _, _ ->
+                // Both choices start at the real parent; SAF supplies the existing folders.
+                launchDataPicker(file)
+            }
             .setNegativeButton(R.string.dialog_cancel, null)
-            .setPositiveButton(R.string.dialog_ok) { _, _ ->
-                pendingDataPath = file.path
-                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
-                        Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION)
-                    putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, AndroidDataAccess.initialUri(file))
-                }
-                runCatching { dataPicker.launch(intent) }.onFailure {
-                    pendingDataPath = null
-                    toast(getString(R.string.saf_failed, it.message ?: ""))
-                }
-            }.show()
+            .show()
     }
+
+    private fun launchDataPicker(file: XFile) {
+        pendingDataPath = file.path
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
+                Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION)
+            putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, AndroidDataAccess.initialUri(file))
+        }
+        runCatching { dataPicker.launch(intent) }.onFailure {
+            pendingDataPath = null
+            toast(getString(R.string.saf_failed, it.message ?: ""))
+        }
+    }
+
     private var pendingScrollToCurrent = false // Scroll once to the current directory after restoring the previous position.
 
     // inotify watches on already-expanded local directories (real-time sync when external apps add/remove files).

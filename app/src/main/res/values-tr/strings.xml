@@ -883,6 +883,5 @@
     <string name="info_app_shortcuts_limited">Android, diğer uygulamaların dinamik kısayollarına erişimi kısıtlar. Yalnızca uygulamada tanımlanan kısayollar gösterilir.</string>
     <string name="android_data_grant">Android/data erişimine izin ver…</string>
     <string name="android_data_wrong_folder">Bu klasör, istenen konuma erişim sağlamıyor. Android/data veya ilgili uygulamanın klasörünü seçin.</string>
-    <string name="android_data_saf_explanation">Android, %1$s konumuna erişimi kısıtlıyor. Önce sistem klasör seçicisinde Android/data klasörünün tamamını seçmeyi deneyin. Bu engellenirse ilgili uygulamanın klasörünü seçin. İkisine de izin verilmiyorsa root veya Shizuku kullanın.</string>
     <string name="pin_shortcut_failed">Kısayol eklenemedi</string>
 </resources>

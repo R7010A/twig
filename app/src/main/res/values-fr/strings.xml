@@ -883,6 +883,5 @@
     <string name="info_app_shortcuts_limited">Android limite l’accès aux raccourcis dynamiques des autres applications. Seuls les raccourcis déclarés par l’application sont affichés.</string>
     <string name="android_data_grant">Autoriser l’accès à Android/data…</string>
     <string name="android_data_wrong_folder">Ce dossier ne donne pas accès à l’emplacement demandé. Sélectionnez Android/data ou le dossier de l’application concernée.</string>
-    <string name="android_data_saf_explanation">Android limite l’accès à %1$s. Essayez d’abord de sélectionner tout le dossier Android/data dans le sélecteur système. Si cela est bloqué, sélectionnez le dossier de l’application concernée. Si aucune option n’est autorisée, utilisez root ou Shizuku.</string>
     <string name="pin_shortcut_failed">Impossible d’ajouter le raccourci</string>
 </resources>

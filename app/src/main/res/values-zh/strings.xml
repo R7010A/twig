@@ -911,8 +911,9 @@
     <string name="folder_counts_description">目录：%1$d，文件：%2$d</string>
     <string name="info_activity_failed">无法打开此 Activity</string>
     <string name="info_app_shortcuts_limited">Android 限制读取其他应用的动态快捷方式。此处仅显示应用声明的快捷方式。</string>
-    <string name="android_data_grant">授权 Android/data…</string>
+    <string name="android_data_grant">授权访问…</string>
     <string name="android_data_wrong_folder">所选目录无法授权访问目标位置，请选择 Android/data 或对应的应用目录。</string>
-    <string name="android_data_saf_explanation">Android 限制访问 %1$s。请先尝试在系统选择器中选择整个 Android/data 目录；如果系统不允许，再进入对应的应用目录单独授权。如果均无法选择，仍需使用 root 或 Shizuku。</string>
     <string name="pin_shortcut_failed">无法添加快捷方式</string>
+    <string name="android_data_whole">整个 Android/data</string>
+    <string name="android_data_app">指定应用目录…</string>
 </resources>

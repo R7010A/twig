@@ -167,6 +167,6 @@ class AndroidDataAccess(private val ctx: Context) {
             }
         }
         fun initialUri(file: XFile): Uri = DocumentsContract.buildDocumentUri(
-            AUTHORITY, documentId(file.path)!!.substringBefore(':') + ":Android/data")
+            AUTHORITY, documentId(file.path)!!)
     }
 }

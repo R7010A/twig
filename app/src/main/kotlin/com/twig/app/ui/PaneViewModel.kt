@@ -2006,7 +2006,13 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                             }
                             rebuild()
                         },
-                        { rebuild(); if (mine) emitFailure(it, n.file) },
+                        {
+                            // Keep the authorization action reachable even when Android hides data's contents.
+                            val keepOpen = mine && AndroidDataAccess.isRoot(n.file)
+                            if (keepOpen) accordionExpand(key)
+                            rebuild()
+                            if (mine && !keepOpen) emitFailure(it, n.file)
+                        },
                     )
                 }
             }
