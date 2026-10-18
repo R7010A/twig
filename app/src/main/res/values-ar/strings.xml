@@ -657,6 +657,7 @@
     <string name="info_section_image">صورة</string>
     <string name="info_section_media">وسائط</string>
     <string name="info_section_app">تطبيق</string>
+    <string name="info_selected">المحدد</string>
     <string name="info_name">الاسم</string>
     <string name="info_path">المسار</string>
     <string name="info_copied">تم النسخ</string>

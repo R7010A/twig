@@ -657,6 +657,7 @@
     <string name="info_section_image">Gambar</string>
     <string name="info_section_media">Media</string>
     <string name="info_section_app">Aplikasi</string>
+    <string name="info_selected">Dipilih</string>
     <string name="info_name">Nama</string>
     <string name="info_path">Jalur</string>
     <string name="info_copied">Disalin</string>

@@ -187,6 +187,7 @@ class PaneFragment : Fragment() {
     }
 
     private var pendingScrollToCurrent = false // Scroll once to the current directory after restoring the previous position.
+    private var pendingSelectionInfoScroll = false
 
     // inotify watches on already-expanded local directories (real-time sync when external apps add/remove files).
     private val observers = HashMap<String, android.os.FileObserver>()
@@ -345,6 +346,12 @@ class PaneFragment : Fragment() {
         adapter.submitList(s.rows) {
             val bb = _b ?: return@submitList
             bb.list.invalidate() // The highlight frame redraws as currentKey changes.
+            if (pendingSelectionInfoScroll) {
+                val index = s.rows.indexOfFirst { it is PaneViewModel.InfoNode && it.selection }
+                if (index >= 0) (bb.list.layoutManager as? LinearLayoutManager)
+                    ?.scrollToPositionWithOffset(index, bb.list.height / 4)
+                pendingSelectionInfoScroll = false
+            }
             if (pendingScrollToCurrent) {
                 // Restoration expands directories asynchronously, so the row count keeps shifting: re-anchor to the target row on every
                 // version until restoring drops — only anchoring once stops at the half-built version's position.
@@ -1739,12 +1746,17 @@ class PaneFragment : Fragment() {
     }
 
     /**
-     * Multi-selection (> 1 checked) exclusive menu: keep only operations that make sense in bulk (refresh thumbnails / copy / move / delete);
-     * single-file-only items like Select / Properties / Open as archive / Open with / Rename / Favorite are meaningless in batch and hidden.
+     * Multi-selection (> 1 checked) menu, including aggregate properties and system sharing for files.
+     * Single-file operations such as Open with / Rename / Favorite are hidden.
      * The title uses the check count instead of a file name.
      */
     private fun showBatchMenu(targets: List<XFile>) {
         val actions = ArrayList<MenuAct>()
+        actions.item(getString(R.string.file_info), R.drawable.ic_info) {
+            val anchor = adapter.currentList.filterIsInstance<PaneViewModel.FileNode>().firstOrNull { adapter.isSelected(it) }
+            pendingSelectionInfoScroll = true
+            viewModel.toggleSelectionInfo(targets, anchor?.key)
+        }
         if (targets.none { it.isDir }) {
             actions.item(getString(R.string.action_share), R.drawable.ic_share) { shareFiles(targets) }
         }

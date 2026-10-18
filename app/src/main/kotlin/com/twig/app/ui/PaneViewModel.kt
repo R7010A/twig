@@ -182,8 +182,9 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         val hashing: Boolean = false,
         val dirStat: DirStat? = null,
         val scanning: Boolean = false,
+        val selection: Boolean = false,
     ) : Node {
-        override val key: String get() = "info:${fileKey(file)}"
+        override val key: String get() = if (selection) "info:selection" else "info:${fileKey(file)}"
     }
 
     /**
@@ -403,6 +404,8 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
     private val confirmedMaterialize = HashSet<String>()
     /** File key (fileKey) for which the properties card is open; the card content is cached and dropped when closed/folded. */
     private val infoOpen = LinkedHashSet<String>()
+    private data class SelectionInfo(val anchor: String, val targets: List<XFile>, val scan: DirScanState)
+    private var selectionInfo: SelectionInfo? = null
     private val infoCache = HashMap<String, com.twig.app.FileInfo.Details>()
     private val infoLoads = HashMap<String, kotlinx.coroutines.Job>()
     /** Currently selected tab on the card, already-computed hashes, keys currently computing. */
@@ -856,6 +859,11 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
             is CompareNode -> Unit // Handled by Fragment (jumps to compare page).
             is ActionNode -> Unit // Handled by Fragment.
             is InfoNode -> { // The ✕ button
+                if (node.selection) {
+                    closeSelectionInfo()
+                    rebuild()
+                    return
+                }
                 val key = fileKey(node.file)
                 infoOpen.remove(key)
                 stopDirScan(key)
@@ -1645,6 +1653,38 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
      */
     fun toggleInfo(n: FileNode) = toggleInfo(n.file)
 
+    /** Snapshot the selection and attach its aggregate properties above the first selected row. */
+    fun toggleSelectionInfo(targets: List<XFile>, anchorKey: String? = null) {
+        val selectedKeys = targets.mapTo(HashSet()) { fileKey(it) }
+        val anchor = _state.value.rows.filterIsInstance<FileNode>()
+            .firstOrNull { fileKey(it.file) in selectedKeys && (anchorKey == null || it.key == anchorKey) } ?: return
+        val previous = selectionInfo
+        closeSelectionInfo()
+        if (previous?.targets == targets && previous.anchor == anchor.key) {
+            rebuild()
+            return
+        }
+        val scan = DirScanState()
+        selectionInfo = SelectionInfo(anchor.key, targets.toList(), scan)
+        rebuild()
+        scan.job = viewModelScope.launch {
+            val start = android.os.SystemClock.elapsedRealtime()
+            scanSelectionStat(targets, io).collect {
+                scan.stat = it
+                rebuild()
+            }
+            val left = DIR_SCAN_MIN_SPIN_MS - (android.os.SystemClock.elapsedRealtime() - start)
+            if (left > 0) kotlinx.coroutines.delay(left)
+            scan.scanning = false
+            rebuild()
+        }
+    }
+
+    private fun closeSelectionInfo() {
+        selectionInfo?.scan?.job?.cancel()
+        selectionInfo = null
+    }
+
     /** Same as above but takes a file directly (favorite rows have no matching [FileNode]; the menu's "Properties" entry uses this). */
     fun toggleInfo(file: XFile) {
         val key = fileKey(file)
@@ -1730,7 +1770,8 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /** For unit tests only: count of in-flight directory-recursive stat scans (must drop to zero after the card is closed/collapsed). */
-    internal fun activeDirScans(): Int = dirScan.count { it.value.job?.isActive == true }
+    internal fun activeDirScans(): Int = dirScan.count { it.value.job?.isActive == true } +
+        if (selectionInfo?.scan?.job?.isActive == true) 1 else 0
 
     /**
      * Switch the properties card's tab. Switching to the "Hash" tab (index == section
@@ -1738,6 +1779,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
      * to tap "Compute" (a whole-file read — bandwidth/time is up to the user).
      */
     fun selectInfoTab(n: InfoNode, idx: Int) {
+        if (n.selection) return // Aggregate properties have only the Basic tab, with no single-file hash.
         val key = fileKey(n.file)
         infoTab[key] = idx
         val isHash = !n.file.isDir && idx == (n.details?.sections?.size ?: 0)
@@ -1749,6 +1791,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Manual "compute hash" button on the Hash tab (network files). */
     fun computeHash(n: InfoNode) {
+        if (n.selection) return
         val key = fileKey(n.file)
         if (!hashCache.containsKey(key) && !hashing.contains(key)) startHash(key, n.file)
         rebuild()
@@ -2698,8 +2741,18 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                 str(R.string.apps_root),
             )
         }
+        selectionInfo?.let { info ->
+            val index = rows.indexOfFirst { it.key == info.anchor }
+            if (index < 0) closeSelectionInfo()
+            else {
+                val anchor = rows[index] as FileNode
+                rows.add(index, InfoNode(anchor.file, anchor.depth + 1,
+                    com.twig.app.FileInfo.selection(getApplication(), info.targets, info.scan.stat),
+                    scanning = info.scan.scanning, selection = true))
+            }
+        }
         // Auto-close and discard the cache of info cards whose containing directory was collapsed (so no card row was built).
-        val liveInfo = rows.mapNotNullTo(HashSet()) { (it as? InfoNode)?.let { n -> fileKey(n.file) } }
+        val liveInfo = rows.mapNotNullTo(HashSet()) { (it as? InfoNode)?.takeUnless { it.selection }?.let { n -> fileKey(n.file) } }
         infoOpen.retainAll(liveInfo)
         infoCache.keys.retainAll(infoOpen)
         infoLoads.keys.toList().forEach { key -> if (key !in infoOpen) infoLoads.remove(key)?.cancel() }

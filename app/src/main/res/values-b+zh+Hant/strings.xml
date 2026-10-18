@@ -657,6 +657,7 @@
     <string name="info_section_image">圖片</string>
     <string name="info_section_media">媒體</string>
     <string name="info_section_app">應用</string>
+    <string name="info_selected">已選擇</string>
     <string name="info_name">名稱</string>
     <string name="info_path">路徑</string>
     <string name="info_copied">已複製</string>

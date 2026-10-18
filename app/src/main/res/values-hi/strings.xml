@@ -657,6 +657,7 @@
     <string name="info_section_image">छवि</string>
     <string name="info_section_media">मीडिया</string>
     <string name="info_section_app">ऐप</string>
+    <string name="info_selected">चयनित</string>
     <string name="info_name">नाम</string>
     <string name="info_path">पथ</string>
     <string name="info_copied">कॉपी हुआ</string>

@@ -657,6 +657,7 @@
     <string name="info_section_image">Görüntü</string>
     <string name="info_section_media">Medya</string>
     <string name="info_section_app">Uygulama</string>
+    <string name="info_selected">Seçili</string>
     <string name="info_name">Ad</string>
     <string name="info_path">Yol</string>
     <string name="info_copied">Kopyalandı</string>

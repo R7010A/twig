@@ -699,6 +699,7 @@
     <string name="info_section_image">Image</string>
     <string name="info_section_media">Media</string>
     <string name="info_section_app">App</string>
+    <string name="info_selected">Selected</string>
     <string name="info_name">Name</string>
     <string name="info_path">Path</string>
     <string name="info_copied">Copied</string>

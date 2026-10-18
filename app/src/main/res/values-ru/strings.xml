@@ -683,6 +683,7 @@
     <string name="info_section_image">Изображение</string>
     <string name="info_section_media">Медиа</string>
     <string name="info_section_app">Приложение</string>
+    <string name="info_selected">Выбрано</string>
     <string name="info_name">Имя</string>
     <string name="info_path">Путь</string>
     <string name="info_copied">Скопировано</string>

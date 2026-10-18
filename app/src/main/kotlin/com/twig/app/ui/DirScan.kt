@@ -8,7 +8,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.flow
 import kotlin.coroutines.coroutineContext
 
 /** Realtime result of a recursive directory scan (displayed by the properties card as the scan progresses). */
@@ -26,6 +28,31 @@ private const val DIR_SCAN_UI_MS = 200L
  * half-second than to make the status indicator look meaningless.
  */
 internal const val DIR_SCAN_MIN_SPIN_MS = 600L
+
+/** Union of selected entries and their descendants; nested selections count only once. */
+fun scanSelectionStat(targets: List<XFile>, io: CoroutineDispatcher = Dispatchers.IO): Flow<DirStat> = flow {
+    val unique = targets.distinctBy { it.scheme to it.path.trimEnd('/') }
+    val roots = unique.filter { file ->
+        unique.none { parent ->
+            parent.isDir && parent.scheme == file.scheme && parent !== file &&
+                file.path.startsWith(parent.path.trimEnd('/') + "/")
+        }
+    }
+    var total = DirStat(
+        files = roots.count { !it.isDir },
+        dirs = roots.count { it.isDir },
+        bytes = roots.filter { !it.isDir }.sumOf { it.size.coerceAtLeast(0) },
+    )
+    emit(total)
+    for (root in roots.filter { it.isDir }) {
+        var scanned = DirStat()
+        scanDirStat(root, io).collect { current ->
+            scanned = current
+            emit(DirStat(total.files + current.files, total.dirs + current.dirs, total.bytes + current.bytes))
+        }
+        total = DirStat(total.files + scanned.files, total.dirs + scanned.dirs, total.bytes + scanned.bytes)
+    }
+}
 
 /**
  * Recursively count files / directories / total bytes under [root],

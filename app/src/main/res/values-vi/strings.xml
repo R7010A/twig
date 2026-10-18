@@ -657,6 +657,7 @@
     <string name="info_section_image">Ảnh</string>
     <string name="info_section_media">Đa phương tiện</string>
     <string name="info_section_app">Ứng dụng</string>
+    <string name="info_selected">Đã chọn</string>
     <string name="info_name">Tên</string>
     <string name="info_path">Đường dẫn</string>
     <string name="info_copied">Đã sao chép</string>

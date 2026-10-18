@@ -403,7 +403,7 @@ class FileAdapter(
 
         fun bind(node: PaneViewModel.InfoNode) {
             val sections = node.details?.sections.orEmpty()
-            val count = sections.size + if (node.file.isDir || sections.isEmpty()) 0 else 1
+            val count = sections.size + if (node.selection || node.file.isDir || sections.isEmpty()) 0 else 1
             val tab = node.tab.coerceIn(0, (count - 1).coerceAtLeast(0))
             b.root.swipeEnabled = count > 1
             b.root.onSwipe = { step ->
@@ -445,7 +445,7 @@ class FileAdapter(
             }
 
             val titles = ArrayList(d.sections.map { it.title })
-            val hashIdx = if (node.file.isDir) -1 else titles.size
+            val hashIdx = if (node.selection || node.file.isDir) -1 else titles.size
             if (hashIdx >= 0) titles += ctx.getString(R.string.info_tab_hash)
             val cur = node.tab.coerceIn(0, titles.size - 1)
             buildTabs(node, titles, cur)
