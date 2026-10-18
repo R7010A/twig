@@ -91,6 +91,23 @@ class SlowExpandRaceTest {
     private fun row(name: String) =
         vm.state.value.rows.filterIsInstance<PaneViewModel.FileNode>().single { it.file.name == name }
 
+    @Test
+    fun `returning to the top abandons a slow expansion so it cannot reopen the tree later`() = runTest(dispatcher) {
+        val root = server("top-race.test")
+        vm.revealPath(root)
+        advanceUntilIdle()
+        vm.io = hold
+        vm.toggle(row("slow"))
+        advanceUntilIdle()
+        vm.top()
+        assertTrue(vm.state.value.rows.all { it.depth == 0 })
+        hold.release()
+        advanceUntilIdle()
+        assertTrue(vm.state.value.rows.all { it.depth == 0 })
+        assertTrue(vm.state.value.currentKey == null)
+        assertTrue(vm.currentDir == null)
+    }
+
     private fun failingFavorite(): PaneViewModel.FavoriteNode {
         val conn = SavedConnection(type = "sftp", host = "favorite-failure.test", user = "u")
         ConnectionStore.save(app, conn)

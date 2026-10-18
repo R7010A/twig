@@ -1393,6 +1393,25 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         rebuild()
     }
 
+    /** Return to the top-level overview without constructing paths or listing any backend. */
+    fun top() {
+        pendingExpand?.let { abandoned.add(it) }
+        pendingExpand = null
+        val files = _state.value.rows.filterIsInstance<FileNode>().map { it.file }
+        Thumbs.cancelPending(files)
+        SizeProbes.cancelPending(files)
+        DirectoryCounts.cancelPending(files)
+        expanded.clear()
+        infoOpen.clear()
+        closeSelectionInfo()
+        searchState.values.forEach { it.job?.cancel() }
+        searchState.clear()
+        currentKey = null
+        currentDir = null
+        scrollKey = null
+        rebuild()
+    }
+
     /**
      * Collapse the current directory and move "current directory" up one level.
      * Server/favorite roots are not standalone [FileNode] rows (their children hang

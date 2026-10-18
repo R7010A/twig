@@ -610,6 +610,19 @@ class PaneFragment : Fragment() {
         viewModel.up()
     }
 
+    fun actionTop() {
+        if (mapMode) exitTreemap()
+        pendingScrollToCurrent = false
+        pendingSelectionInfoScroll = false
+        adapter.clearSelection()
+        viewModel.top()
+        b.list.post {
+            _b?.list?.let { list ->
+                (list.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(0, 0)
+            }
+        }
+    }
+
     fun actionRefresh() {
         viewModel.currentDir?.let(viewModel::noteChangedIn)
         viewModel.refresh()

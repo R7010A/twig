@@ -82,6 +82,25 @@ class StripWriteActionsTest {
     private fun pane1(): PaneFragment =
         activity.supportFragmentManager.findFragmentByTag("pane1") as PaneFragment
 
+    @Test
+    fun `holding the toolbar or any strip Up icon returns the active pane to the top overview`() {
+        val toolbar = activity.findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+        val navigation = (0 until toolbar.childCount).map { toolbar.getChildAt(it) }
+            .first { it is android.widget.ImageButton && it.drawable === toolbar.navigationIcon }
+        val controls = listOf(navigation) + listOf(R.id.strip_left, R.id.strip_mid, R.id.strip_right).map {
+            activity.findViewById<View>(it).findViewById<View>(R.id.as_up)
+        }
+        for (control in controls) {
+            val vm = pane0().viewModel
+            vm.expandGroup("fav")
+            assertTrue(vm.state.value.rows.filterIsInstance<PaneViewModel.GroupNode>().first { it.id == "fav" }.expanded)
+            assertTrue(control.performLongClick())
+            assertFalse(vm.state.value.rows.filterIsInstance<PaneViewModel.GroupNode>().first { it.id == "fav" }.expanded)
+            assertTrue(vm.currentDir == null)
+            assertTrue(vm.state.value.currentKey == null)
+        }
+    }
+
     private fun assertStrip(id: Int, enabled: Boolean) {
         for (strip in listOf(R.id.strip_left, R.id.strip_mid, R.id.strip_right)) {
             val button = activity.findViewById<View>(strip).findViewById<View>(id)

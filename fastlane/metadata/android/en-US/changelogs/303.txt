@@ -1,0 +1,1 @@
+Preview 2: Android/data stays expanded after denied listings, keeping authorization accessible. Use the system picker to select the whole folder or an existing app folder. Adds multi-file sharing, inline properties for selected items, and long-press Up to return to the top-level overview. Refines parent-directory and WiFi sharing icons.

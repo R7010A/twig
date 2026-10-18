@@ -232,6 +232,12 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         b.toolbar.setNavigationIcon(R.drawable.ic_parent_directory)
         b.toolbar.setNavigationContentDescription(R.string.strip_up)
         b.toolbar.setNavigationOnClickListener { activePane()?.actionUp() }
+        for (i in 0 until b.toolbar.childCount) {
+            val child = b.toolbar.getChildAt(i)
+            if (child is android.widget.ImageButton && child.drawable === b.toolbar.navigationIcon) {
+                child.setOnLongClickListener { activePane()?.actionTop(); true }
+            }
+        }
 
         TwigApp.registerBaseFs(this) // Base sources (local / archive / SAF / apps / content://)
 
@@ -447,6 +453,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
     private fun wireStrip(s: ActionStripBinding) {
         s.sizeIconsLikeRows(this)
         s.asUp.setOnClickListener { activePane()?.actionUp() }
+        s.asUp.setOnLongClickListener { activePane()?.actionTop(); true }
         s.asSort.setOnClickListener { showSortDialog() }
         s.asRefresh.setOnClickListener { activePane()?.actionRefresh() }
         s.asNewFolder.setOnClickListener { activePane()?.actionNewFolder() }
