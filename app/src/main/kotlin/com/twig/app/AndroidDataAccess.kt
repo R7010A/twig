@@ -149,6 +149,7 @@ class AndroidDataAccess(private val ctx: Context) {
         }
         fun supports(file: XFile) = Build.VERSION.SDK_INT >= 30 && file.scheme == "file" && documentId(file.path) != null
         fun isRoot(file: XFile) = supports(file) && documentId(file.path)?.substringAfter(':') == "Android/data"
-        fun initialUri(file: XFile): Uri = DocumentsContract.buildDocumentUri(AUTHORITY, documentId(file.path)!!)
+        fun initialUri(file: XFile): Uri = DocumentsContract.buildDocumentUri(
+            AUTHORITY, documentId(file.path)!!.substringBefore(':') + ":Android/data")
     }
 }

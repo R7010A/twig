@@ -951,7 +951,7 @@
     <string name="info_app_details_unavailable" translatable="false">Some app details could not be read.</string>
     <string name="info_app_shortcuts_limited">Android restricts access to dynamic shortcuts from other apps. Only declared shortcuts are shown.</string>
     <string name="info_activity_failed">Could not open this Activity</string>
-    <string name="android_data_grant">Authorize app folder…</string>
-    <string name="android_data_wrong_folder">This folder does not grant access to the requested location. Select the app folder under Android/data.</string>
-    <string name="android_data_saf_explanation">Android restricts access to %1$s. In the system picker, select the app folder you want to access. Each folder needs its own authorization. Some system versions block this; if selection is unavailable, use root or Shizuku.</string>
+    <string name="android_data_grant">Authorize Android/data…</string>
+    <string name="android_data_wrong_folder">This folder does not grant access to the requested location. Select Android/data or the corresponding app folder.</string>
+    <string name="android_data_saf_explanation">Android restricts access to %1$s. First try selecting the entire Android/data folder in the system picker. If that is blocked, select the corresponding app folder instead. If neither is allowed, use root or Shizuku.</string>
 </resources>
