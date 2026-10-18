@@ -884,4 +884,5 @@
     <string name="android_data_grant">Izinkan akses ke Android/data…</string>
     <string name="android_data_wrong_folder">Folder ini tidak memberikan akses ke lokasi yang diminta. Pilih Android/data atau folder aplikasi yang sesuai.</string>
     <string name="android_data_saf_explanation">Android membatasi akses ke %1$s. Coba pilih seluruh folder Android/data di pemilih folder sistem terlebih dahulu. Jika diblokir, pilih folder aplikasi yang sesuai. Jika keduanya tidak diizinkan, gunakan root atau Shizuku.</string>
+    <string name="pin_shortcut_failed">Tidak dapat menambahkan pintasan</string>
 </resources>

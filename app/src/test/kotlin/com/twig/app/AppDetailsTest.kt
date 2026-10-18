@@ -164,6 +164,34 @@ class AppDetailsTest {
         assertTrue(intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0)
     }
 
+    @Test fun `Activity shortcuts launch the explicit component with a persistent action and rendered icon`() {
+        val pi = info().apply {
+            activities = activities!! + activity("AnotherPublic")
+            activities!!.first { it.name == "$pkg.Public" }.nonLocalizedLabel = "Open page"
+        }
+        shadowOf(app.packageManager).installPackage(pi)
+        val entry = AppDetails.load(app, pi, true).single { it.kind == AppDetails.Kind.ACTIVITIES }
+            .entries.single { it.title == "Public" }
+        val shortcut = AppDetails.activityShortcut(app, entry)
+        assertEquals("Open page", shortcut.shortLabel.toString())
+        assertEquals(ComponentName(pkg, "$pkg.Public"), shortcut.intent.component)
+        assertEquals(Intent.ACTION_MAIN, shortcut.intent.action)
+        assertTrue(shortcut.intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0)
+        assertEquals(androidx.core.graphics.drawable.IconCompat.TYPE_BITMAP, shortcut.icon!!.type)
+        assertEquals(shortcut.id, AppDetails.activityShortcut(app, entry).id)
+        assertNotEquals(shortcut.id, AppDetails.activityShortcut(app,
+            entry.copy(action = AppDetails.Action.Activity(pkg, "$pkg.AnotherPublic"))).id)
+        assertEquals(entry.title, AppDetails.activityShortcut(app, entry.copy(subtitle = null)).shortLabel.toString())
+    }
+
+    @Test fun `unavailable Activity entries cannot produce a launcher shortcut`() {
+        val entries = AppDetails.load(app, info(), true).single { it.kind == AppDetails.Kind.ACTIVITIES }.entries
+        for (entry in entries.filter { !it.actionable }) {
+            try { AppDetails.activityShortcut(app, entry); fail("must reject ${entry.title}") }
+            catch (_: IllegalArgumentException) { }
+        }
+    }
+
     @Suppress("DEPRECATION")
     @Test fun `signature fingerprints come from certificates rather than package metadata`() {
         val pi = info().apply { signatures = arrayOf(Signature(byteArrayOf(1, 2, 3))) }

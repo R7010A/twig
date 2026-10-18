@@ -884,4 +884,5 @@
     <string name="android_data_grant">Autorizar acceso a Android/data…</string>
     <string name="android_data_wrong_folder">Esta carpeta no permite acceder a la ubicación solicitada. Selecciona Android/data o la carpeta de la aplicación correspondiente.</string>
     <string name="android_data_saf_explanation">Android restringe el acceso a %1$s. Primero intenta seleccionar toda la carpeta Android/data en el selector del sistema. Si está bloqueada, selecciona la carpeta de la aplicación correspondiente. Si ninguna opción está permitida, utiliza root o Shizuku.</string>
+    <string name="pin_shortcut_failed">No se pudo añadir el acceso directo</string>
 </resources>

@@ -12,6 +12,8 @@ import android.content.pm.ShortcutManager
 import android.os.Build
 import android.os.Process
 import android.util.Xml
+import androidx.core.content.pm.ShortcutInfoCompat
+import com.twig.app.ui.ShortcutIcons
 import org.bouncycastle.asn1.ASN1String
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.asn1.x500.style.BCStyle
@@ -106,6 +108,20 @@ object AppDetails {
             }
             null -> error("No launch action")
         }
+    }
+
+    internal fun activityShortcut(ctx: Context, entry: Entry): ShortcutInfoCompat {
+        require(entry.actionable)
+        val action = entry.action as? Action.Activity ?: error("Not an Activity")
+        val component = ComponentName(action.packageName, action.className)
+        val label = entry.subtitle?.takeIf { it.isNotBlank() } ?: entry.title
+        val icon = ctx.packageManager.getActivityIcon(component)
+        return ShortcutInfoCompat.Builder(ctx, "activity:" + component.flattenToString())
+            .setShortLabel(label)
+            .setLongLabel("$label · ${entry.title}")
+            .setIcon(ShortcutIcons.of(ctx, icon))
+            .setIntent(Intent(Intent.ACTION_MAIN).setComponent(component).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            .build()
     }
 
     private fun componentEnabled(ctx: Context, component: ComponentInfo, installed: Boolean): Boolean {

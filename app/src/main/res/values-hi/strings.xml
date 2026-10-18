@@ -884,4 +884,5 @@
     <string name="android_data_grant">Android/data का ऐक्सेस दें…</string>
     <string name="android_data_wrong_folder">इस फ़ोल्डर से अनुरोधित स्थान का ऐक्सेस नहीं मिलता। Android/data या संबंधित ऐप का फ़ोल्डर चुनें।</string>
     <string name="android_data_saf_explanation">Android, %1$s का ऐक्सेस सीमित करता है। पहले सिस्टम के फ़ोल्डर चयनकर्ता में पूरा Android/data फ़ोल्डर चुनने की कोशिश करें। अगर इसकी अनुमति नहीं है, तो संबंधित ऐप का फ़ोल्डर चुनें। अगर दोनों में से किसी की अनुमति नहीं है, तो root या Shizuku का उपयोग करें।</string>
+    <string name="pin_shortcut_failed">शॉर्टकट नहीं जोड़ा जा सका</string>
 </resources>

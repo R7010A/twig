@@ -884,4 +884,5 @@
     <string name="android_data_grant">Android/data へのアクセスを許可…</string>
     <string name="android_data_wrong_folder">このフォルダでは対象の場所へのアクセスを許可できません。Android/data または該当アプリのフォルダを選択してください。</string>
     <string name="android_data_saf_explanation">Android は %1$s へのアクセスを制限しています。まず、システムのフォルダ選択画面で Android/data フォルダ全体を選択してください。許可されない場合は、該当アプリのフォルダを選択してください。どちらも許可されない場合は、root または Shizuku を使用してください。</string>
+    <string name="pin_shortcut_failed">ショートカットを追加できませんでした</string>
 </resources>

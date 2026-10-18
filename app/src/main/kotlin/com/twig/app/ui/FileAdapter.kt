@@ -24,6 +24,8 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -548,6 +550,24 @@ class FileAdapter(
                                         R.string.info_app_shortcut_failed else R.string.info_activity_failed
                                     Toast.makeText(ctx, ctx.getString(message), Toast.LENGTH_SHORT).show()
                                 }
+                            }
+                            if (entry.action is AppDetails.Action.Activity) row.setOnLongClickListener { anchor ->
+                                PopupMenu(ctx, anchor).apply {
+                                    menu.add(R.string.action_pin_shortcut).setOnMenuItemClickListener {
+                                        if (!ShortcutManagerCompat.isRequestPinShortcutSupported(ctx)) {
+                                            Toast.makeText(ctx, R.string.pin_shortcut_unsupported, Toast.LENGTH_SHORT).show()
+                                        } else {
+                                            runCatching {
+                                                check(ShortcutManagerCompat.requestPinShortcut(ctx, AppDetails.activityShortcut(ctx, entry), null))
+                                            }.onFailure {
+                                                Toast.makeText(ctx, R.string.pin_shortcut_failed, Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                        true
+                                    }
+                                    show()
+                                }
+                                true
                             }
                         }
                         content.addView(row, LinearLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT,

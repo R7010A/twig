@@ -883,4 +883,5 @@
     <string name="android_data_grant">Cấp quyền truy cập Android/data…</string>
     <string name="android_data_wrong_folder">Thư mục này không cấp quyền truy cập vị trí được yêu cầu. Hãy chọn Android/data hoặc thư mục của ứng dụng tương ứng.</string>
     <string name="android_data_saf_explanation">Android hạn chế quyền truy cập %1$s. Trước tiên, hãy thử chọn toàn bộ thư mục Android/data trong trình chọn thư mục của hệ thống. Nếu bị chặn, hãy chọn thư mục của ứng dụng tương ứng. Nếu cả hai đều không được phép, hãy sử dụng root hoặc Shizuku.</string>
+    <string name="pin_shortcut_failed">Không thể thêm lối tắt</string>
 </resources>

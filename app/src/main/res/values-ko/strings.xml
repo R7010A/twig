@@ -884,4 +884,5 @@
     <string name="android_data_grant">Android/data 접근 허용…</string>
     <string name="android_data_wrong_folder">이 폴더로는 요청한 위치에 접근할 수 없습니다. Android/data 또는 해당 앱의 폴더를 선택하세요.</string>
     <string name="android_data_saf_explanation">Android에서 %1$s 접근을 제한합니다. 먼저 시스템 폴더 선택기에서 Android/data 폴더 전체를 선택해 보세요. 차단된 경우 해당 앱의 폴더를 선택하세요. 둘 다 허용되지 않으면 root 또는 Shizuku를 사용하세요.</string>
+    <string name="pin_shortcut_failed">바로가기를 추가할 수 없습니다</string>
 </resources>
