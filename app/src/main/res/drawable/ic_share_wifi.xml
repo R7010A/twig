@@ -1,5 +1,6 @@
 <!--
-  "WiFi sharing" entry (off): three thin arcs + a downward triangle.
+  "WiFi sharing" entry (off): two concentric arcs + a fan-shaped base.
+  All segments share a center and side rays; radial gaps are 2.5 viewport units.
   ★ Do not put android:tint here — this icon sits on the action strip and its color is
   given uniformly by @style/StripIcon's tint (@color/primary); an in-drawable tint would
   override the unified light/dark theme coloring.
@@ -8,5 +9,5 @@
     android:width="24dp" android:height="24dp"
     android:viewportWidth="24" android:viewportHeight="24">
     <path android:fillColor="@android:color/black"
-        android:pathData="M12,21l-3.5,-4.5h7L12,21zM1.4,8.6C4.3,5.8 8,4.2 12,4.2s7.7,1.6 10.6,4.4l-1.8,1.8C18.4,8.1 15.3,6.8 12,6.8S5.6,8.1 3.2,10.4L1.4,8.6zM5,12.2c1.9,-1.8 4.4,-2.9 7,-2.9s5.1,1.1 7,2.9l-1.8,1.8c-1.4,-1.3 -3.2,-2.1 -5.2,-2.1s-3.8,0.8 -5.2,2.1L5,12.2z" />
+        android:pathData="M1.2012,8.1305A16.8,16.8 0,0 1,22.7988,8.1305L21.1276,10.1222A14.2,14.2 0,0 0,2.8724,10.1222zM4.4794,12.0373A11.7,11.7 0,0 1,19.5206,12.0373L17.8494,14.0290A9.1,9.1 0,0 0,6.1506,14.0290zM7.7576,15.9441A6.6,6.6 0,0 1,16.2424,15.9441L12,21z" />
 </vector>
