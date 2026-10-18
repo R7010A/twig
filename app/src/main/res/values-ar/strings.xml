@@ -885,4 +885,7 @@
     <string name="folder_counts_description">المجلدات: %1$d، الملفات: %2$d</string>
     <string name="info_activity_failed">تعذّر فتح هذا Activity</string>
     <string name="info_app_shortcuts_limited">يقيّد Android الوصول إلى الاختصارات الديناميكية للتطبيقات الأخرى. تُعرض فقط الاختصارات المعلنة من التطبيق.</string>
+    <string name="android_data_grant">السماح بالوصول إلى Android/data…</string>
+    <string name="android_data_wrong_folder">لا يمنح هذا المجلد حق الوصول إلى الموقع المطلوب. اختر Android/data أو مجلد التطبيق المعني.</string>
+    <string name="android_data_saf_explanation">يقيّد Android الوصول إلى %1$s. حاول أولاً اختيار مجلد Android/data بالكامل في منتقي المجلدات الخاص بالنظام. إذا لم يُسمح بذلك، فاختر مجلد التطبيق المعني بدلاً منه. إذا لم يُسمح بأي منهما، فاستخدم root أو Shizuku.</string>
 </resources>

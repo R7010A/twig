@@ -917,4 +917,7 @@
     <string name="folder_counts_description">Папок: %1$d, файлов: %2$d</string>
     <string name="info_app_shortcuts_limited">Android ограничивает доступ к динамическим ярлыкам из других приложений. Отображаются только объявленные ярлыки.</string>
     <string name="info_activity_failed">Не удалось открыть эту активити</string>
+    <string name="android_data_grant">Разрешить доступ к Android/data…</string>
+    <string name="android_data_wrong_folder">Эта папка не даёт доступа к запрошенному расположению. Выберите Android/data или папку соответствующего приложения.</string>
+    <string name="android_data_saf_explanation">Android ограничивает доступ к %1$s. Сначала попробуйте выбрать всю папку Android/data в системном окне выбора папок. Если это запрещено, выберите папку соответствующего приложения. Если оба варианта недоступны, используйте root или Shizuku.</string>
 </resources>

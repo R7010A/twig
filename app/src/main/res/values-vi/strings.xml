@@ -880,4 +880,7 @@
     <string name="folder_counts_description">Thư mục: %1$d, tệp: %2$d</string>
     <string name="info_activity_failed">Không thể mở Activity này</string>
     <string name="info_app_shortcuts_limited">Android hạn chế quyền truy cập vào lối tắt động của ứng dụng khác. Chỉ hiển thị các lối tắt được ứng dụng khai báo.</string>
+    <string name="android_data_grant">Cấp quyền truy cập Android/data…</string>
+    <string name="android_data_wrong_folder">Thư mục này không cấp quyền truy cập vị trí được yêu cầu. Hãy chọn Android/data hoặc thư mục của ứng dụng tương ứng.</string>
+    <string name="android_data_saf_explanation">Android hạn chế quyền truy cập %1$s. Trước tiên, hãy thử chọn toàn bộ thư mục Android/data trong trình chọn thư mục của hệ thống. Nếu bị chặn, hãy chọn thư mục của ứng dụng tương ứng. Nếu cả hai đều không được phép, hãy sử dụng root hoặc Shizuku.</string>
 </resources>

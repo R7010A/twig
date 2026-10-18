@@ -881,4 +881,7 @@
     <string name="folder_counts_description">Ordner: %1$d, Dateien: %2$d</string>
     <string name="info_activity_failed">Diese Activity konnte nicht geöffnet werden</string>
     <string name="info_app_shortcuts_limited">Android schränkt den Zugriff auf dynamische Verknüpfungen anderer Apps ein. Es werden nur von der App deklarierte Verknüpfungen angezeigt.</string>
+    <string name="android_data_grant">Zugriff auf Android/data erlauben…</string>
+    <string name="android_data_wrong_folder">Dieser Ordner gewährt keinen Zugriff auf den gewünschten Speicherort. Wähle Android/data oder den entsprechenden App-Ordner.</string>
+    <string name="android_data_saf_explanation">Android schränkt den Zugriff auf %1$s ein. Versuche zuerst, den gesamten Ordner Android/data in der Systemauswahl auszuwählen. Falls dies blockiert wird, wähle stattdessen den entsprechenden App-Ordner. Falls beides nicht erlaubt ist, verwende Root oder Shizuku.</string>
 </resources>
