@@ -492,7 +492,7 @@ add its symptom here.
   *Explains*: a command that hangs until timeout, `/sdcard` listing as empty, "the dialog
   has no options at all", a root process left alive after an upgrade, a file that vanished
   when moved into a place even root could not write, a root terminal that exits with code 1
-  the moment it opens and prints nothing.
+  the moment it opens and prints nothing, `/system` being readable while `/` cannot be listed.
 - **[RAR and F-Droid](docs/lessons/rar-and-fdroid.md)** — `full` and `libre` differ in RAR
   **alone**; check the scheme via `Archives.RAR_SCHEME`, never `RarFileSystem.SCHEME`; the
   verification criterion is the dependency graph, not that it compiles. F-Droid's scanner reads

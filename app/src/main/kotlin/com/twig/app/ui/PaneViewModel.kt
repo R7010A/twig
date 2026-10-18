@@ -2440,11 +2440,22 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
      */
     private fun listChildren(file: XFile, rowKey: String? = null): Listing =
         if (file.isDir) {
-            val listed = runCatching { FsRegistry.of(file).list(file) }
+            val fs = FsRegistry.of(file)
+            val listed = runCatching { fs.list(file) }
+            // Android can deny enumerating / while allowing direct access to known children.
+            // These are navigation shortcuts only: filesystem listings must still fail for
+            // copy, comparison and recursive scans rather than pretending this is a complete root.
+            val rootShortcuts = if (file.scheme == "file" && file.path == "/" && listed.getOrNull().isNullOrEmpty()) {
+                listOf("/system", "/vendor", "/product", "/system_ext", "/apex", "/odm", "/oem", "/proc", "/mnt", "/storage")
+                    .mapNotNull { path -> runCatching { fs.stat(path) }.getOrNull()?.takeIf { it.isDir && it.canRead } }
+            } else emptyList()
             val granted = if (AndroidDataAccess.isRoot(file))
                 AndroidDataAccess.instance?.grantedFolders(file).orEmpty() else emptyList()
-            val kids = if (granted.isEmpty()) listed.getOrThrow()
-                else (listed.getOrDefault(emptyList()).filter { entry -> granted.none { it.name == entry.name } } + granted)
+            val kids = when {
+                rootShortcuts.isNotEmpty() -> rootShortcuts
+                granted.isNotEmpty() -> listed.getOrDefault(emptyList()).filter { entry -> granted.none { it.name == entry.name } } + granted
+                else -> listed.getOrThrow()
+            }
             Listing(
                 children = kids,
                 resticRepo = if (ResticRepo.looksLikeRepo(kids)) fileKey(file) else null,
