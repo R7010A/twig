@@ -66,7 +66,7 @@
         android:orientation="horizontal">
 
         <LinearLayout android:id="@+id/as_up" style="@style/StripItem">
-            <ImageView style="@style/StripIcon" android:src="@drawable/ic_up"
+            <ImageView style="@style/StripIcon" android:src="@drawable/ic_parent_directory"
                 android:contentDescription="@null" />
             <TextView style="@style/StripLabel" android:text="@string/strip_up" />
         </LinearLayout>

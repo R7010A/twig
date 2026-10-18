@@ -228,7 +228,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         // Portrait's "up" on the left of the title bar: same action as the strip's as_up
         // (landscape has no Toolbar, see applyLayoutMode) — placed here because one-handed
         // use reaches the top-left more easily than the right-side action strip
-        b.toolbar.setNavigationIcon(R.drawable.ic_up)
+        b.toolbar.setNavigationIcon(R.drawable.ic_parent_directory)
         b.toolbar.setNavigationContentDescription(R.string.strip_up)
         b.toolbar.setNavigationOnClickListener { activePane()?.actionUp() }
 
