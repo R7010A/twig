@@ -900,7 +900,7 @@
     <string name="about_version">Версия: %1$s (%2$d)</string>
     <string name="about_body">%1$s\nЛицензия: GPL-3.0-only\n\nИсходный код, вопросы и релизы:\n%2$s</string>
     <string name="about_open">Перейти</string>
-    <string name="about_copy">Копировать</string>
+    <string name="about_copy">Копир.</string>
     <string name="about_no_browser">На этом устройстве нечем открыть ссылку — вместо этого адрес был скопирован в буфер обмена</string>
     <string name="pdf_page_mode">По одной странице на экран</string>
     <string name="pdf_open_failed">Не удаётся открыть этот PDF</string>
@@ -916,7 +916,8 @@
     <string name="folder_counts_description">Папок: %1$d, файлов: %2$d</string>
     <string name="info_app_shortcuts_limited">Android ограничивает доступ к динамическим ярлыкам из других приложений. Отображаются только объявленные ярлыки.</string>
     <string name="info_activity_failed">Не удалось открыть эту активити</string>
-    <string name="android_data_grant">Разрешить доступ к Android/data…</string>
+    <string name="android_data_grant">Разрешить доступ…</string>
+    <string name="android_data_grant_note">Системные ограничения могут препятствовать работе обоих методов. Если ни один из них не сработал, попробуйте открыть папку с помощью root (su) или Shizuku.</string>
     <string name="android_data_wrong_folder">Эта папка не даёт доступа к запрошенному расположению. Выберите Android/data или папку соответствующего приложения.</string>
     <string name="pin_shortcut_failed">Не удалось добавить ярлык</string>
 
@@ -946,4 +947,11 @@
     <string name="batch_done">Переименовано: %d</string>
     <string name="batch_failed">Переименовано: %1$d. Остановлено: %2$s</string>
     <string name="android_data_hide_system">Скрывать папки системных приложений</string>
+    <string name="android_data_whole">Весь Android/data</string>
+    <string name="android_data_app">Конкретная папка приложения…</string>
+    <string name="android_data_detect_empty">Нет доступных приложений для выбора.</string>
+    <string name="android_data_filter">Фильтровать по названию приложения или пакету</string>
+    <string name="android_data_existing">Показывать только обнаруженные папки с данными</string>
+    <string name="android_data_existing_note">Android может скрывать папки. Отключите, чтобы увидеть все возможные приложения.</string>
+    <string name="android_data_no_matches">Нет подходящих приложений</string>
 </resources>
