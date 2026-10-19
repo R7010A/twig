@@ -953,6 +953,7 @@
     <string name="info_app_shortcuts_limited">Android restricts access to dynamic shortcuts from other apps. Only declared shortcuts are shown.</string>
     <string name="info_activity_failed">Could not open this Activity</string>
     <string name="android_data_grant">Authorize access…</string>
+    <string name="android_data_grant_note">System restrictions may prevent either method from working. If neither works, try accessing the folder using root (su) or Shizuku.</string>
     <string name="android_data_wrong_folder">This folder does not grant access to the requested location. Select Android/data or the corresponding app folder.</string>
     <string name="pin_shortcut_failed">Could not add shortcut</string>
     <string name="android_data_whole">Entire Android/data</string>

@@ -164,7 +164,7 @@ class PaneFragment : Fragment() {
             return
         }
         AlertDialog.Builder(requireContext())
-            .setTitle(R.string.android_data_grant)
+            .setCustomTitle(layoutInflater.inflate(R.layout.dialog_android_data_title, null))
             .setItems(arrayOf(getString(R.string.android_data_whole),
                 getString(R.string.android_data_app))) { _, which ->
                 if (which == 0) launchDataPicker(file) else showAppDataFolders(file)
