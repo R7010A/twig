@@ -868,8 +868,6 @@
     <string name="about_no_browser">Ninguna app abre enlaces; dirección copiada al portapapeles</string>
     <string name="pdf_page_mode">Una página por pantalla</string>
     <string name="pdf_open_failed">No se puede abrir este PDF</string>
-    <string name="settings_swipe_animation">Animación al deslizar</string>
-    <string name="settings_swipe_animation_desc">Animar el cambio de panel al deslizar</string>
     <string name="settings_date_format">Formato de fecha</string>
     <string name="date_format_system">Región del sistema</string>
     <string name="date_format_ymd">YY-MM-DD</string>

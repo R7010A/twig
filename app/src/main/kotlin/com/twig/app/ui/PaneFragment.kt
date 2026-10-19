@@ -646,11 +646,9 @@ class PaneFragment : Fragment() {
     private fun scrollRowToTop(index: Int) {
         val layout = b.list.layoutManager as? LinearLayoutManager ?: return
         b.list.stopScroll()
-        if (Prefs.swipeAnimation(requireContext())) {
-            layout.startSmoothScroll(object : LinearSmoothScroller(requireContext()) {
-                override fun getVerticalSnapPreference() = SNAP_TO_START
-            }.apply { targetPosition = index })
-        } else layout.scrollToPositionWithOffset(index, 0)
+        layout.startSmoothScroll(object : LinearSmoothScroller(requireContext()) {
+            override fun getVerticalSnapPreference() = SNAP_TO_START
+        }.apply { targetPosition = index })
     }
 
     fun actionRefresh() {

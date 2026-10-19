@@ -904,8 +904,6 @@
     <string name="about_no_browser">На этом устройстве нечем открыть ссылку — вместо этого адрес был скопирован в буфер обмена</string>
     <string name="pdf_page_mode">По одной странице на экран</string>
     <string name="pdf_open_failed">Не удаётся открыть этот PDF</string>
-    <string name="settings_swipe_animation">Анимация свайпа</string>
-    <string name="settings_swipe_animation_desc">Анимировать переключение панелей при свайпе</string>
     <string name="settings_date_format">Формат даты</string>
     <string name="date_format_system">Регион системы</string>
     <string name="date_format_ymd">YY-MM-DD</string>
