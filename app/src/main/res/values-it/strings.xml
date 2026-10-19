@@ -883,4 +883,30 @@
     <string name="android_data_grant">Autorizza l’accesso ad Android/data…</string>
     <string name="android_data_wrong_folder">Questa cartella non consente l’accesso alla posizione richiesta. Seleziona Android/data o la cartella dell’app corrispondente.</string>
     <string name="pin_shortcut_failed">Impossibile aggiungere la scorciatoia</string>
+
+    <!-- Batch rename -->
+    <string name="batch_rename">Rinomina in serie</string>
+    <string name="batch_apply_to">Applica a</string>
+    <string name="batch_name_only">Solo nome</string>
+    <string name="batch_ext_only">Solo estensione</string>
+    <string name="batch_name_ext">Nome ed estensione</string>
+    <string name="batch_replace">Sostituisci</string>
+    <string name="batch_numbering">Numerazione</string>
+    <string name="batch_find">Trova</string>
+    <string name="batch_replacement">Sostituisci con</string>
+    <string name="batch_regex">Espressione regolare</string>
+    <string name="batch_match_case">Distingui maiuscole</string>
+    <string name="batch_number_format">Formato numero</string>
+    <string name="batch_start">Inizia da</string>
+    <string name="batch_old_number">Nome originale - numero</string>
+    <string name="batch_number_old">Numero - nome originale</string>
+    <string name="batch_before">Nome originale</string>
+    <string name="batch_after">Nuovo nome</string>
+    <string name="batch_invalid_rule">Espressione, sostituzione o numero iniziale non valido</string>
+    <string name="batch_invalid_name">Nome file non valido: %s</string>
+    <string name="batch_conflict">Nome duplicato o esistente: %s</string>
+    <string name="batch_nested">Rinomina separatamente le cartelle selezionate e il contenuto</string>
+    <string name="batch_working">Rinomina…</string>
+    <string name="batch_done">%d elementi rinominati</string>
+    <string name="batch_failed">%1$d elementi rinominati. Interrotto: %2$s</string>
 </resources>

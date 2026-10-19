@@ -1116,7 +1116,7 @@ class PaneFragment : Fragment() {
             create = canCreateHere(),
             copy = transfer,
             move = sources.isNotEmpty() && sources.all { it.isMovableSource() },
-            rename = sources.size == 1 && modify,
+            rename = modify,
             delete = modify,
             treemap = mapMode || target?.let { it.isDir || com.twig.fs.archive.Archives.isArchive(it) } == true,
             search = target?.isDir == true,
@@ -1127,11 +1127,18 @@ class PaneFragment : Fragment() {
 
     fun actionRename() {
         val sel = selectionOrCurrent()
-        if (sel.size != 1) {
-            toast(getString(R.string.msg_pick_one_to_rename)); return
+        if (sel.isEmpty()) {
+            toast(getString(R.string.msg_no_selection)); return
         }
+        if (!sel.all { it.isMutable() }) return
         noteSourceDirs(sel)
-        performRename(sel.first())
+        if (sel.size == 1) performRename(sel.first()) else performBatchRename(sel)
+    }
+
+    private fun performBatchRename(targets: List<XFile>) {
+        BatchRenameDialog.show(requireContext(), this, targets.distinctBy { it.scheme to it.path }, viewModel::renameParent) {
+            adapter.clearSelection(); clearMapSelection(); viewModel.refresh()
+        }
     }
 
     private fun performRename(target: XFile) {
@@ -1788,7 +1795,7 @@ class PaneFragment : Fragment() {
 
     /**
      * Multi-selection (> 1 checked) menu, including aggregate properties and system sharing for files.
-     * Single-file operations such as Open with / Rename / Favorite are hidden.
+     * Single-file operations such as Open with / Favorite are hidden.
      * The title uses the check count instead of a file name.
      */
     private fun showBatchMenu(targets: List<XFile>) {
@@ -1815,6 +1822,7 @@ class PaneFragment : Fragment() {
         }
         actions.item(getString(R.string.strip_compress), R.drawable.ic_compress) { performCompress(targets) }
         if (mutable) {
+            actions.item(getString(R.string.batch_rename), R.drawable.ic_rename) { performBatchRename(targets) }
             actions.item(getString(R.string.strip_delete), R.drawable.ic_delete, DANGER) { performDelete(targets) }
         }
         showActionMenu(requireContext(), getString(R.string.title_selected_count, targets.size), actions) {

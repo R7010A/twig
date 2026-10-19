@@ -783,6 +783,9 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         }?.key ?: fk
     }
 
+    /** A UI-thread snapshot of the real containing directory, including opaque paths. */
+    fun renameParent(file: XFile): XFile? = parentRow(file)?.second
+
     /**
      * [file]'s parent directory's **name as displayed in the tree**, used as the
      * title of ad-hoc lists like "now playing".

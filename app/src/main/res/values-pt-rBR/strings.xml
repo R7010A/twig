@@ -883,4 +883,30 @@
     <string name="android_data_grant">Autorizar acesso a Android/data…</string>
     <string name="android_data_wrong_folder">Esta pasta não permite acessar o local solicitado. Selecione Android/data ou a pasta do aplicativo correspondente.</string>
     <string name="pin_shortcut_failed">Não foi possível adicionar o atalho</string>
+
+    <!-- Batch rename -->
+    <string name="batch_rename">Renomear em lote</string>
+    <string name="batch_apply_to">Aplicar a</string>
+    <string name="batch_name_only">Somente nome</string>
+    <string name="batch_ext_only">Somente extensão</string>
+    <string name="batch_name_ext">Nome e extensão</string>
+    <string name="batch_replace">Substituir</string>
+    <string name="batch_numbering">Numeração</string>
+    <string name="batch_find">Localizar</string>
+    <string name="batch_replacement">Substituir por</string>
+    <string name="batch_regex">Expressão regular</string>
+    <string name="batch_match_case">Diferenciar maiúsculas</string>
+    <string name="batch_number_format">Formato do número</string>
+    <string name="batch_start">Começar em</string>
+    <string name="batch_old_number">Nome antigo - número</string>
+    <string name="batch_number_old">Número - nome antigo</string>
+    <string name="batch_before">Nome original</string>
+    <string name="batch_after">Novo nome</string>
+    <string name="batch_invalid_rule">Expressão, substituição ou número inicial inválido</string>
+    <string name="batch_invalid_name">Nome de arquivo inválido: %s</string>
+    <string name="batch_conflict">Nome duplicado ou existente: %s</string>
+    <string name="batch_nested">Renomeie as pastas selecionadas e seu conteúdo separadamente</string>
+    <string name="batch_working">Renomeando…</string>
+    <string name="batch_done">%d itens renomeados</string>
+    <string name="batch_failed">%1$d itens renomeados. Interrompido: %2$s</string>
 </resources>

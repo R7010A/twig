@@ -883,4 +883,30 @@
     <string name="android_data_grant">Autorizar acceso a Android/data…</string>
     <string name="android_data_wrong_folder">Esta carpeta no permite acceder a la ubicación solicitada. Selecciona Android/data o la carpeta de la aplicación correspondiente.</string>
     <string name="pin_shortcut_failed">No se pudo añadir el acceso directo</string>
+
+    <!-- Batch rename -->
+    <string name="batch_rename">Renombrar en lote</string>
+    <string name="batch_apply_to">Aplicar a</string>
+    <string name="batch_name_only">Solo nombre</string>
+    <string name="batch_ext_only">Solo extensión</string>
+    <string name="batch_name_ext">Nombre y extensión</string>
+    <string name="batch_replace">Reemplazar</string>
+    <string name="batch_numbering">Numeración</string>
+    <string name="batch_find">Buscar</string>
+    <string name="batch_replacement">Reemplazar por</string>
+    <string name="batch_regex">Expresión regular</string>
+    <string name="batch_match_case">Distinguir mayúsculas</string>
+    <string name="batch_number_format">Formato de número</string>
+    <string name="batch_start">Empezar en</string>
+    <string name="batch_old_number">Nombre anterior - número</string>
+    <string name="batch_number_old">Número - nombre anterior</string>
+    <string name="batch_before">Nombre original</string>
+    <string name="batch_after">Nombre nuevo</string>
+    <string name="batch_invalid_rule">Expresión, reemplazo o número inicial no válido</string>
+    <string name="batch_invalid_name">Nombre de archivo no válido: %s</string>
+    <string name="batch_conflict">Nombre duplicado o existente: %s</string>
+    <string name="batch_nested">Renombra las carpetas seleccionadas y su contenido por separado</string>
+    <string name="batch_working">Renombrando…</string>
+    <string name="batch_done">%d elementos renombrados</string>
+    <string name="batch_failed">%1$d elementos renombrados. Detenido: %2$s</string>
 </resources>

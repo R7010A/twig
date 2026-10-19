@@ -883,4 +883,30 @@
     <string name="android_data_grant">Android/data 접근 허용…</string>
     <string name="android_data_wrong_folder">이 폴더로는 요청한 위치에 접근할 수 없습니다. Android/data 또는 해당 앱의 폴더를 선택하세요.</string>
     <string name="pin_shortcut_failed">바로가기를 추가할 수 없습니다</string>
+
+    <!-- Batch rename -->
+    <string name="batch_rename">일괄 이름 변경</string>
+    <string name="batch_apply_to">적용 대상</string>
+    <string name="batch_name_only">이름만</string>
+    <string name="batch_ext_only">확장자만</string>
+    <string name="batch_name_ext">이름 및 확장자</string>
+    <string name="batch_replace">바꾸기</string>
+    <string name="batch_numbering">번호 매기기</string>
+    <string name="batch_find">찾기</string>
+    <string name="batch_replacement">바꿀 내용</string>
+    <string name="batch_regex">정규식</string>
+    <string name="batch_match_case">대소문자 구분</string>
+    <string name="batch_number_format">번호 형식</string>
+    <string name="batch_start">시작 번호</string>
+    <string name="batch_old_number">기존 이름 - 번호</string>
+    <string name="batch_number_old">번호 - 기존 이름</string>
+    <string name="batch_before">기존 이름</string>
+    <string name="batch_after">새 이름</string>
+    <string name="batch_invalid_rule">표현식, 바꿀 내용 또는 시작 번호가 잘못되었습니다</string>
+    <string name="batch_invalid_name">잘못된 파일 이름: %s</string>
+    <string name="batch_conflict">중복되거나 이미 존재하는 이름: %s</string>
+    <string name="batch_nested">선택한 폴더와 내용의 이름을 따로 변경하세요</string>
+    <string name="batch_working">이름 변경 중…</string>
+    <string name="batch_done">%d개 항목 이름 변경됨</string>
+    <string name="batch_failed">%1$d개 항목 변경 후 중지: %2$s</string>
 </resources>

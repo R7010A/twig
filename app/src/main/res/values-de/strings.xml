@@ -883,4 +883,30 @@
     <string name="android_data_grant">Zugriff auf Android/data erlauben…</string>
     <string name="android_data_wrong_folder">Dieser Ordner gewährt keinen Zugriff auf den gewünschten Speicherort. Wähle Android/data oder den entsprechenden App-Ordner.</string>
     <string name="pin_shortcut_failed">Verknüpfung konnte nicht hinzugefügt werden</string>
+
+    <!-- Batch rename -->
+    <string name="batch_rename">Mehrfach umbenennen</string>
+    <string name="batch_apply_to">Anwenden auf</string>
+    <string name="batch_name_only">Nur Name</string>
+    <string name="batch_ext_only">Nur Erweiterung</string>
+    <string name="batch_name_ext">Name und Erweiterung</string>
+    <string name="batch_replace">Ersetzen</string>
+    <string name="batch_numbering">Nummerierung</string>
+    <string name="batch_find">Suchen</string>
+    <string name="batch_replacement">Ersetzen durch</string>
+    <string name="batch_regex">Regulärer Ausdruck</string>
+    <string name="batch_match_case">Groß-/Kleinschreibung</string>
+    <string name="batch_number_format">Zahlenformat</string>
+    <string name="batch_start">Startwert</string>
+    <string name="batch_old_number">Alter Name - Nummer</string>
+    <string name="batch_number_old">Nummer - alter Name</string>
+    <string name="batch_before">Alter Name</string>
+    <string name="batch_after">Neuer Name</string>
+    <string name="batch_invalid_rule">Ungültiger Ausdruck, Ersatz oder Startwert</string>
+    <string name="batch_invalid_name">Ungültiger Dateiname: %s</string>
+    <string name="batch_conflict">Name doppelt oder bereits vorhanden: %s</string>
+    <string name="batch_nested">Ausgewählte Ordner und deren Inhalte getrennt umbenennen</string>
+    <string name="batch_working">Umbenennen…</string>
+    <string name="batch_done">%d Einträge umbenannt</string>
+    <string name="batch_failed">%1$d Einträge umbenannt. Abgebrochen: %2$s</string>
 </resources>

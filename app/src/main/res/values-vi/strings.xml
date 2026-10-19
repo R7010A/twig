@@ -882,4 +882,30 @@
     <string name="android_data_grant">Cấp quyền truy cập Android/data…</string>
     <string name="android_data_wrong_folder">Thư mục này không cấp quyền truy cập vị trí được yêu cầu. Hãy chọn Android/data hoặc thư mục của ứng dụng tương ứng.</string>
     <string name="pin_shortcut_failed">Không thể thêm lối tắt</string>
+
+    <!-- Batch rename -->
+    <string name="batch_rename">Đổi tên hàng loạt</string>
+    <string name="batch_apply_to">Áp dụng cho</string>
+    <string name="batch_name_only">Chỉ tên</string>
+    <string name="batch_ext_only">Chỉ phần mở rộng</string>
+    <string name="batch_name_ext">Tên và phần mở rộng</string>
+    <string name="batch_replace">Thay thế</string>
+    <string name="batch_numbering">Đánh số</string>
+    <string name="batch_find">Tìm</string>
+    <string name="batch_replacement">Thay bằng</string>
+    <string name="batch_regex">Biểu thức chính quy</string>
+    <string name="batch_match_case">Phân biệt hoa thường</string>
+    <string name="batch_number_format">Định dạng số</string>
+    <string name="batch_start">Bắt đầu từ</string>
+    <string name="batch_old_number">Tên cũ - số</string>
+    <string name="batch_number_old">Số - tên cũ</string>
+    <string name="batch_before">Tên gốc</string>
+    <string name="batch_after">Tên mới</string>
+    <string name="batch_invalid_rule">Biểu thức, nội dung thay thế hoặc số bắt đầu không hợp lệ</string>
+    <string name="batch_invalid_name">Tên tệp không hợp lệ: %s</string>
+    <string name="batch_conflict">Tên trùng lặp hoặc đã tồn tại: %s</string>
+    <string name="batch_nested">Đổi tên thư mục đã chọn và nội dung bên trong riêng biệt</string>
+    <string name="batch_working">Đang đổi tên…</string>
+    <string name="batch_done">Đã đổi tên %d mục</string>
+    <string name="batch_failed">Đã đổi tên %1$d mục. Đã dừng: %2$s</string>
 </resources>

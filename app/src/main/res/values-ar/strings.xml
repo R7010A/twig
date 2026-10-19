@@ -887,4 +887,30 @@
     <string name="android_data_grant">السماح بالوصول إلى Android/data…</string>
     <string name="android_data_wrong_folder">لا يمنح هذا المجلد حق الوصول إلى الموقع المطلوب. اختر Android/data أو مجلد التطبيق المعني.</string>
     <string name="pin_shortcut_failed">تعذّرت إضافة الاختصار</string>
+
+    <!-- Batch rename -->
+    <string name="batch_rename">إعادة تسمية جماعية</string>
+    <string name="batch_apply_to">تطبيق على</string>
+    <string name="batch_name_only">الاسم فقط</string>
+    <string name="batch_ext_only">الامتداد فقط</string>
+    <string name="batch_name_ext">الاسم والامتداد</string>
+    <string name="batch_replace">استبدال</string>
+    <string name="batch_numbering">ترقيم</string>
+    <string name="batch_find">بحث</string>
+    <string name="batch_replacement">استبدال بـ</string>
+    <string name="batch_regex">تعبير نمطي</string>
+    <string name="batch_match_case">مطابقة حالة الأحرف</string>
+    <string name="batch_number_format">تنسيق الرقم</string>
+    <string name="batch_start">البدء من</string>
+    <string name="batch_old_number">الاسم القديم - الرقم</string>
+    <string name="batch_number_old">الرقم - الاسم القديم</string>
+    <string name="batch_before">الاسم الأصلي</string>
+    <string name="batch_after">الاسم الجديد</string>
+    <string name="batch_invalid_rule">التعبير أو البديل أو رقم البداية غير صالح</string>
+    <string name="batch_invalid_name">اسم ملف غير صالح: %s</string>
+    <string name="batch_conflict">اسم مكرر أو موجود: %s</string>
+    <string name="batch_nested">أعد تسمية المجلدات المحددة ومحتوياتها بشكل منفصل</string>
+    <string name="batch_working">جارٍ تغيير الأسماء…</string>
+    <string name="batch_done">تمت إعادة تسمية %d عناصر</string>
+    <string name="batch_failed">تمت إعادة تسمية %1$d عناصر. توقف: %2$s</string>
 </resources>
