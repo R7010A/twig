@@ -79,6 +79,24 @@ class PaneViewModelDuplicateRowTest {
     )
 
     @Test
+    fun `path bar can locate a file inside an externally opened archive`() = runTest(dispatcher) {
+        vm.mountExternal(archiveX())
+        advanceUntilIdle()
+        val target = vm.pathEditTarget()!!
+
+        vm.revealUnder(target.key, target.root, "/b.txt")
+        advanceUntilIdle()
+
+        val state = vm.state.value
+        assertEquals(target.key, state.currentKey)
+        assertEquals(target.root.scheme, state.currentDir?.scheme)
+        assertTrue("the focused file must have a visible row", state.rows.any { it.key == state.scrollKey })
+        assertTrue("the archive row must retain its host file", state.rows
+            .filterIsInstance<PaneViewModel.FileNode>()
+            .any { it.key == target.key && it.file == archiveX() })
+    }
+
+    @Test
     fun `externally opened archive does not collide with its original spot in the tree`() = runTest(dispatcher) {
         // External storage is already expanded -- that zip is already visible in this tree
         vm.bootstrap(listOf("file\t${ext.path}"))

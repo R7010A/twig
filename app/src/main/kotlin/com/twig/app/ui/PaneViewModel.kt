@@ -1193,6 +1193,23 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
 
     // ---- Go to path (jump under a root) ----
 
+    internal data class PathEditTarget(val key: String, val root: XFile, val path: String)
+
+    /** Follow the visible branch, including favorites and mounted archive roots. */
+    internal fun pathEditTarget(): PathEditTarget? {
+        val dir = currentDir ?: return null
+        val key = currentKey ?: return null
+        if (!supportsGoto(dir, connOf(dir.scheme)) || !dir.path.startsWith("/")) return null
+        val branch = ancestorKeysOf(key) + key
+        return _state.value.rows.firstNotNullOfOrNull { row ->
+            if (row.key !in branch) return@firstNotNullOfOrNull null
+            val root = mountRoots[row.key] ?: keyFile[row.key] ?: return@firstNotNullOfOrNull null
+            root.takeIf { it.isDir && it.scheme == dir.scheme &&
+                (dir.path == it.path || dir.path.startsWith(it.path.trimEnd('/') + "/")) }
+                ?.let { PathEditTarget(row.key, it, dir.path) }
+        }
+    }
+
     /**
      * Expand and locate by a path typed by the user, starting from one **root row**
      * (storage root / server root / document-tree root / favorite). A trailing
@@ -1231,7 +1248,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                     applyDescend(chain, plan)
                     currentDir = plan.target
                     currentKey = plan.targetKey
-                    scrollKey = plan.focus?.let { fileKey(it) }
+                    scrollKey = plan.focus?.let { plan.keyPrefix + fileKey(it) }
                     rebuild()
                 },
                 { rebuild(); emitError(it.message) },
@@ -1268,16 +1285,21 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         /** Key of the row the highlight lands on — the root's own key when nothing was descended. */
         val targetKey: String,
         val focus: XFile?,
+        val keyPrefix: String,
     )
 
     /** IO: descend from [root] segment by segment, producing the plan; touches no VM state. */
     private fun planDescend(rootKey: String, root: XFile?, segs: List<String>): DescendPlan {
+        val keyPrefix = if (rootKey.startsWith(EXTERNAL_KEY_PREFIX)) EXTERNAL_KEY_PREFIX else ""
         val expand = ArrayList<Pair<String, XFile>>()
         val fetched = ArrayList<Restored>()
         // Cached children are used as they are (same as planReveal); otherwise list now.
         fun kidsOf(key: String, dir: XFile): List<XFile> {
-            children[key]?.let { expand.add(key to dir); return it }
-            val r = Restored(key, dir, listChildren(dir))
+            // An archive row still represents its host file, even while descending
+            // through the mounted filesystem's root underneath that row.
+            val rowFile = if (mountRoots.containsKey(key)) keyFile[key] ?: dir else dir
+            children[key]?.let { expand.add(key to rowFile); return it }
+            val r = Restored(key, rowFile, listChildren(dir))
             fetched.add(r)
             return r.listing.children
         }
@@ -1304,10 +1326,10 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                 break
             }
             dir = hit
-            key = fileKey(hit)
+            key = keyPrefix + fileKey(hit)
             kids = kidsOf(key, dir)
         }
-        return DescendPlan(expand, fetched, dir, key, focus)
+        return DescendPlan(expand, fetched, dir, key, focus, keyPrefix)
     }
 
     /** Group row a server row belongs to; null for any other kind of root. */

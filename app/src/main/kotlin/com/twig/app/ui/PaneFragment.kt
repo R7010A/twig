@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.ResolveInfo
 import android.os.Build
 import android.os.Bundle
+import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -286,6 +287,16 @@ class PaneFragment : Fragment() {
         b.list.addItemDecoration(CurrentDirFrame(requireContext()))
 
         installGestures()
+        b.pathBar.setOnLongClickListener { editCurrentPath() }
+        val pathGestures = GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
+            override fun onDown(e: MotionEvent) = true
+            override fun onDoubleTap(e: MotionEvent) = editCurrentPath()
+        }).apply { setIsLongpressEnabled(false) }
+        b.pathBar.setOnTouchListener { _, event ->
+            pathGestures.onTouchEvent(event)
+            // Observe double taps while leaving the View's native long-click handling intact.
+            false
+        }
         // The map's swipes / touches share the same interaction as the tree list: horizontal swipe switches panes, touch reports the active pane.
         b.map.onTouchDown = { host?.onPaneTouched(this) }
         b.map.onSwipe = { dx -> host?.onPaneSwipe(dx) }
@@ -966,6 +977,13 @@ class PaneFragment : Fragment() {
             .show()
     }
 
+    private fun editCurrentPath(): Boolean {
+        val target = viewModel.pathEditTarget() ?: return false
+        host?.onPaneTouched(this)
+        promptGoto(target.key, target.root, target.path)
+        return true
+    }
+
     /**
      * "Go to path": type a path under this root and jump straight there — every level
      * on the way is expanded, a trailing file scrolls the list to its row. Accepts a
@@ -974,12 +992,16 @@ class PaneFragment : Fragment() {
      * [root] is null only for a server that has not been connected yet — the jump
      * connects it on the way.
      */
-    private fun promptGoto(rootKey: String, root: XFile?) {
+    private fun promptGoto(rootKey: String, root: XFile?, initialPath: String = "") {
         val input = EditText(requireContext()).apply {
             hint = getString(R.string.goto_hint)
             setSingleLine()
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            setText(initialPath)
+            setSelection(text.length)
         }
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle(R.string.action_goto_path)
             .setView(input)
             .setNegativeButton(R.string.dialog_cancel, null)
@@ -990,7 +1012,10 @@ class PaneFragment : Fragment() {
                 pendingScrollToCurrent = true
                 viewModel.revealUnder(rootKey, root, path)
             }
-            .show()
+            .create()
+        input.requestFocus()
+        dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+        dialog.show()
     }
 
     /** Search virtual directory's long-press menu: show on other side (the directory being searched) + Properties (stats; only shows on tap, no longer pops on long-press). */

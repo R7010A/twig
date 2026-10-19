@@ -73,6 +73,49 @@ class PaneViewModelGotoTest {
     // ---- local roots ----
 
     @Test
+    fun `path bar edits from the storage root so a sibling can be reached`() = runTest(dispatcher) {
+        File(ext, "edit/first").mkdirs()
+        File(ext, "edit/second").mkdirs()
+        val (key, root) = storageRoot()
+        vm.revealUnder(key, root, "edit/first")
+        advanceUntilIdle()
+
+        val target = vm.pathEditTarget()!!
+        assertEquals(key, target.key)
+        assertEquals("${ext.path}/edit/first", target.path)
+        vm.revealUnder(target.key, target.root, "${ext.path}/edit/second")
+        advanceUntilIdle()
+
+        assertEquals("f:file:${ext.path}/edit/second", vm.state.value.currentKey)
+        assertNull(vm.state.value.error)
+    }
+
+    @Test
+    fun `path bar stays inside a mounted source when editing a nested path`() = runTest(dispatcher) {
+        val scheme = "path-edit-mount"
+        FsRegistry.register(FakeFileSystem(scheme, dirs = mapOf(
+            "/" to listOf("first", "second"),
+            "/first" to emptyList(),
+            "/second" to emptyList(),
+        )))
+        vm.mountExternal(XFile(scheme, "/", isDir = true))
+        advanceUntilIdle()
+        val root = vm.pathEditTarget()!!
+        vm.revealUnder(root.key, root.root, "/first")
+        advanceUntilIdle()
+
+        val nested = vm.pathEditTarget()!!
+        assertEquals(root.key, nested.key)
+        assertEquals("/first", nested.path)
+        vm.revealUnder(nested.key, nested.root, "/second")
+        advanceUntilIdle()
+
+        assertEquals(scheme, vm.state.value.currentDir?.scheme)
+        assertEquals("/second", vm.state.value.currentDir?.path)
+        assertNull(vm.state.value.error)
+    }
+
+    @Test
     fun `a relative path expands every level on the way`() = runTest(dispatcher) {
         File(ext, "docs/notes").apply { mkdirs() }
         File(ext, "docs/notes/todo.txt").writeText("x")
