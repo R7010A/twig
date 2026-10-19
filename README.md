@@ -258,6 +258,52 @@ needs no special case.
   resolver on every tap) — and its icon reuses an already-cached thumbnail when one
   exists. Runs in its own task, so tapping one never routes through the main screen.
 
+### Websites and page customization
+
+Keep a self-hosted dashboard, web music player or favourite site in Twig's **Websites**
+root, and tinker with the page to make it feel a little more like your own app.
+Each bookmark opens in its own
+task through Android's system WebView; pin it to the home screen for direct access.
+Opening an already-running website returns to its existing page rather than loading
+the URL again.
+
+Expand **Websites → Add website…**, enter a name and URL, then choose how it opens.
+Long-press its tree entry to edit it or add a home-screen shortcut. Site settings cover:
+
+- **Display and gestures:** fullscreen, separate toolbar/status/navigation bar controls,
+  screen orientation, desktop mode, pull to refresh at the top of the page, scroll
+  direction locking and optional text-selection suppression. Double-tap toggles the
+  toolbar by default; turn it off for sites that use their own double-tap gestures.
+- **Page customization:** expand **Advanced** to add JavaScript, CSS and CSS selectors
+  for elements to hide. Restyle a dashboard, remove a banner or add your own page tools.
+  JavaScript runs after page load; scripts, styles and hidden elements apply to the
+  saved site's same-origin main page.
+- **Requests and login:** custom User-Agent, manual request headers and HTTP Basic
+  authentication. Saved Basic credentials and header values use Twig's encrypted
+  secret storage. Headers apply to same-origin GET page navigation, not every API or
+  resource request.
+- **Resource blocking:** one domain or URL pattern per line, with `*` wildcards, to
+  block matching image, script or API requests exposed by WebView. Plain domains include
+  subdomains. These are manual resource rules, not a full ad-block filter-list engine;
+  they do not block main-page navigation.
+- **Tinker on the page:** the toolbar's **Web debugging** panel provides a console,
+  JavaScript execution, CSS preview and an element picker. Copy a selector or HTML,
+  hide an element, and save your changes back to the bookmark. For desktop DevTools,
+  enable **Computer debugging (session)** and use `chrome://inspect/#devices` with
+  USB debugging; some Android development builds force WebView debugging on.
+- **Downloads:** HTTP(S) downloads go to `Downloads/twig` by default. Confirm the file
+  name or choose another writable destination through Twig's own picker, including
+  connected storage, with transfer progress and cancellation.
+- **Run in background:** an opt-in setting, off by default, keeps a live website session
+  under a foreground service with a notification, for media or other page tasks.
+  Close the page or use the notification to end it. It improves background survival;
+  it cannot guarantee uninterrupted execution under Android power management or a
+  site's own pause logic.
+
+Cookies and login state persist in Twig's shared WebView profile, separate from your
+other browsers; bookmarks are not isolated account containers. Website compatibility
+depends on the installed system WebView.
+
 ### Compare
 
 - **Directory compare** in the Beyond Compare style: two trees aligned row by row with
