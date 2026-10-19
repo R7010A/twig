@@ -1051,4 +1051,30 @@
     <string name="android_data_existing">Only show detected data folders</string>
     <string name="android_data_existing_note">Android may hide folders. Turn this off to see all candidate apps.</string>
     <string name="android_data_no_matches">No matching apps</string>
+
+    <!-- Batch rename -->
+    <string name="batch_rename">Batch rename</string>
+    <string name="batch_apply_to">Apply to</string>
+    <string name="batch_name_only">Name only</string>
+    <string name="batch_ext_only">Extension only</string>
+    <string name="batch_name_ext">Name and extension</string>
+    <string name="batch_replace">Replace</string>
+    <string name="batch_numbering">Numbering</string>
+    <string name="batch_find">Find</string>
+    <string name="batch_replacement">Replace with</string>
+    <string name="batch_regex">Regular expression</string>
+    <string name="batch_match_case">Match case</string>
+    <string name="batch_number_format">Number format</string>
+    <string name="batch_start">Start with</string>
+    <string name="batch_old_number">Old name - number</string>
+    <string name="batch_number_old">Number - old name</string>
+    <string name="batch_before">Original name</string>
+    <string name="batch_after">New name</string>
+    <string name="batch_invalid_rule">Invalid expression, replacement or starting number</string>
+    <string name="batch_invalid_name">Invalid file name: %s</string>
+    <string name="batch_conflict">Duplicate or existing name: %s</string>
+    <string name="batch_nested">Rename selected folders and their contents separately</string>
+    <string name="batch_working">Renaming…</string>
+    <string name="batch_done">Renamed %d items</string>
+    <string name="batch_failed">Renamed %1$d items. Stopped: %2$s</string>
 </resources>

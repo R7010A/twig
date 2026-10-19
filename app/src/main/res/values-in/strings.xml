@@ -973,4 +973,30 @@
     <string name="android_data_grant">Izinkan akses ke Android/data…</string>
     <string name="android_data_wrong_folder">Folder ini tidak memberikan akses ke lokasi yang diminta. Pilih Android/data atau folder aplikasi yang sesuai.</string>
     <string name="pin_shortcut_failed">Tidak dapat menambahkan pintasan</string>
+
+    <!-- Batch rename -->
+    <string name="batch_rename">Ubah nama massal</string>
+    <string name="batch_apply_to">Terapkan ke</string>
+    <string name="batch_name_only">Nama saja</string>
+    <string name="batch_ext_only">Ekstensi saja</string>
+    <string name="batch_name_ext">Nama dan ekstensi</string>
+    <string name="batch_replace">Ganti</string>
+    <string name="batch_numbering">Penomoran</string>
+    <string name="batch_find">Cari</string>
+    <string name="batch_replacement">Ganti dengan</string>
+    <string name="batch_regex">Ekspresi reguler</string>
+    <string name="batch_match_case">Peka huruf besar/kecil</string>
+    <string name="batch_number_format">Format nomor</string>
+    <string name="batch_start">Mulai dari</string>
+    <string name="batch_old_number">Nama lama - nomor</string>
+    <string name="batch_number_old">Nomor - nama lama</string>
+    <string name="batch_before">Nama asli</string>
+    <string name="batch_after">Nama baru</string>
+    <string name="batch_invalid_rule">Ekspresi, pengganti, atau nomor awal tidak valid</string>
+    <string name="batch_invalid_name">Nama berkas tidak valid: %s</string>
+    <string name="batch_conflict">Nama duplikat atau sudah ada: %s</string>
+    <string name="batch_nested">Ubah nama folder yang dipilih dan isinya secara terpisah</string>
+    <string name="batch_working">Mengubah nama…</string>
+    <string name="batch_done">%d item diubah namanya</string>
+    <string name="batch_failed">%1$d item diubah namanya. Dihentikan: %2$s</string>
 </resources>

@@ -1009,4 +1009,30 @@
     <string name="android_data_grant">Разрешить доступ к Android/data…</string>
     <string name="android_data_wrong_folder">Эта папка не даёт доступа к запрошенному расположению. Выберите Android/data или папку соответствующего приложения.</string>
     <string name="pin_shortcut_failed">Не удалось добавить ярлык</string>
+
+    <!-- Batch rename -->
+    <string name="batch_rename">Пакетное переименование</string>
+    <string name="batch_apply_to">Применить к</string>
+    <string name="batch_name_only">Только имя</string>
+    <string name="batch_ext_only">Только расширение</string>
+    <string name="batch_name_ext">Имя и расширение</string>
+    <string name="batch_replace">Замена</string>
+    <string name="batch_numbering">Нумерация</string>
+    <string name="batch_find">Найти</string>
+    <string name="batch_replacement">Заменить на</string>
+    <string name="batch_regex">Регулярное выражение</string>
+    <string name="batch_match_case">Учитывать регистр</string>
+    <string name="batch_number_format">Формат номера</string>
+    <string name="batch_start">Начать с</string>
+    <string name="batch_old_number">Старое имя - номер</string>
+    <string name="batch_number_old">Номер - старое имя</string>
+    <string name="batch_before">Исходное имя</string>
+    <string name="batch_after">Новое имя</string>
+    <string name="batch_invalid_rule">Недопустимое выражение, замена или начальный номер</string>
+    <string name="batch_invalid_name">Недопустимое имя файла: %s</string>
+    <string name="batch_conflict">Повторяющееся или существующее имя: %s</string>
+    <string name="batch_nested">Переименуйте выбранные папки и их содержимое отдельно</string>
+    <string name="batch_working">Переименование…</string>
+    <string name="batch_done">Переименовано: %d</string>
+    <string name="batch_failed">Переименовано: %1$d. Остановлено: %2$s</string>
 </resources>

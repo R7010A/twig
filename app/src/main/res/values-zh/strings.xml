@@ -1011,4 +1011,30 @@
     <string name="android_data_existing">仅显示检测到的数据目录</string>
     <string name="android_data_existing_note">系统可能隐藏目录，关闭可查看全部候选应用。</string>
     <string name="android_data_no_matches">没有匹配的应用</string>
+
+    <!-- Batch rename -->
+    <string name="batch_rename">批量重命名</string>
+    <string name="batch_apply_to">应用范围</string>
+    <string name="batch_name_only">仅文件名</string>
+    <string name="batch_ext_only">仅扩展名</string>
+    <string name="batch_name_ext">文件名和扩展名</string>
+    <string name="batch_replace">替换</string>
+    <string name="batch_numbering">编号</string>
+    <string name="batch_find">查找</string>
+    <string name="batch_replacement">替换为</string>
+    <string name="batch_regex">正则表达式</string>
+    <string name="batch_match_case">区分大小写</string>
+    <string name="batch_number_format">编号格式</string>
+    <string name="batch_start">起始编号</string>
+    <string name="batch_old_number">原名 - 编号</string>
+    <string name="batch_number_old">编号 - 原名</string>
+    <string name="batch_before">原名</string>
+    <string name="batch_after">新名</string>
+    <string name="batch_invalid_rule">表达式、替换内容或起始编号无效</string>
+    <string name="batch_invalid_name">无效的文件名：%s</string>
+    <string name="batch_conflict">名称重复或已存在：%s</string>
+    <string name="batch_nested">请分开重命名所选文件夹及其内容</string>
+    <string name="batch_working">正在重命名…</string>
+    <string name="batch_done">已重命名 %d 项</string>
+    <string name="batch_failed">已重命名 %1$d 项，操作停止：%2$s</string>
 </resources>

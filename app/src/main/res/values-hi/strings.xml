@@ -973,4 +973,30 @@
     <string name="android_data_grant">Android/data का ऐक्सेस दें…</string>
     <string name="android_data_wrong_folder">इस फ़ोल्डर से अनुरोधित स्थान का ऐक्सेस नहीं मिलता। Android/data या संबंधित ऐप का फ़ोल्डर चुनें।</string>
     <string name="pin_shortcut_failed">शॉर्टकट नहीं जोड़ा जा सका</string>
+
+    <!-- Batch rename -->
+    <string name="batch_rename">एक साथ नाम बदलें</string>
+    <string name="batch_apply_to">लागू करें</string>
+    <string name="batch_name_only">केवल नाम</string>
+    <string name="batch_ext_only">केवल एक्सटेंशन</string>
+    <string name="batch_name_ext">नाम और एक्सटेंशन</string>
+    <string name="batch_replace">बदलें</string>
+    <string name="batch_numbering">क्रमांकन</string>
+    <string name="batch_find">खोजें</string>
+    <string name="batch_replacement">इससे बदलें</string>
+    <string name="batch_regex">रेगुलर एक्सप्रेशन</string>
+    <string name="batch_match_case">बड़े/छोटे अक्षर अलग</string>
+    <string name="batch_number_format">संख्या प्रारूप</string>
+    <string name="batch_start">यहाँ से शुरू करें</string>
+    <string name="batch_old_number">पुराना नाम - संख्या</string>
+    <string name="batch_number_old">संख्या - पुराना नाम</string>
+    <string name="batch_before">मूल नाम</string>
+    <string name="batch_after">नया नाम</string>
+    <string name="batch_invalid_rule">अमान्य व्यंजक, प्रतिस्थापन या आरंभिक संख्या</string>
+    <string name="batch_invalid_name">अमान्य फ़ाइल नाम: %s</string>
+    <string name="batch_conflict">डुप्लिकेट या मौजूदा नाम: %s</string>
+    <string name="batch_nested">चुने हुए फ़ोल्डर और उनकी सामग्री का नाम अलग-अलग बदलें</string>
+    <string name="batch_working">नाम बदला जा रहा है…</string>
+    <string name="batch_done">%d आइटम का नाम बदला गया</string>
+    <string name="batch_failed">%1$d आइटम का नाम बदला गया। रोका गया: %2$s</string>
 </resources>

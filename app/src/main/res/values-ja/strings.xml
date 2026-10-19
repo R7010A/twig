@@ -973,4 +973,30 @@
     <string name="android_data_grant">Android/data へのアクセスを許可…</string>
     <string name="android_data_wrong_folder">このフォルダでは対象の場所へのアクセスを許可できません。Android/data または該当アプリのフォルダを選択してください。</string>
     <string name="pin_shortcut_failed">ショートカットを追加できませんでした</string>
+
+    <!-- Batch rename -->
+    <string name="batch_rename">一括名前変更</string>
+    <string name="batch_apply_to">適用範囲</string>
+    <string name="batch_name_only">名前のみ</string>
+    <string name="batch_ext_only">拡張子のみ</string>
+    <string name="batch_name_ext">名前と拡張子</string>
+    <string name="batch_replace">置換</string>
+    <string name="batch_numbering">連番</string>
+    <string name="batch_find">検索</string>
+    <string name="batch_replacement">置換後</string>
+    <string name="batch_regex">正規表現</string>
+    <string name="batch_match_case">大文字と小文字を区別</string>
+    <string name="batch_number_format">番号の形式</string>
+    <string name="batch_start">開始番号</string>
+    <string name="batch_old_number">元の名前 - 番号</string>
+    <string name="batch_number_old">番号 - 元の名前</string>
+    <string name="batch_before">元の名前</string>
+    <string name="batch_after">新しい名前</string>
+    <string name="batch_invalid_rule">式、置換文字列または開始番号が無効です</string>
+    <string name="batch_invalid_name">無効なファイル名：%s</string>
+    <string name="batch_conflict">名前が重複または既に存在します：%s</string>
+    <string name="batch_nested">選択したフォルダとその内容は別々に名前を変更してください</string>
+    <string name="batch_working">名前を変更中…</string>
+    <string name="batch_done">%d 項目の名前を変更しました</string>
+    <string name="batch_failed">%1$d 項目を変更後に停止：%2$s</string>
 </resources>

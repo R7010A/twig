@@ -4,6 +4,13 @@
 > shared conventions are in [AGENTS.md](../../AGENTS.md); the other sections live
 > beside this file in [docs/lessons/](.).
 
+- **Batch-rename preview columns shifted until scrolling** (2026-10-19): top alignment
+  alone did not fix weighted columns during the dialog's initial `AT_MOST` measure.
+  `BatchRenameDialog.NameColumns` divides the available width explicitly for both
+  headers and rows. `BatchRenameTest` covers first measurement and rebound long names.
+  Rename preflight uses tree parents for opaque URIs and rejects failed listings,
+  conflicting destinations and selected ancestors before changing any names.
+
 - **Website fullscreen plus a hidden toolbar took three Back gestures (2026-10-17)**:
   a separate application fullscreen-exit state consumed Back on top of system navigation
   revealing immersive bars. The original tests called the Activity dispatcher directly,

@@ -973,4 +973,30 @@
     <string name="android_data_grant">Android/data erişimine izin ver…</string>
     <string name="android_data_wrong_folder">Bu klasör, istenen konuma erişim sağlamıyor. Android/data veya ilgili uygulamanın klasörünü seçin.</string>
     <string name="pin_shortcut_failed">Kısayol eklenemedi</string>
+
+    <!-- Batch rename -->
+    <string name="batch_rename">Toplu yeniden adlandır</string>
+    <string name="batch_apply_to">Uygulama alanı</string>
+    <string name="batch_name_only">Yalnızca ad</string>
+    <string name="batch_ext_only">Yalnızca uzantı</string>
+    <string name="batch_name_ext">Ad ve uzantı</string>
+    <string name="batch_replace">Değiştir</string>
+    <string name="batch_numbering">Numaralandırma</string>
+    <string name="batch_find">Bul</string>
+    <string name="batch_replacement">Yeni metin</string>
+    <string name="batch_regex">Düzenli ifade</string>
+    <string name="batch_match_case">Büyük/küçük harfe duyarlı</string>
+    <string name="batch_number_format">Sayı biçimi</string>
+    <string name="batch_start">Başlangıç</string>
+    <string name="batch_old_number">Eski ad - sayı</string>
+    <string name="batch_number_old">Sayı - eski ad</string>
+    <string name="batch_before">Eski ad</string>
+    <string name="batch_after">Yeni ad</string>
+    <string name="batch_invalid_rule">Geçersiz ifade, değiştirme veya başlangıç sayısı</string>
+    <string name="batch_invalid_name">Geçersiz dosya adı: %s</string>
+    <string name="batch_conflict">Yinelenen veya mevcut ad: %s</string>
+    <string name="batch_nested">Seçili klasörleri ve içeriklerini ayrı ayrı yeniden adlandırın</string>
+    <string name="batch_working">Yeniden adlandırılıyor…</string>
+    <string name="batch_done">%d öğe yeniden adlandırıldı</string>
+    <string name="batch_failed">%1$d öğe yeniden adlandırıldı. Durduruldu: %2$s</string>
 </resources>
