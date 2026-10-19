@@ -332,6 +332,11 @@ Cookies and login state persist in Twig's shared WebView profile, separate from 
 other browsers; bookmarks are not isolated account containers. Website compatibility
 depends on the installed system WebView.
 
+When Twig's master password is enabled, opening a website or returning to its task
+requires unlocking Twig if it is locked. Cookies and the live page are retained,
+and opted-in background sessions continue. Website windows block screenshots and
+recent-task previews while the master password is enabled.
+
 ### Compare
 
 - **Directory compare** in the Beyond Compare style: two trees aligned row by row with
@@ -480,7 +485,7 @@ Twig can find it and save it as a connection.
   rewritten. No new dependency: scrypt comes from the Bouncy Castle already in the APK.
 - The master password is an **app lock checked at every entry point** — the main UI,
   "open with Twig", "copy to…", the file picker, the terminal shortcut and the remote
-  command shortcuts. Miss one and the lock only guards the front door. **Lock** drops the
+  command shortcuts, and website tasks. Miss one and the lock only guards the front door. **Lock** drops the
   key from memory while music, terminals and sharing keep running. A file's desktop
   shortcut is the one deliberate exception: local and SAF files need no decrypted secret
   to open, so those skip the prompt entirely — only a shortcut to a server file gates,

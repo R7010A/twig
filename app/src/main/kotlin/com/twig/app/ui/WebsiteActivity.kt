@@ -45,6 +45,7 @@ import com.twig.app.R
 import com.twig.app.Website
 import com.twig.app.WebsiteStore
 import com.twig.app.WebsiteOrientation
+import com.twig.app.secure.Secrets
 import com.twig.app.databinding.ActivityWebsiteBinding
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runInterruptible
@@ -56,6 +57,9 @@ import java.io.ByteArrayInputStream
 class WebsiteActivity : AppCompatActivity() {
     private lateinit var b: ActivityWebsiteBinding
     private lateinit var site: Website
+    private var pendingSavedState: Bundle? = null
+    private var pendingWebsiteIntent = false
+    private var lockCover: View? = null
     @Volatile private var requestBlocker = WebsiteRequestBlocker.EMPTY
     private var mobileUserAgent = ""
     private lateinit var debugger: WebsiteDebugPanel
@@ -77,11 +81,60 @@ class WebsiteActivity : AppCompatActivity() {
         upload = null
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         b = ActivityWebsiteBinding.inflate(layoutInflater)
         setContentView(b.root)
+        pendingSavedState = savedInstanceState
+        unlockWebsite()
+    }
+
+    /** Keep the live WebView running behind an opaque input shield while asking to unlock. */
+    private fun protectWebsite() {
+        if (Secrets.hasMasterPassword(this)) window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        else window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        if (!Secrets.locked(this) || lockCover != null) return
+        lockCover = View(this).apply {
+            tag = "website_lock_cover"
+            setBackgroundColor(androidx.core.content.ContextCompat.getColor(this@WebsiteActivity, R.color.surface))
+            isClickable = true
+            isFocusable = true
+        }.also {
+            (window.decorView as ViewGroup).addView(it, ViewGroup.LayoutParams(-1, -1))
+            it.requestFocus()
+        }
+        b.root.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+        fullscreenLayer?.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+    }
+
+    private fun unlockWebsite() {
+        protectWebsite()
+        SecurityUi.gate(this) {
+            if (isFinishing || isDestroyed) return@gate
+            if (!::site.isInitialized) {
+                initializeWebsite(pendingSavedState)
+                pendingSavedState = null
+            }
+            if (isFinishing) return@gate
+            if (pendingWebsiteIntent) {
+                pendingWebsiteIntent = false
+                applyWebsiteIntent()
+            }
+            if (isFinishing) return@gate
+            lockCover?.let { (it.parent as? ViewGroup)?.removeView(it) }
+            lockCover = null
+            b.root.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+            fullscreenLayer?.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+            if (lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.STARTED)) {
+                WebsiteRemoteDebug.start(this)
+                syncRemoteDebugMenu()
+            }
+            if (lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) resumeWebsite()
+        }
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun initializeWebsite(savedInstanceState: Bundle?) {
         val id = intent.data?.takeIf { it.scheme == "twig" && it.host == "website" }?.lastPathSegment
         val saved = WebsiteStore.all(this).firstOrNull { it.id == id }
         if (saved == null || WebsiteStore.normalizeUrl(saved.url) == null) {
@@ -91,7 +144,9 @@ class WebsiteActivity : AppCompatActivity() {
         }
         site = saved
         lifecycle.addObserver(object : androidx.lifecycle.DefaultLifecycleObserver {
-            override fun onResume(owner: androidx.lifecycle.LifecycleOwner) { syncBackgroundRunning() }
+            override fun onResume(owner: androidx.lifecycle.LifecycleOwner) {
+                if (!Secrets.locked(this@WebsiteActivity)) resumeWebsite()
+            }
         })
         requestBlocker = WebsiteRequestBlocker.parse(saved.blockedRequests) ?: WebsiteRequestBlocker.EMPTY
         debugger = WebsiteDebugPanel(this, b.debugHost, b.web, { site }) { updated ->
@@ -314,6 +369,11 @@ class WebsiteActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        pendingWebsiteIntent = true
+        unlockWebsite()
+    }
+
+    private fun applyWebsiteIntent() {
         // Bringing an existing document task forward must keep its live WebView,
         // including navigation, scroll position and unsaved form contents.
         val id = intent.data?.takeIf { it.scheme == "twig" && it.host == "website" }?.lastPathSegment
@@ -364,6 +424,7 @@ class WebsiteActivity : AppCompatActivity() {
     }
 
     private fun back() {
+        if (Secrets.locked(this)) { unlockWebsite(); return }
         if (fullscreenLayer != null) {
             hidePageFullscreen()
             return
@@ -492,6 +553,8 @@ class WebsiteActivity : AppCompatActivity() {
 
     private fun syncBackgroundRunning() {
         if (!::site.isInitialized) return
+        // Existing sessions stay alive while locked, but cannot create a new session or prompt.
+        if (Secrets.locked(this)) return
         val allowed = WebsiteStore.all(this).firstOrNull { it.id == site.id }?.allowBackgroundRunning == true
         if (allowed != site.allowBackgroundRunning) site = site.copy(allowBackgroundRunning = allowed)
         WebsiteBackground.update(this, site)
@@ -651,6 +714,11 @@ class WebsiteActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        unlockWebsite()
+    }
+
+    private fun resumeWebsite() {
+        syncBackgroundRunning()
         syncRemoteDebugMenu()
         if (::b.isInitialized) {
             b.web.clearSslPreferences()
@@ -659,6 +727,11 @@ class WebsiteActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        if (!::site.isInitialized) {
+            pendingSavedState?.let { outState.putAll(it) }
+            super.onSaveInstanceState(outState)
+            return
+        }
         outState.putBoolean("background_notification_requested", backgroundNotificationRequested)
         toolbarVisibleOverride?.let { outState.putBoolean("toolbar_visible_override", it) }
         outState.putBoolean("immersive_fullscreen", immersiveFullscreen)
@@ -673,8 +746,11 @@ class WebsiteActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        WebsiteRemoteDebug.start(this)
-        syncRemoteDebugMenu()
+        protectWebsite()
+        if (::site.isInitialized && !Secrets.locked(this)) {
+            WebsiteRemoteDebug.start(this)
+            syncRemoteDebugMenu()
+        }
     }
 
     override fun onStop() {

@@ -376,3 +376,21 @@ option.**
   contains the early return, and
   [AndroidInfo](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/base/android/java/src/org/chromium/base/AndroidInfo.java)
   defines the build-type check.
+
+- **Website tasks must gate both fresh and retained login sessions** (2026-10-19).
+  `WebsiteActivity` was not exported, but home-screen shortcuts and recent tasks still
+  opened it directly. Encrypting Basic credentials did not protect an already-open
+  authenticated WebView or its persistent cookies. The missing boundary was the app
+  lock, not cookie persistence. Gate creation, reused intents and resume through
+  `SecurityUi.gate`; load credentials and restore page state only after unlocking.
+  Inflate the empty binding before the gate so pause/save/destroy remain safe while
+  the dialog is pending. Keep the latest incoming intent pending until unlock.
+  Cover existing content and disable its accessibility descendants while prompting;
+  do not destroy, hide or pause an opted-in background WebView to implement a UI lock.
+  `FLAG_SECURE` while a master password is enabled also prevents screenshots and
+  recent-task snapshots from exposing the authenticated page. Cookies remain intact.
+  Resume WebView work from the lifecycle observer (RESUMED is delivered after the
+  Activity's `onResume` method), and also after an asynchronous unlock on a resumed
+  screen. Tests exercise cold shortcut entry, reused intents, return from recents,
+  actual password-dialog unlock, decrypted Basic auth, cancellation, cookies and
+  background ownership. Device screenshot rendering remains a platform check.

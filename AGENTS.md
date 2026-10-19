@@ -157,6 +157,10 @@ each write `= null`.
   and header values use `Secrets`; `.twigbak` includes website configuration with those
   fields decrypted for export and re-encrypted on import, but excludes WebView cookies
   and sessions. Import restores the website list as a whole, rather than merging entries.
+  Website tasks gate cold starts, reused shortcut intents and resumes with `SecurityUi`;
+  defer reading credentials and loading/restoring pages until unlocked. An opaque cover
+  blocks the live page while prompting without pausing opted-in background execution.
+  With a master password enabled, `FLAG_SECURE` prevents screenshots/task snapshots.
 - Viewers: `TextViewerActivity` / `HexViewerActivity` / `ImageViewerActivity` /
   `MediaPlayerActivity` (ExoPlayer + ffmpeg software audio decoding).
   Music inside mounted restic repositories and archives uses an in-memory queue
@@ -525,7 +529,8 @@ add its symptom here.
   *Explains*: a crash right after entering the master password, "after unlocking, WebDAV
   login fails until I re-save the connection", a password field rendered in plain text,
   saved archive/sharing passwords included in system backups, document previews fetching tracking pixels,
-  computer WebView debugging still available after its switch is turned off on userdebug systems.
+  computer WebView debugging still available after its switch is turned off on userdebug systems,
+  authenticated website tasks opening from shortcuts or recents while Twig is locked.
 - **[SAF](docs/lessons/saf.md)** — a SAF path is a whole document URI, so nothing may
   slice it: ask the tree who contains a row instead of computing a parent. The grant is
   persistable, so SAF entries are *local* (real fd, pread), not outsiders.
