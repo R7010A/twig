@@ -999,4 +999,9 @@
     <string name="batch_working">Renombrando…</string>
     <string name="batch_done">%d elementos renombrados</string>
     <string name="batch_failed">%1$d elementos renombrados. Detenido: %2$s</string>
+    <string name="twig_shortcut">Twig shortcut</string>
+    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="shortcut_pick_node">Elige una carpeta, archivo o sitio web y confirma</string>
+    <string name="shortcut_pick_command">Elige una carpeta local o una ubicación SSH (SFTP)</string>
+    <string name="cmd_use_privileged">Usar sesión privilegiada (%1$s)</string>
 </resources>

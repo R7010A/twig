@@ -88,7 +88,10 @@ object PrivShell {
      * when `su` fails, the outer shell leaves at once and the session ends carrying su's own error
      * message, instead of quietly handing back a prompt at the app's uid that looks like root.
      */
-    fun rootKickoff(): String? = suPath()?.let { "$it; exit\n" }
+    fun rootKickoff(command: String? = null): String? = suPath()?.let {
+        if (command == null) "$it; exit\n"
+        else "$it -c " + RemoteCmd.sq(command) + "; exit\n"
+    }
 
     const val SHELL = "/system/bin/sh"
 

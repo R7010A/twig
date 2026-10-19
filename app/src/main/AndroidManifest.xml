@@ -318,6 +318,27 @@
             </intent-filter>
         </activity>
 
+        <!-- Launcher action factories, also available to gesture/shortcut editors. -->
+        <activity android:name=".ui.CreateShortcutActivity"
+            android:exported="true" android:label="@string/twig_shortcut"
+            android:icon="@drawable/ic_shortcut_launcher">
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ui.CreateCommandShortcutActivity"
+            android:exported="true" android:label="@string/twig_command_shortcut"
+            android:icon="@drawable/ic_shortcut_terminal">
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ui.LauncherShortcutActivity"
+            android:exported="true" android:taskAffinity="${applicationId}.shortcut"
+            android:theme="@style/Theme.Twig.Translucent" />
+
         <!-- Entry point for home-screen command shortcuts (headless relay:
              decides terminal vs. background service) -->
         <activity

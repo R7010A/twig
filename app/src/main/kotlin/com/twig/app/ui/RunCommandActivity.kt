@@ -50,6 +50,24 @@ class RunCommandActivity : AppCompatActivity() {
             finish(); return
         }
 
+        if (cmd.isLocal) {
+            if (cmd.isShizuku && !com.twig.app.Privileged.shizukuMatches(cmd.target)) {
+                Toast.makeText(this, R.string.terminal_priv_unavailable, Toast.LENGTH_LONG).show()
+            } else if (cmd.target == RemoteCmd.TARGET_ROOT && com.twig.app.PrivShell.suPath() == null) {
+                Toast.makeText(this, R.string.terminal_priv_unavailable, Toast.LENGTH_LONG).show()
+            } else if (cmd.inTerminal) {
+                TerminalActivity.startLocal(this, cmd.workdir.ifEmpty { null },
+                    when {
+                        cmd.isShizuku -> com.twig.app.Privileged.SHIZUKU
+                        cmd.target == RemoteCmd.TARGET_ROOT -> com.twig.app.Privileged.ROOT
+                        else -> com.twig.app.Privileged.OFF
+                    },
+                    command = cmd.command, shizukuTarget = cmd.target.takeIf { cmd.isShizuku })
+            } else CmdService.start(this, cmd)
+            finish()
+            return
+        }
+
         if (!cmd.inTerminal) {
             CmdService.start(this, cmd)
             finish(); return

@@ -999,4 +999,9 @@
     <string name="batch_working">Mengubah nama…</string>
     <string name="batch_done">%d item diubah namanya</string>
     <string name="batch_failed">%1$d item diubah namanya. Dihentikan: %2$s</string>
+    <string name="twig_shortcut">Twig shortcut</string>
+    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="shortcut_pick_node">Pilih folder, file, atau situs web, lalu konfirmasi</string>
+    <string name="shortcut_pick_command">Pilih folder lokal atau lokasi SSH (SFTP)</string>
+    <string name="cmd_use_privileged">Gunakan sesi berhak istimewa (%1$s)</string>
 </resources>

@@ -227,3 +227,26 @@
   navigation and keyboard insets remain applied. Keep the terminal-size
   freeze before focus-loss relayouts and the thaw after fullscreen is reapplied;
   changing window insets must not bypass `TermSizeFreezeLayout`.
+
+- **Launcher command identities** (`RemoteCmd.target`, 2026-10-19): ordinary local
+  directories, including `/`, use the app uid. The command dialog's optional
+  privileged-session checkbox defaults off and follows the selected Root or Shizuku
+  provider. The target is
+  stored in the private command record, and old records default to SSH. Never infer
+  the identity again from the edited working directory or current privilege setting.
+  Root commands use `su -c` as a child of the PTY shell and check uid 0 before user
+  code; neither denial nor a missing `su` may fall back to local execution. Local
+  command PTYs pass the executable as argv[0] before `-c`: Termux's JNI passes the
+  argument array straight to `execvp`. Background commands use separate processes
+  and drain stdout/stderr concurrently, with bounded output tails. Do not run user
+  commands through the persistent shell used for filesystem access. Native PTY and
+  root authorization checks remain user-operated device tests.
+
+  Shizuku commands retain the chosen uid (0 or 2000); a service restart with a
+  different identity must fail before user code runs. Terminal commands pass argv
+  through the helper's AIDL to `Pty.nativeOpen`; do not enqueue the ordinary
+  startup `cd` after launching a command, since it could become input to that
+  command rather than the shell. The helper adds argv[0] itself,
+  unlike Termux's JNI. Bump `PrivService.VERSION` whenever the helper changes.
+  Background commands use a fresh Shizuku process, never the persistent shell
+  serving filesystem operations.

@@ -9,7 +9,7 @@ import com.twig.app.ui.ShortcutIcons
 import org.json.JSONObject
 
 /**
- * A "run this command on a server" entry. A desktop shortcut tap runs it: either
+ * A saved command with an explicit SSH, local or root execution identity. A shortcut runs it either
  * inside a terminal (visible output, interactive) or silently, with only the result.
  *
  * ★ What we store is [connLabel] (`SavedConnection.label()`), not the scheme — the
@@ -37,7 +37,14 @@ data class RemoteCmd(
     val loginShell: Boolean = false,
     /** Name shown on the shortcut / notification. */
     val label: String,
+    /** Execution identity, persisted explicitly so a root action never becomes a local one. */
+    val target: String = TARGET_SSH,
 ) {
+    init { require(target == TARGET_SSH || target == TARGET_LOCAL || target == TARGET_ROOT || target == TARGET_SHIZUKU || target == TARGET_SHIZUKU_ROOT) }
+
+    val isShizuku: Boolean get() = target == TARGET_SHIZUKU || target == TARGET_SHIZUKU_ROOT
+    val isLocal: Boolean get() = target == TARGET_LOCAL || target == TARGET_ROOT || isShizuku
+
     /**
      * Puts the full command body into an Intent. **Only for in-app use, with the
      * target component un-exported** (currently just [ui.CmdService], which is
@@ -52,11 +59,12 @@ data class RemoteCmd(
         putExtra(EXTRA_TERM, inTerminal)
         putExtra(EXTRA_LOGIN, loginShell)
         putExtra(EXTRA_LABEL, label)
+        putExtra(EXTRA_TARGET, target)
     }
 
     fun toJson(): JSONObject = JSONObject().apply {
         put("conn", connLabel); put("workdir", workdir); put("command", command)
-        put("terminal", inTerminal); put("login", loginShell); put("label", label)
+        put("terminal", inTerminal); put("login", loginShell); put("label", label); put("target", target)
     }
 
     /**
@@ -76,6 +84,12 @@ data class RemoteCmd(
         }
 
     companion object {
+        const val TARGET_SSH = "ssh"
+        const val TARGET_LOCAL = "local"
+        const val TARGET_ROOT = "root"
+        const val TARGET_SHIZUKU = "shizuku"
+        const val TARGET_SHIZUKU_ROOT = "shizuku_root"
+        private const val EXTRA_TARGET = "cmd_target"
         private const val EXTRA_CONN = "cmd_conn"
         private const val EXTRA_WORKDIR = "cmd_workdir"
         private const val EXTRA_CMD = "cmd_command"
@@ -90,6 +104,7 @@ data class RemoteCmd(
             val command = intent.getStringExtra(EXTRA_CMD) ?: return null
             return RemoteCmd(
                 connLabel = conn,
+                target = intent.getStringExtra(EXTRA_TARGET) ?: TARGET_SSH,
                 workdir = intent.getStringExtra(EXTRA_WORKDIR).orEmpty(),
                 command = command,
                 inTerminal = intent.getBooleanExtra(EXTRA_TERM, false),
@@ -110,6 +125,7 @@ data class RemoteCmd(
 
         fun fromJson(o: JSONObject) = RemoteCmd(
             connLabel = o.getString("conn"),
+            target = o.optString("target", TARGET_SSH),
             workdir = o.optString("workdir", ""),
             command = o.getString("command"),
             inTerminal = o.optBoolean("terminal", false),
@@ -136,16 +152,19 @@ data class RemoteCmd(
         /** Requests pinning this command to the home screen. */
         fun pin(ctx: Context, cmd: RemoteCmd): Boolean {
             if (!ShortcutManagerCompat.isRequestPinShortcutSupported(ctx)) return false
-            val id = "cmd_" + (cmd.connLabel + "|" + cmd.workdir + "|" + cmd.command).hashCode()
-            val shortcut = ShortcutInfoCompat.Builder(ctx, id)
+            ShortcutManagerCompat.requestPinShortcut(ctx, shortcut(ctx, cmd), null)
+            return true
+        }
+
+        fun shortcut(ctx: Context, cmd: RemoteCmd): ShortcutInfoCompat {
+            val id = "cmd_" + (cmd.target + "|" + cmd.connLabel + "|" + cmd.workdir + "|" + cmd.command).hashCode()
+            return ShortcutInfoCompat.Builder(ctx, id)
                 .setShortLabel(cmd.label.ifEmpty { cmd.command.take(24) })
                 // Use the terminal icon: on the home screen this immediately reads as "run a
                 // command", not "a server".
                 .setIcon(ShortcutIcons.of(ctx, R.drawable.ic_shortcut_terminal))
                 .setIntent(cmd.launchIntent(ctx))
                 .build()
-            ShortcutManagerCompat.requestPinShortcut(ctx, shortcut, null)
-            return true
         }
     }
 }

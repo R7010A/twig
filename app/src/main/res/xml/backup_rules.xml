@@ -28,6 +28,8 @@
     <exclude domain="file" path=".ssh/" />
     <!-- StreamProvider's HMAC key: per install by design -->
     <exclude domain="sharedpref" path="twig_stream.xml" />
+    <!-- Opaque launcher action ids are private to this installation. -->
+    <exclude domain="sharedpref" path="twig_launcher_shortcuts.xml" />
     <!-- Website login data stays on this device. -->
     <exclude domain="root" path="app_webview/" />
 </full-backup-content>

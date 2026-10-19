@@ -38,9 +38,9 @@ import com.twig.core.XFile
  * Single-select: tapping a file returns it; with `EXTRA_ALLOW_MULTIPLE` it becomes "check a few,
  * then confirm"; multiple results go into ClipData as per the convention.
  */
-class PickerActivity : AppCompatActivity(), PaneFragment.Host {
+open class PickerActivity : AppCompatActivity(), PaneFragment.Host {
 
-    private lateinit var b: ActivityPickerBinding
+    protected lateinit var b: ActivityPickerBinding
     private var allowMultiple = false
     private var pickDir = false
 
@@ -112,11 +112,14 @@ class PickerActivity : AppCompatActivity(), PaneFragment.Host {
         SecurityUi.gate(this) { ensurePermissionThenInit() }
     }
 
-    private fun pane(): PaneFragment? =
+    protected fun pane(): PaneFragment? =
         supportFragmentManager.findFragmentByTag(PANE_TAG) as? PaneFragment
 
     private fun initPaneIfNeeded() {
-        if (supportFragmentManager.findFragmentByTag(PANE_TAG) != null) return
+        if (supportFragmentManager.findFragmentByTag(PANE_TAG) != null) {
+            onPaneReady()
+            return
+        }
         val lock = intent.getStringExtra(EXTRA_START_SCHEME)
         // When a source is specified, use a locked panel: the tree only contains that server,
         // so other places aren't even visible or selectable
@@ -133,7 +136,10 @@ class PickerActivity : AppCompatActivity(), PaneFragment.Host {
             .replace(R.id.pane, fragment, PANE_TAG)
             .commitNow() // synchronous commit; we need the viewModel immediately below
         if (pickDir) pane()?.let { enableOnWritableDir(it, b.btnConfirm) }
+        onPaneReady()
     }
+
+    protected open fun onPaneReady() {}
 
     // ---- Selection ----
 

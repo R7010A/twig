@@ -103,6 +103,10 @@ class PaneFragment : Fragment() {
         /** File-picker mode: if the host takes the click (returns true), don't proceed to open / viewer. */
         fun onPickFile(file: XFile): Boolean = false
 
+        /** Launcher configuration can observe navigation and consume leaf clicks. */
+        fun onPickNode(node: PaneViewModel.Node): Boolean = false
+        val shortcutResult: ((ShortcutInfoCompat) -> Unit)? get() = null
+
         /** Notify the host when a transfer finishes (the share-target page should close itself after copying); the main UI ignores this. */
         fun onTransferFinished(session: Transfers.Session) {}
 
@@ -229,7 +233,8 @@ class PaneFragment : Fragment() {
             thumbs = Prefs.thumbs(requireContext()),
             gridMode = Prefs.thumbsGrid(requireContext()),
             gridNames = Prefs.thumbsGridNames(requireContext()),
-            onClick = { node ->
+            onClick = click@{ node ->
+                if (host?.onPickNode(node) == true) return@click
                 when (node) {
                     is PaneViewModel.FileNode ->
                         if (node.expandable) viewModel.toggle(node) else open(node.file)
@@ -250,7 +255,10 @@ class PaneFragment : Fragment() {
                     else -> viewModel.toggle(node)
                 }
             },
-            onLongClick = { node -> onLongClick(node) },
+            onLongClick = { node ->
+                if (host?.shortcutResult != null) host?.onPickNode(node)
+                else onLongClick(node)
+            },
             onSelectionChanged = { host?.onSelectionChanged() },
             onInfoTab = { node, idx -> viewModel.selectInfoTab(node, idx) },
             onInfoHash = { node -> viewModel.computeHash(node) },
@@ -1984,10 +1992,43 @@ class PaneFragment : Fragment() {
         }
     }
 
+    private fun deliverShortcut(shortcut: ShortcutInfoCompat) {
+        val result = host?.shortcutResult
+        if (result != null) result(shortcut)
+        else ShortcutManagerCompat.requestPinShortcut(requireContext(), shortcut, null)
+    }
+
+    /** Configure a launcher action using the same builders and dialogs as the tree menu. */
+    fun createNodeShortcut(node: PaneViewModel.Node, command: Boolean) {
+        val file = when (node) {
+            is PaneViewModel.FileNode -> node.file
+            is PaneViewModel.ServerNode -> viewModel.serverTarget(node)
+            is PaneViewModel.FavoriteNode -> viewModel.favoriteTarget(node)
+            else -> null
+        }
+        if (command) {
+            if (file?.scheme == "file" && file.isDir) {
+                showCommandDialog(null, "file", file.path, getString(R.string.terminal_local), com.twig.app.RemoteCmd.TARGET_LOCAL)
+                return
+            }
+            val conn = when (node) {
+                is PaneViewModel.ServerNode -> node.conn
+                else -> file?.let { viewModel.connOf(it.scheme) }
+            } ?: return
+            if (conn.type != "sftp") return
+            val dir = file?.takeIf { it.isDir }?.let { Connections.shellPath(it.scheme, it.path) }.orEmpty()
+            showCommandDialog(conn, file?.scheme, dir, getString(R.string.cmd_title_server, conn.shortLabel()))
+        } else if (node is PaneViewModel.WebsiteNode) {
+            deliverShortcut(WebsiteDialogs.shortcut(requireContext(), node.site))
+        } else if (file != null) {
+            if (file.isDir) pinFileShortcut(file) else pinFileOpenShortcut(file)
+        }
+    }
+
     /** Standalone home-screen shortcut: directory → expand to itself (and its contents); file → expand parent and scroll to that file's row. */
     private fun pinFileShortcut(file: XFile) {
         val ctx = requireContext()
-        if (!ShortcutManagerCompat.isRequestPinShortcutSupported(ctx)) {
+        if (host?.shortcutResult == null && !ShortcutManagerCompat.isRequestPinShortcutSupported(ctx)) {
             toast(getString(R.string.pin_shortcut_unsupported)); return
         }
         val revealPath = if (file.isDir) file.path else file.parentPath
@@ -2002,7 +2043,7 @@ class PaneFragment : Fragment() {
             .setIcon(ShortcutIcons.of(ctx, iconRes))
             .setIntent(intent)
             .build()
-        ShortcutManagerCompat.requestPinShortcut(ctx, shortcut, null)
+        deliverShortcut(shortcut)
     }
 
     /**
@@ -2014,7 +2055,7 @@ class PaneFragment : Fragment() {
      */
     private fun pinFileOpenShortcut(file: XFile) {
         val ctx = requireContext()
-        if (!ShortcutManagerCompat.isRequestPinShortcutSupported(ctx)) {
+        if (host?.shortcutResult == null && !ShortcutManagerCompat.isRequestPinShortcutSupported(ctx)) {
             toast(getString(R.string.pin_shortcut_unsupported)); return
         }
         val actions = ArrayList<MenuAct>()
@@ -2087,7 +2128,7 @@ class PaneFragment : Fragment() {
             .setIcon(icon)
             .setIntent(OpenShortcutActivity.intent(ctx, file, mode, component))
             .build()
-        ShortcutManagerCompat.requestPinShortcut(ctx, shortcut, null)
+        deliverShortcut(shortcut)
     }
 
     /** Show on other side: expand level by level in the sibling pane to locate and focus this directory. */
@@ -2415,6 +2456,7 @@ class PaneFragment : Fragment() {
 
     /** "Choose script…" backfill target input field (valid for the lifetime of the dialog, same approach as picking a private key). */
     private var scriptTarget: android.widget.EditText? = null
+    private var scriptLocal = false
 
     private val scriptPicker =
         registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()) { r ->
@@ -2424,7 +2466,8 @@ class PaneFragment : Fragment() {
             val q = com.twig.app.RemoteCmd.sq(path)
             target.setText(
                 when (path.substringAfterLast('.', "").lowercase()) {
-                    "sh", "bash" -> "bash $q"
+                    "sh" -> if (scriptLocal) "sh $q" else "bash $q"
+                    "bash" -> "bash $q"
                     "py" -> "python3 $q"
                     else -> q
                 },
@@ -2440,10 +2483,11 @@ class PaneFragment : Fragment() {
      * The shortcut itself stores the connection label, not the scheme — the scheme changes across launches.
      */
     private fun showCommandDialog(
-        conn: SavedConnection,
+        conn: SavedConnection?,
         scheme: String?,
         workdir: String,
         title: String,
+        target: String = com.twig.app.RemoteCmd.TARGET_SSH,
     ) {
         val ctx = requireContext()
         val dp = resources.displayMetrics.density
@@ -2464,7 +2508,7 @@ class PaneFragment : Fragment() {
             }
         }
 
-        val etLabel = field(getString(R.string.cmd_label), conn.shortLabel())
+        val etLabel = field(getString(R.string.cmd_label), conn?.shortLabel() ?: title)
         val etCommand = field(getString(R.string.cmd_command), "", maxLines = 4)
         val etWorkdir = field(getString(R.string.cmd_workdir), workdir)
         // Login shell only makes sense for silent execution: the terminal is already an interactive login shell.
@@ -2477,16 +2521,29 @@ class PaneFragment : Fragment() {
             text = getString(R.string.cmd_in_terminal)
             isChecked = true // Default is to run visibly; silent is an explicit choice.
             textSize = 14f
-            setOnCheckedChangeListener { _, on -> cbLogin.visibility = if (on) View.GONE else View.VISIBLE }
+            setOnCheckedChangeListener { _, on -> cbLogin.visibility = if (on || conn == null) View.GONE else View.VISIBLE }
+        }
+        val privilegedTarget = com.twig.app.Privileged.commandTarget()
+        val cbPrivileged = android.widget.CheckBox(ctx).apply {
+            val identity = when (privilegedTarget) {
+                com.twig.app.RemoteCmd.TARGET_ROOT -> getString(R.string.priv_mode_root)
+                com.twig.app.RemoteCmd.TARGET_SHIZUKU_ROOT -> getString(R.string.priv_state_shizuku_root)
+                else -> getString(R.string.priv_mode_shizuku)
+            }
+            text = getString(R.string.cmd_use_privileged, identity)
+            textSize = 14f
+            isChecked = false
+            visibility = if (conn == null && privilegedTarget != null) View.VISIBLE else View.GONE
         }
         val btnScript = android.widget.Button(ctx).apply {
             text = getString(R.string.cmd_pick_script)
             isAllCaps = false
             setOnClickListener {
                 scriptTarget = etCommand
+                scriptLocal = scheme == "file"
                 if (scheme != null) {
-                    launchScriptPicker(scheme, etWorkdir.text.toString(), conn.shortLabel())
-                } else {
+                    launchScriptPicker(scheme, etWorkdir.text.toString(), conn?.shortLabel() ?: title)
+                } else if (conn != null) {
                     // Haven't connected to this server yet: connect first, get the scheme, then open the picker.
                     toast(getString(R.string.ftp_connecting))
                     viewLifecycleOwner.lifecycleScope.launch {
@@ -2506,6 +2563,7 @@ class PaneFragment : Fragment() {
             addView(btnScript)
             addView(etWorkdir)
             addView(cbTerminal)
+            addView(cbPrivileged)
             addView(cbLogin)
         }
 
@@ -2513,7 +2571,8 @@ class PaneFragment : Fragment() {
             val command = etCommand.text.toString().trim()
             if (command.isEmpty()) { toast(getString(R.string.cmd_empty)); return null }
             return com.twig.app.RemoteCmd(
-                connLabel = conn.label(),
+                connLabel = conn?.label().orEmpty(),
+                target = if (cbPrivileged.isChecked) requireNotNull(privilegedTarget) else target,
                 workdir = etWorkdir.text.toString().trim(),
                 command = command,
                 inTerminal = cbTerminal.isChecked,
@@ -2522,17 +2581,21 @@ class PaneFragment : Fragment() {
             )
         }
 
-        AlertDialog.Builder(ctx)
+        val builder = AlertDialog.Builder(ctx)
             .setTitle(title)
             .setView(android.widget.ScrollView(ctx).apply { addView(box) })
             .setNegativeButton(R.string.dialog_cancel, null)
-            .setNeutralButton(R.string.cmd_run_now) { _, _ -> collect()?.let { runCommandNow(conn, scheme, it) } }
-            .setPositiveButton(R.string.cmd_create) { _, _ ->
-                collect()?.let {
-                    if (!com.twig.app.RemoteCmd.pin(ctx, it)) toast(getString(R.string.cmd_pin_unsupported))
-                }
-            }
-            .show()
+            .setPositiveButton(if (host?.shortcutResult != null) R.string.picker_confirm else R.string.cmd_create, null)
+        if (host?.shortcutResult == null && conn != null) {
+            builder.setNeutralButton(R.string.cmd_run_now) { _, _ -> collect()?.let { runCommandNow(conn, scheme, it) } }
+        }
+        val dialog = builder.show()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            val cmd = collect() ?: return@setOnClickListener
+            if (host?.shortcutResult != null) deliverShortcut(com.twig.app.RemoteCmd.shortcut(ctx, cmd))
+            else if (!com.twig.app.RemoteCmd.pin(ctx, cmd)) toast(getString(R.string.cmd_pin_unsupported))
+            dialog.dismiss()
+        }
     }
 
     private fun launchScriptPicker(scheme: String, startPath: String, label: String?) {

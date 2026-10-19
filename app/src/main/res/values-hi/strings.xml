@@ -999,4 +999,9 @@
     <string name="batch_working">नाम बदला जा रहा है…</string>
     <string name="batch_done">%d आइटम का नाम बदला गया</string>
     <string name="batch_failed">%1$d आइटम का नाम बदला गया। रोका गया: %2$s</string>
+    <string name="twig_shortcut">Twig shortcut</string>
+    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="shortcut_pick_node">फ़ोल्डर, फ़ाइल या वेबसाइट चुनें, फिर पुष्टि करें</string>
+    <string name="shortcut_pick_command">स्थानीय फ़ोल्डर या SSH (SFTP) स्थान चुनें</string>
+    <string name="cmd_use_privileged">विशेषाधिकार सत्र का उपयोग करें (%1$s)</string>
 </resources>

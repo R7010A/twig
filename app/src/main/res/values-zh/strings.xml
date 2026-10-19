@@ -1037,4 +1037,9 @@
     <string name="batch_working">正在重命名…</string>
     <string name="batch_done">已重命名 %d 项</string>
     <string name="batch_failed">已重命名 %1$d 项，操作停止：%2$s</string>
+    <string name="twig_shortcut">Twig shortcut</string>
+    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="shortcut_pick_node">选择目录、文件或网站，然后确定</string>
+    <string name="shortcut_pick_command">选择本地目录或 SSH（SFTP）位置</string>
+    <string name="cmd_use_privileged">使用特权会话（%1$s）</string>
 </resources>

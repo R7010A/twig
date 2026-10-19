@@ -1077,4 +1077,9 @@
     <string name="batch_working">Renaming…</string>
     <string name="batch_done">Renamed %d items</string>
     <string name="batch_failed">Renamed %1$d items. Stopped: %2$s</string>
+    <string name="twig_shortcut">Twig shortcut</string>
+    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="shortcut_pick_node">Choose a directory, file or website, then confirm</string>
+    <string name="shortcut_pick_command">Choose a local directory or SSH (SFTP) location</string>
+    <string name="cmd_use_privileged">Use privileged session (%1$s)</string>
 </resources>

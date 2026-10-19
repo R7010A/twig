@@ -581,7 +581,19 @@ class TerminalActivity : AppCompatActivity() {
         val scheme = intent.getStringExtra(EXTRA_SCHEME)
         if (scheme == LOCAL_SCHEME) {
             val priv = intent.getIntExtra(EXTRA_PRIV, Privileged.OFF)
-            if (priv == Privileged.OFF) openLocal(intent.getStringExtra(EXTRA_DIR))
+            val command = intent.getStringExtra(EXTRA_CMD)
+            if (command != null) {
+                // Command shortcuts name the identity explicitly; do not substitute the
+                // currently selected privilege provider (which might be Shizuku).
+                if (priv == Privileged.OFF || priv == Privileged.ROOT) {
+                    openLocal(intent.getStringExtra(EXTRA_DIR), priv, command)
+                } else if (priv == Privileged.SHIZUKU) {
+                    val target = intent.getStringExtra(EXTRA_SHIZUKU_TARGET)
+                    if (target == com.twig.app.RemoteCmd.TARGET_SHIZUKU || target == com.twig.app.RemoteCmd.TARGET_SHIZUKU_ROOT) {
+                        openPrivilegedPty(intent.getStringExtra(EXTRA_DIR), command, target)
+                    } else Toast.makeText(this, R.string.terminal_priv_unavailable, Toast.LENGTH_LONG).show()
+                } else Toast.makeText(this, R.string.terminal_priv_unavailable, Toast.LENGTH_LONG).show()
+            } else if (priv == Privileged.OFF) openLocal(intent.getStringExtra(EXTRA_DIR))
             else openPrivileged(intent.getStringExtra(EXTRA_DIR))
         } else if (scheme != null) {
             val title = intent.getStringExtra(EXTRA_TITLE)
@@ -610,7 +622,7 @@ class TerminalActivity : AppCompatActivity() {
      * Limitations: the process runs as this app's uid, not root; available commands are the system-provided mksh + toybox.
      * Since Android 10 you can't execve files in the app's private dir, so scripts have to be run as `sh xxx.sh`.
      */
-    private fun openLocal(cwd: String?, priv: Int = Privileged.OFF) {
+    private fun openLocal(cwd: String?, priv: Int = Privileged.OFF, command: String? = null) {
         val dir = cwd?.takeIf { java.io.File(it).isDirectory }
             ?: android.os.Environment.getExternalStorageDirectory().absolutePath
         val cmd = PrivShell.command(this, priv)
@@ -618,18 +630,25 @@ class TerminalActivity : AppCompatActivity() {
             // If it can't start, just say which identity can't start — don't silently fall back to a plain shell —
             // the user thinks they're typing commands as root but is actually under the app uid; that's more dangerous than an error.
             Toast.makeText(this, getString(R.string.terminal_priv_unavailable), Toast.LENGTH_LONG).show()
-            if (TermManager.current == null) openLocal(cwd, Privileged.OFF)
+            if (command == null && TermManager.current == null) openLocal(cwd, Privileged.OFF)
             return
         }
-        val (exe, args) = cmd
+        val (exe, baseArgs) = cmd
+        val action = command?.let {
+            com.twig.app.LocalCommands.line(com.twig.app.RemoteCmd(
+                connLabel = "", workdir = cwd.orEmpty(), command = it, inTerminal = true,
+                label = "", target = if (priv == Privileged.ROOT) com.twig.app.RemoteCmd.TARGET_ROOT else com.twig.app.RemoteCmd.TARGET_LOCAL,
+            ), terminal = true)
+        }
+        val args = if (action != null && priv == Privileged.OFF) arrayOf(exe, "-c", action) else baseArgs
         // Root does not exec su itself; the session opens as an ordinary shell and its first line
         // turns it into a root one (PrivShell.rootKickoff explains why).
-        val kickoff = if (priv == Privileged.ROOT) PrivShell.rootKickoff() else null
+        val kickoff = if (priv == Privileged.ROOT) PrivShell.rootKickoff(action) else null
         if (priv != Privileged.OFF) {
             Log.i(
                 PRIV_TAG,
                 "local session priv=$priv exec=$exe args=${args.joinToString(" ")} " +
-                    "kickoff=${kickoff?.trim() ?: "-"}",
+                    "kickoff=${if (command != null) "command shortcut" else kickoff?.trim() ?: "-"}",
             )
         }
         val title = when (priv) {
@@ -899,7 +918,7 @@ class TerminalActivity : AppCompatActivity() {
      * `untrusted_app` is not allowed to load files labelled `app_data_file`. But the helper runs as **our own APK**
      * (`/data/app`, `apk_data_file`), and is not subject to that limit.
      */
-    private fun openPrivilegedPty(cwd: String?) {
+    private fun openPrivilegedPty(cwd: String?, command: String? = null, target: String? = null) {
         val dir = cwd?.takeIf { it.isNotBlank() } ?: "/"
         val t = TermManager.create(LOCAL_SCHEME, getString(R.string.terminal_local_shizuku))
         val s = TerminalSession("/system/bin/sh", "/", arrayOf(), arrayOf(), 5000, sessionClient)
@@ -927,8 +946,17 @@ class TerminalActivity : AppCompatActivity() {
                 val pfd = runCatching {
                     val svc = com.twig.app.priv.PrivService.get()
                         ?: error("could not bind the Shizuku helper")
-                    Log.i(PRIV_TAG, "helper uid=${svc.uid}")
-                    svc.start(apk, abi, "/system/bin/sh", dir, env, rows, cols, pidOut)
+                    val uid = svc.uid
+                    Log.i(PRIV_TAG, "helper uid=$uid")
+                    val args = if (command == null) arrayOf<String>() else {
+                        // Bind the saved action to the Shizuku identity chosen when it
+                        // was created. A service restart must not silently change uid.
+                        check(uid == if (target == com.twig.app.RemoteCmd.TARGET_SHIZUKU_ROOT) 0 else 2000)
+                        val action = com.twig.app.RemoteCmd("", dir, command, true,
+                            label = "", target = requireNotNull(target))
+                        arrayOf("-c", com.twig.app.LocalCommands.line(action, terminal = true))
+                    }
+                    svc.start(apk, abi, "/system/bin/sh", args, dir, env, rows, cols, pidOut)
                         ?: error("helper could not allocate a pty")
                 }.onFailure { Log.w(PRIV_TAG, "privileged pty failed", it) }.getOrNull()
                 main.post {
@@ -942,7 +970,7 @@ class TerminalActivity : AppCompatActivity() {
                         }
                         closeExited(t)
                     } else {
-                        wirePty(t, pfd, pidOut[0], cwd)
+                        wirePty(t, pfd, pidOut[0], if (command == null) cwd else null)
                     }
                 }
             }, "twig-term-priv").start()
@@ -1812,6 +1840,7 @@ class TerminalActivity : AppCompatActivity() {
         private const val EXTRA_CMD = "cmd"
         private const val EXTRA_TITLE = "title"
         private const val EXTRA_PRIV = "priv"
+        private const val EXTRA_SHIZUKU_TARGET = "shizuku_target"
 
         /** Layout must be quiet this long after a resume before the size is applied. */
         private const val THAW_SETTLE_MS = 250L
@@ -1913,12 +1942,14 @@ class TerminalActivity : AppCompatActivity() {
          * Open a local shell with the given local directory as cwd (used by the local-dir long-press menu).
          * When [priv] is not [Privileged.OFF] the session runs under that privileged identity (su / rish).
          */
-        fun startLocal(context: Context, dir: String?, priv: Int = Privileged.OFF) {
+        fun startLocal(context: Context, dir: String?, priv: Int = Privileged.OFF, command: String? = null, shizukuTarget: String? = null) {
             context.startActivity(
                 Intent(context, TerminalActivity::class.java)
                     .putExtra(EXTRA_SCHEME, LOCAL_SCHEME)
                     .putExtra(EXTRA_PRIV, priv)
+                    .putExtra(EXTRA_SHIZUKU_TARGET, shizukuTarget)
                     .putExtra(EXTRA_DIR, dir)
+                    .putExtra(EXTRA_CMD, command)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
             )
         }

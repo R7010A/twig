@@ -853,6 +853,12 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
 
     // ---- Interaction ----
 
+    /** Move the selection frame without opening a leaf in a launcher configuration. */
+    fun highlightNode(node: Node) {
+        currentKey = node.key
+        rebuild()
+    }
+
     fun toggle(node: Node) {
         when (node) {
             is FileNode -> toggleFile(node)

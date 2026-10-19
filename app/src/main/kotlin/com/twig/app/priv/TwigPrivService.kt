@@ -56,6 +56,7 @@ class TwigPrivService : ITwigPrivService.Stub() {
         apkPath: String,
         abi: String,
         cmd: String,
+        args: Array<String>,
         cwd: String?,
         env: Array<String>,
         rows: Int,
@@ -74,7 +75,7 @@ class TwigPrivService : ITwigPrivService.Stub() {
         // where an unprivileged shell can read it. A failure here costs the session its directory title,
         // nothing else, so it must never stop the pty from opening.
         runCatching { ensurePrivRc() }.onFailure { Log.w(TAG, "cannot write ${com.twig.app.TermRc.PRIV_PATH}", it) }
-        val fd = Pty.nativeOpen(cmd, cwd, arrayOf(), env, pid, rows, cols)
+        val fd = Pty.nativeOpen(cmd, cwd, args, env, pid, rows, cols)
         if (fd < 0) {
             Log.e(TAG, "forkpty failed for $cmd")
             return null

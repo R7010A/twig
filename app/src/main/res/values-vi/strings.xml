@@ -998,4 +998,9 @@
     <string name="batch_working">Đang đổi tên…</string>
     <string name="batch_done">Đã đổi tên %d mục</string>
     <string name="batch_failed">Đã đổi tên %1$d mục. Đã dừng: %2$s</string>
+    <string name="twig_shortcut">Twig shortcut</string>
+    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="shortcut_pick_node">Chọn thư mục, tệp hoặc trang web rồi xác nhận</string>
+    <string name="shortcut_pick_command">Chọn thư mục cục bộ hoặc vị trí SSH (SFTP)</string>
+    <string name="cmd_use_privileged">Sử dụng phiên đặc quyền (%1$s)</string>
 </resources>

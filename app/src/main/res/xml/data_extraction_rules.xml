@@ -15,6 +15,7 @@
         <exclude domain="file" path="keys/" />
         <exclude domain="file" path=".ssh/" />
         <exclude domain="sharedpref" path="twig_stream.xml" />
+        <exclude domain="sharedpref" path="twig_launcher_shortcuts.xml" />
         <!-- Website login data stays on this device. -->
         <exclude domain="root" path="app_webview/" />
     </cloud-backup>
@@ -27,6 +28,7 @@
         <exclude domain="file" path="keys/" />
         <exclude domain="file" path=".ssh/" />
         <exclude domain="sharedpref" path="twig_stream.xml" />
+        <exclude domain="sharedpref" path="twig_launcher_shortcuts.xml" />
         <!-- Website login data stays on this device. -->
         <exclude domain="root" path="app_webview/" />
     </device-transfer>

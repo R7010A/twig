@@ -74,6 +74,15 @@ class CmdService : Service() {
 
     /** Connect on demand and look up the scheme: the shortcut stores the connection label, and on a cold start this server has not been registered yet. */
     private fun execute(cmd: RemoteCmd): SftpFileSystem.ExecResult {
+        if (cmd.isLocal) {
+            if (cmd.isShizuku && !com.twig.app.Privileged.shizukuMatches(cmd.target)) {
+                throw IllegalStateException(getString(R.string.terminal_priv_unavailable))
+            }
+            if (cmd.target == RemoteCmd.TARGET_ROOT && com.twig.app.PrivShell.suPath() == null) {
+                throw IllegalStateException(getString(R.string.terminal_priv_unavailable))
+            }
+            return com.twig.app.LocalCommands.execute(cmd)
+        }
         val conn = Connections.find(this, cmd.connLabel)
             ?: throw IllegalStateException(getString(R.string.cmd_conn_missing))
         val scheme = Connections.ensure(this, conn)

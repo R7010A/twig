@@ -26,7 +26,7 @@ object PrivService {
      * whenever [TwigPrivService]'s behaviour changes**, otherwise the user's
      * device may still be running a resident process started from the old code.
      */
-    private const val VERSION = 3
+    private const val VERSION = 4
 
     private val args = Shizuku.UserServiceArgs(
         ComponentName("com.twig.app", TwigPrivService::class.java.name),

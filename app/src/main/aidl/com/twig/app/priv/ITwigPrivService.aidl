@@ -31,7 +31,7 @@ interface ITwigPrivService {
      * [apkPath] / [abi] are used to extract libtwigpty.so from the APK and
      * load it — see TwigPrivService.ensureLib for the details.
      */
-    ParcelFileDescriptor start(String apkPath, String abi, String cmd, String cwd,
+    ParcelFileDescriptor start(String apkPath, String abi, String cmd, in String[] args, String cwd,
                                in String[] env, int rows, int cols, out int[] pid);
 
     /** End the session: send SIGHUP to the whole foreground process group. */

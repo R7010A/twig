@@ -999,4 +999,9 @@
     <string name="batch_working">Renomeando…</string>
     <string name="batch_done">%d itens renomeados</string>
     <string name="batch_failed">%1$d itens renomeados. Interrompido: %2$s</string>
+    <string name="twig_shortcut">Twig shortcut</string>
+    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="shortcut_pick_node">Escolha uma pasta, arquivo ou site e confirme</string>
+    <string name="shortcut_pick_command">Escolha uma pasta local ou um local SSH (SFTP)</string>
+    <string name="cmd_use_privileged">Usar sessão privilegiada (%1$s)</string>
 </resources>

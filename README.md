@@ -287,6 +287,17 @@ needs no special case.
   resolver on every tap) — and its icon reuses an already-cached thumbnail when one
   exists. Runs in its own task, so tapping one never routes through the main screen.
 
+Launchers such as Nova also list **Twig shortcut** and **Twig command shortcut** in
+their shortcut/action picker. Select a directory, file or website and confirm, or
+select a command location and configure its command with the same dialog used in
+Twig. SFTP locations use SSH. Local directories (including `/`) use the app uid
+unless **Use privileged session** is checked. This defaults off and follows the
+privilege provider selected in Settings: Root (su) or Shizuku. Saved shortcuts keep
+the chosen provider and Shizuku uid; an unavailable or changed identity fails
+rather than falling back to another shell. The launcher can bind the result to an icon gesture (swipe up/down)
+without adding another home-screen icon. Temporary archive/restic/git mounts cannot
+be selected because they cannot be reopened after a process restart.
+
 ### Websites and page customization
 
 Keep a self-hosted dashboard, web music player or favourite site in Twig's **Websites**

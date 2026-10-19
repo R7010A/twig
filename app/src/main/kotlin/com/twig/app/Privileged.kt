@@ -175,6 +175,28 @@ object Privileged {
         !Shizuku.isPreV11() && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
     }.getOrDefault(false)
 
+    /** The service's actual uid, independent of Twig's selected filesystem privilege mode. */
+    fun shizukuUid(): Int = runCatching {
+        if (shizukuRunning() && shizukuGranted()) Shizuku.getUid() else -1
+    }.getOrDefault(-1)
+
+    /** Optional command identity follows the selected, effective privilege provider. */
+    fun commandTarget(mode: Int = active, serviceUid: Int = shizukuUid(), hasSu: Boolean = PrivShell.suPath() != null): String? = when {
+        mode == ROOT && hasSu -> RemoteCmd.TARGET_ROOT
+        mode == SHIZUKU && serviceUid == 0 -> RemoteCmd.TARGET_SHIZUKU_ROOT
+        mode == SHIZUKU && serviceUid == 2000 -> RemoteCmd.TARGET_SHIZUKU
+        else -> null
+    }
+
+    fun shizukuMatches(target: String): Boolean = shizukuUid() ==
+        if (target == RemoteCmd.TARGET_SHIZUKU_ROOT) 0 else 2000
+
+    /** A fresh command process; never share the filesystem-access shell with user code. */
+    fun startShizukuCommand(cmd: RemoteCmd): PrivilegedProcess {
+        check(cmd.isShizuku && shizukuMatches(cmd.target))
+        return ShizukuLauncher().start(LocalCommands.line(cmd))
+    }
+
     /** Whether the Shizuku manager is installed (different from "running"; messages need to be distinct). */
     fun shizukuInstalled(ctx: Context): Boolean = runCatching {
         ctx.packageManager.getPackageInfo(SHIZUKU_PKG, 0) != null

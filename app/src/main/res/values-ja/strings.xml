@@ -999,4 +999,9 @@
     <string name="batch_working">名前を変更中…</string>
     <string name="batch_done">%d 項目の名前を変更しました</string>
     <string name="batch_failed">%1$d 項目を変更後に停止：%2$s</string>
+    <string name="twig_shortcut">Twig shortcut</string>
+    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="shortcut_pick_node">フォルダ、ファイル、ウェブサイトを選択して確定</string>
+    <string name="shortcut_pick_command">ローカルフォルダまたは SSH（SFTP）の場所を選択</string>
+    <string name="cmd_use_privileged">特権セッションを使用（%1$s）</string>
 </resources>

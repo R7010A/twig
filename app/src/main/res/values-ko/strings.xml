@@ -999,4 +999,9 @@
     <string name="batch_working">이름 변경 중…</string>
     <string name="batch_done">%d개 항목 이름 변경됨</string>
     <string name="batch_failed">%1$d개 항목 변경 후 중지: %2$s</string>
+    <string name="twig_shortcut">Twig shortcut</string>
+    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="shortcut_pick_node">폴더, 파일 또는 웹사이트를 선택한 후 확인하세요</string>
+    <string name="shortcut_pick_command">로컬 폴더 또는 SSH(SFTP) 위치를 선택하세요</string>
+    <string name="cmd_use_privileged">권한 세션 사용(%1$s)</string>
 </resources>

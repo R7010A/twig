@@ -998,4 +998,9 @@
     <string name="batch_working">正在重新命名…</string>
     <string name="batch_done">已重新命名 %d 項</string>
     <string name="batch_failed">已重新命名 %1$d 項，操作停止：%2$s</string>
+    <string name="twig_shortcut">Twig shortcut</string>
+    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="shortcut_pick_node">選擇目錄、檔案或網站，然後確定</string>
+    <string name="shortcut_pick_command">選擇本機目錄或 SSH（SFTP）位置</string>
+    <string name="cmd_use_privileged">使用特權工作階段（%1$s）</string>
 </resources>

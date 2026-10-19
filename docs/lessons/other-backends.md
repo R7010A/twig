@@ -52,6 +52,27 @@
     drawable named in `shortcuts.xml` relies on a tint". ★ That XML check must strip comments first,
     or the drawable's own comment explaining the rule matches `android:tint`.
 
+- **Launcher gesture factories must return results without file descriptors**
+  (2026-10-19, `CreateShortcutActivity`). Selecting **Twig shortcut** in Nova's
+  gesture editor crashed `ChooseActionIntentActivity.onActivityResult` with
+  `Not allowed to write file descriptors here`, inside `Parcel.LazyValue.writeToParcel`
+  while forwarding the result through `finishActivity`. The initial tests only read
+  the returned name and launch Intent under Robolectric, which did not exercise
+  Android's lazy cross-process Bundle forwarding. A two-Activity probe on the phone
+  reproduced exactly the same failure with the original APK.
+  The factory used `ShortcutManagerCompat.createShortcutResultIntent` with a rendered
+  bitmap icon; bitmap parceling can carry an ashmem file descriptor. A gesture editor
+  may pass the entire result onwards without unpacking it, so even valid shortcut
+  metadata is not necessarily safe to forward. Return only the legacy shortcut name,
+  opaque-id launch Intent and `ShortcutIconResource` instead. The icon resource must
+  have literal colors (`ic_shortcut_launcher` / `ic_shortcut_terminal`), as above.
+  Do not include bitmap extras or a platform pin request in this result. Ordinary
+  system-managed pinned/dynamic shortcuts keep their existing bitmap path.
+  `LauncherShortcutTest` checks the complete result-extra set, rather than just the
+  fields the caller normally reads. Device forwarding is still required to establish
+  compatibility; Robolectric cannot prove native Parcel file-descriptor behavior.
+  The user verified successful Nova shortcut creation after this change.
+
 - **SMB**: `smb2_context` is not thread-safe, so `NativeSmbClient` serializes with a reentrant lock,
   and streaming reads/writes hold the lock until the stream is closed. `exec()` (formerly `run`)
   dispatches to a single-threaded executor — **do not name a member function `run`/`let` or any

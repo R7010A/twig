@@ -999,4 +999,9 @@
     <string name="batch_working">Yeniden adlandırılıyor…</string>
     <string name="batch_done">%d öğe yeniden adlandırıldı</string>
     <string name="batch_failed">%1$d öğe yeniden adlandırıldı. Durduruldu: %2$s</string>
+    <string name="twig_shortcut">Twig shortcut</string>
+    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="shortcut_pick_node">Bir klasör, dosya veya site seçip onaylayın</string>
+    <string name="shortcut_pick_command">Yerel klasör veya SSH (SFTP) konumu seçin</string>
+    <string name="cmd_use_privileged">Ayrıcalıklı oturum kullan (%1$s)</string>
 </resources>
