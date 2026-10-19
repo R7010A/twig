@@ -909,4 +909,5 @@
     <string name="batch_working">이름 변경 중…</string>
     <string name="batch_done">%d개 항목 이름 변경됨</string>
     <string name="batch_failed">%1$d개 항목 변경 후 중지: %2$s</string>
+    <string name="android_data_hide_system">시스템 앱 폴더 숨기기</string>
 </resources>

@@ -1579,8 +1579,12 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                     if (expandedOnly && key !in expanded) continue
                     // A mutation, explicit refresh or navigation may have replaced this cache meanwhile.
                     if (children[key] !== cached) continue
+                    val accessChanged = listing.dataRootAccess?.let { (path, readable) ->
+                        (path in readableDataRoots) != readable
+                    } == true
                     val sorted = sortList(key, applyListing(listing))
                     rememberCounts(key, sorted)
+                    if (accessChanged && key in expanded) changed = true
                     if (cached == sorted) continue
                     children[key] = sorted
                     if (key in expanded) changed = true
@@ -2447,6 +2451,8 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         return Restored("fav:${fav.id}", target, listChildren(target), extra) // listChildren also identifies git / restic along the way.
     }
 
+    private val readableDataRoots = mutableSetOf<String>()
+
     /**
      * One listing's result: children + whatever was **incidentally discovered** this time.
      *
@@ -2457,6 +2463,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
      */
     private class Listing(
         val children: List<XFile>,
+        val dataRootAccess: Pair<String, Boolean>? = null,
         /** This directory itself is a restic repository (value is `fileKey(dir)`). */
         val resticRepo: String? = null,
         /** This directory contains a .git; the data source has been built and registered in FsRegistry, pending registration in the VM's reverse-lookup table. */
@@ -2479,6 +2486,9 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
      * deterministically derived from keys).
      */
     private fun applyListing(l: Listing): List<XFile> {
+        l.dataRootAccess?.let { (path, readable) ->
+            if (readable) readableDataRoots.add(path) else readableDataRoots.remove(path)
+        }
         l.resticRepo?.let { resticRepos.add(it) }
         l.git?.let { g ->
             gitInfo[g.dirKey] = g.scheme to g.label
@@ -2531,6 +2541,9 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
             }
             Listing(
                 children = kids,
+                dataRootAccess = if (AndroidDataAccess.isRoot(file)) file.path to (listed.getOrNull()?.let {
+                    AndroidDataAccess.instance?.hasFullListing(file, it) == true
+                } == true) else null,
                 resticRepo = if (ResticRepo.looksLikeRepo(kids)) fileKey(file) else null,
                 // .git may also be a **file** (worktree / submodule, contents are "gitdir: …") — don't only recognize directories.
                 git = if (kids.any { it.name == ".git" }) buildGit(file) else null,
@@ -2833,7 +2846,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                 addFile(rows, XFile(s, "/", isDir = true, displayName = live, canWrite = false), depth + 1)
             }
             visible(children[key]).forEach { addFile(rows, it, depth + 1, keyPrefix = keyPrefix) }
-            if (AndroidDataAccess.isRoot(file)) {
+            if (AndroidDataAccess.isRoot(file) && file.path !in readableDataRoots) {
                 rows += ActionNode(AndroidDataAccess.ACTION_PREFIX + file.path,
                     str(R.string.android_data_grant), depth + 1)
             }

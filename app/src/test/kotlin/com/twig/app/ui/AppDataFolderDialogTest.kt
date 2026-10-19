@@ -30,6 +30,7 @@ class AppDataFolderDialogTest {
         val folders = listOf(
             AppFolder(XFile("file", "/missing/com.example.alpha", true), "First App"),
             AppFolder(XFile("file", "/missing/com.example.beta", true), "Second App"),
+            AppFolder(XFile("file", "/missing/com.example.system", true), "System App", system = true),
         )
         var selected: XFile? = null
         val dialog = AppDataFolderDialog.show(host.get(), this, folders) { selected = it }
@@ -37,7 +38,15 @@ class AppDataFolderDialogTest {
             val list = dialog.findViewById<ListView>(R.id.list)!!
             val filter = dialog.findViewById<EditText>(R.id.filter)!!
             assertFalse(dialog.findViewById<CheckBox>(R.id.existing)!!.isChecked)
+            val hideSystem = dialog.findViewById<CheckBox>(R.id.hide_system)!!
+            assertTrue(hideSystem.isChecked)
             assertEquals(2, list.count)
+            hideSystem.isChecked = false
+            assertEquals(3, list.count)
+            filter.setText("system")
+            assertEquals(1, list.count)
+            hideSystem.isChecked = true
+            assertEquals(0, list.count)
             filter.setText("FIRST")
             assertEquals(1, list.count)
             filter.setText("beta")

@@ -909,4 +909,5 @@
     <string name="batch_working">Renombrando…</string>
     <string name="batch_done">%d elementos renombrados</string>
     <string name="batch_failed">%1$d elementos renombrados. Detenido: %2$s</string>
+    <string name="android_data_hide_system">Ocultar carpetas de aplicaciones del sistema</string>
 </resources>

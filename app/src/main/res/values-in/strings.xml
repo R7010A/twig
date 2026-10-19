@@ -909,4 +909,5 @@
     <string name="batch_working">Mengubah nama…</string>
     <string name="batch_done">%d item diubah namanya</string>
     <string name="batch_failed">%1$d item diubah namanya. Dihentikan: %2$s</string>
+    <string name="android_data_hide_system">Sembunyikan folder aplikasi sistem</string>
 </resources>

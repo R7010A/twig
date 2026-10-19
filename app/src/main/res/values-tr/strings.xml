@@ -909,4 +909,5 @@
     <string name="batch_working">Yeniden adlandırılıyor…</string>
     <string name="batch_done">%d öğe yeniden adlandırıldı</string>
     <string name="batch_failed">%1$d öğe yeniden adlandırıldı. Durduruldu: %2$s</string>
+    <string name="android_data_hide_system">Sistem uygulaması klasörlerini gizle</string>
 </resources>

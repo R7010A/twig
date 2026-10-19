@@ -913,4 +913,5 @@
     <string name="batch_working">جارٍ تغيير الأسماء…</string>
     <string name="batch_done">تمت إعادة تسمية %d عناصر</string>
     <string name="batch_failed">تمت إعادة تسمية %1$d عناصر. توقف: %2$s</string>
+    <string name="android_data_hide_system">إخفاء مجلدات تطبيقات النظام</string>
 </resources>

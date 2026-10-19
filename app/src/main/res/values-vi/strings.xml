@@ -908,4 +908,5 @@
     <string name="batch_working">Đang đổi tên…</string>
     <string name="batch_done">Đã đổi tên %d mục</string>
     <string name="batch_failed">Đã đổi tên %1$d mục. Đã dừng: %2$s</string>
+    <string name="android_data_hide_system">Ẩn thư mục ứng dụng hệ thống</string>
 </resources>

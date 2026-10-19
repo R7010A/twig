@@ -945,4 +945,5 @@
     <string name="batch_working">Переименование…</string>
     <string name="batch_done">Переименовано: %d</string>
     <string name="batch_failed">Переименовано: %1$d. Остановлено: %2$s</string>
+    <string name="android_data_hide_system">Скрывать папки системных приложений</string>
 </resources>

@@ -987,4 +987,5 @@
     <string name="batch_working">Renaming…</string>
     <string name="batch_done">Renamed %d items</string>
     <string name="batch_failed">Renamed %1$d items. Stopped: %2$s</string>
+    <string name="android_data_hide_system">Hide system app folders</string>
 </resources>

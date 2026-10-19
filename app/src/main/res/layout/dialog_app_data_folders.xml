@@ -15,6 +15,13 @@
         android:singleLine="true" />
 
     <CheckBox
+        android:id="@+id/hide_system"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="@string/android_data_hide_system" />
+
+    <CheckBox
         android:id="@+id/existing"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -55,6 +55,17 @@ class AndroidDataAccess(private val ctx: Context) {
         else Tree(grant).stat(grant.path)
     }.distinctBy { it.path }
 
+    /** Native Android listings may succeed while exposing only our own package. */
+    fun hasFullListing(root: XFile, listed: List<XFile>): Boolean {
+        val parent = File(root.path).canonicalPath
+        if (grants.any { it.path == parent }) return true
+        val names = listed.map { it.name }.toSet()
+        val grantedNames = grants.mapNotNull {
+            it.path.removePrefix("$parent/").takeIf { name -> name != it.path && '/' !in name }
+        }
+        return names.any { it != ctx.packageName } && grantedNames.all { it in names }
+    }
+
     /** Browsing shortcuts only; these do not make an unreadable parent listing complete. */
     fun ownFolder(root: XFile): XFile? {
         if (!isRoot(root)) return null
@@ -65,7 +76,7 @@ class AndroidDataAccess(private val ctx: Context) {
     }
 
     /** Authorization candidates only; Android may hide whether these paths exist. */
-    data class AppFolder(val file: XFile, val label: String)
+    data class AppFolder(val file: XFile, val label: String, val system: Boolean = false)
 
     fun appFolderCandidates(root: XFile): List<AppFolder> {
         if (!isRoot(root)) return emptyList()
@@ -74,15 +85,15 @@ class AndroidDataAccess(private val ctx: Context) {
         val parent = File(root.path).canonicalPath
         val pm = ctx.packageManager
         return pm.getInstalledApplications(0)
-            .filter { it.packageName != ctx.packageName &&
-                it.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0 }
+            .filter { it.packageName != ctx.packageName }
             .filter { info ->
                 val path = "$parent/${info.packageName}"
                 authorized.none { path == it.path || path.startsWith(it.path + "/") }
             }
             .distinctBy { it.packageName }.map { info ->
                 AppFolder(XFile("file", File(root.path, info.packageName).path, true),
-                    info.loadLabel(pm).toString())
+                    info.loadLabel(pm).toString(),
+                    info.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)
             }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.label })
     }
 

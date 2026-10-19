@@ -947,4 +947,5 @@
     <string name="batch_working">正在重命名…</string>
     <string name="batch_done">已重命名 %d 项</string>
     <string name="batch_failed">已重命名 %1$d 项，操作停止：%2$s</string>
+    <string name="android_data_hide_system">隐藏系统应用目录</string>
 </resources>
