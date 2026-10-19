@@ -958,7 +958,7 @@
     <string name="pin_shortcut_failed">Could not add shortcut</string>
     <string name="android_data_whole">Entire Android/data</string>
     <string name="android_data_app">Specific app folder…</string>
-    <string name="android_data_detect_empty">No apps found. You can still try selecting a folder with the system picker.</string>
+    <string name="android_data_detect_empty">No apps available to select.</string>
     <string name="android_data_filter">Filter by app name or package</string>
     <string name="android_data_existing">Only show detected data folders</string>
     <string name="android_data_existing_note">Android may hide folders. Turn this off to see all candidate apps.</string>

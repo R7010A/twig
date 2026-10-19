@@ -172,6 +172,30 @@ class AndroidDataAccessTest {
         assertTrue(candidates.none { it.file.name in listOf("com.system", "com.updated") })
     }
 
+    @Test fun `app picker excludes itself and covered folders but restores revoked grants`() {
+        val pm = shadowOf(app.packageManager)
+        for (pkg in listOf(app.packageName, "com.example", "com.example.other")) {
+            pm.installPackage(android.content.pm.PackageInfo().apply {
+                packageName = pkg
+                applicationInfo = android.content.pm.ApplicationInfo().apply { packageName = pkg; flags = 0 }
+            })
+        }
+        val access = AndroidDataAccess.instance!!
+        val data = root.copy(path = root.parentPath)
+        fun names(folder: XFile = data) = access.appFolderCandidates(folder).map { it.file.name }
+        assertFalse(names().contains(app.packageName))
+        assertTrue(names().contains("com.example"))
+        grant(write = false)
+        assertFalse(names().contains("com.example"))
+        assertTrue(names().contains("com.example.other"))
+        assertTrue(names(data.copy(path = "/storage/ABCD-1234/Android/data")).contains("com.example"))
+        app.contentResolver.releasePersistableUriPermission(tree, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        assertTrue(names().contains("com.example"))
+        val whole = DocumentsContract.buildTreeDocumentUri(AndroidDataAccess.AUTHORITY, "primary:Android/data")
+        app.contentResolver.takePersistableUriPermission(whole, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        assertTrue(names().isEmpty())
+    }
+
     @Test fun `own data folder is visible and readable even when parent listing fails`() = runTest(dispatcher) {
         val data = root.copy(path = root.parentPath)
         val access = AndroidDataAccess.instance!!

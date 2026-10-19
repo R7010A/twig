@@ -69,9 +69,17 @@ class AndroidDataAccess(private val ctx: Context) {
 
     fun appFolderCandidates(root: XFile): List<AppFolder> {
         if (!isRoot(root)) return emptyList()
+        refresh()
+        val authorized = grants
+        val parent = File(root.path).canonicalPath
         val pm = ctx.packageManager
         return pm.getInstalledApplications(0)
-            .filter { it.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0 }
+            .filter { it.packageName != ctx.packageName &&
+                it.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0 }
+            .filter { info ->
+                val path = "$parent/${info.packageName}"
+                authorized.none { path == it.path || path.startsWith(it.path + "/") }
+            }
             .distinctBy { it.packageName }.map { info ->
                 AppFolder(XFile("file", File(root.path, info.packageName).path, true),
                     info.loadLabel(pm).toString())
