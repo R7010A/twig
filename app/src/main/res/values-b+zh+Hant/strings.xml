@@ -1003,4 +1003,5 @@
     <string name="shortcut_pick_node">選擇目錄、檔案或網站，然後確定</string>
     <string name="shortcut_pick_command">選擇本機目錄或 SSH（SFTP）位置</string>
     <string name="cmd_use_privileged">使用特權工作階段（%1$s）</string>
+    <string name="android_data_hide_system">隱藏系統應用程式目錄</string>
 </resources>

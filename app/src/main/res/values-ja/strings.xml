@@ -1004,4 +1004,5 @@
     <string name="shortcut_pick_node">フォルダ、ファイル、ウェブサイトを選択して確定</string>
     <string name="shortcut_pick_command">ローカルフォルダまたは SSH（SFTP）の場所を選択</string>
     <string name="cmd_use_privileged">特権セッションを使用（%1$s）</string>
+    <string name="android_data_hide_system">システムアプリのフォルダを非表示</string>
 </resources>

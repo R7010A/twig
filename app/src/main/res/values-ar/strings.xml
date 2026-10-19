@@ -1008,4 +1008,5 @@
     <string name="shortcut_pick_node">اختر مجلدًا أو ملفًا أو موقعًا ثم أكّد</string>
     <string name="shortcut_pick_command">اختر مجلدًا محليًا أو موقع SSH (SFTP)</string>
     <string name="cmd_use_privileged">استخدام جلسة مميزة (%1$s)</string>
+    <string name="android_data_hide_system">إخفاء مجلدات تطبيقات النظام</string>
 </resources>

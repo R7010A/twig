@@ -1004,4 +1004,5 @@
     <string name="shortcut_pick_node">Ordner, Datei oder Website wählen und bestätigen</string>
     <string name="shortcut_pick_command">Lokalen Ordner oder SSH-Ort (SFTP) wählen</string>
     <string name="cmd_use_privileged">Privilegierte Sitzung verwenden (%1$s)</string>
+    <string name="android_data_hide_system">System-App-Ordner ausblenden</string>
 </resources>

@@ -1042,4 +1042,5 @@
     <string name="shortcut_pick_node">选择目录、文件或网站，然后确定</string>
     <string name="shortcut_pick_command">选择本地目录或 SSH（SFTP）位置</string>
     <string name="cmd_use_privileged">使用特权会话（%1$s）</string>
+    <string name="android_data_hide_system">隐藏系统应用目录</string>
 </resources>

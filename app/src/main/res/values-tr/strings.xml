@@ -1004,4 +1004,5 @@
     <string name="shortcut_pick_node">Bir klasör, dosya veya site seçip onaylayın</string>
     <string name="shortcut_pick_command">Yerel klasör veya SSH (SFTP) konumu seçin</string>
     <string name="cmd_use_privileged">Ayrıcalıklı oturum kullan (%1$s)</string>
+    <string name="android_data_hide_system">Sistem uygulaması klasörlerini gizle</string>
 </resources>

@@ -150,7 +150,7 @@ class AndroidDataAccessTest {
         assertFalse(access.accepts(DocumentsContract.buildTreeDocumentUri("other.provider", packageId), root))
     }
 
-    @Test fun `app folder candidates include user apps without directories and exclude system apps`() {
+    @Test fun `app folder candidates include user and system apps with their classification`() {
         val data = root.copy(path = root.parentPath)
         val pm = shadowOf(app.packageManager)
         pm.installPackage(android.content.pm.PackageInfo().apply {
@@ -169,7 +169,9 @@ class AndroidDataAccessTest {
         assertFalse(File(data.path, "com.missing").exists())
         val candidates = AndroidDataAccess.instance!!.appFolderCandidates(data)
         assertTrue(candidates.any { it.file.path == File(data.path, "com.missing").path && it.label == "Missing App" })
-        assertTrue(candidates.none { it.file.name in listOf("com.system", "com.updated") })
+        assertTrue(candidates.single { it.file.name == "com.system" }.system)
+        assertTrue(candidates.single { it.file.name == "com.updated" }.system)
+        assertFalse(candidates.single { it.file.name == "com.missing" }.system)
     }
 
     @Test fun `app picker excludes itself and covered folders but restores revoked grants`() {
@@ -194,6 +196,36 @@ class AndroidDataAccessTest {
         val whole = DocumentsContract.buildTreeDocumentUri(AndroidDataAccess.AUTHORITY, "primary:Android/data")
         app.contentResolver.takePersistableUriPermission(whole, Intent.FLAG_GRANT_READ_URI_PERMISSION)
         assertTrue(names().isEmpty())
+    }
+
+    @Test fun `authorization row follows complete listing access even when children stay the same`() = runTest(dispatcher) {
+        val data = root.copy(path = root.parentPath)
+        val ownDir = File(data.path, app.packageName).apply { mkdirs() }
+        val own = AndroidDataAccess.instance!!.ownFolder(data)!!
+        var readable = false
+        FsRegistry.register(object : com.twig.core.FileSystem by fs {
+            override fun list(dir: XFile): List<XFile> {
+                if (dir.path != data.path) return fs.list(dir)
+                if (!readable) throw com.twig.core.FsException("blocked")
+                return listOf(own, XFile("file", data.path + "/com.other", true))
+            }
+        })
+        try {
+            val vm = com.twig.app.ui.PaneViewModel(app).apply { io = dispatcher; lockRoot = data }
+            vm.refreshTree()
+            fun row() = vm.state.value.rows.filterIsInstance<com.twig.app.ui.PaneViewModel.FileNode>()
+                .first { it.file.path == data.path }
+            fun hasGrant() = vm.state.value.rows.filterIsInstance<com.twig.app.ui.PaneViewModel.ActionNode>()
+                .any { it.id == AndroidDataAccess.ACTION_PREFIX + data.path }
+            vm.toggle(row())
+            assertTrue(hasGrant())
+            readable = true
+            vm.refreshNode(row())
+            assertFalse(hasGrant())
+            readable = false
+            vm.refreshNode(row())
+            assertTrue(hasGrant())
+        } finally { ownDir.deleteRecursively() }
     }
 
     @Test fun `own data folder is visible and readable even when parent listing fails`() = runTest(dispatcher) {

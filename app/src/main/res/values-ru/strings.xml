@@ -1040,4 +1040,5 @@
     <string name="shortcut_pick_node">Выберите папку, файл или сайт и подтвердите</string>
     <string name="shortcut_pick_command">Выберите локальную папку или SSH (SFTP)</string>
     <string name="cmd_use_privileged">Использовать привилегированный сеанс (%1$s)</string>
+    <string name="android_data_hide_system">Скрывать папки системных приложений</string>
 </resources>

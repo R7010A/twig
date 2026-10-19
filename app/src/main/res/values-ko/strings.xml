@@ -1004,4 +1004,5 @@
     <string name="shortcut_pick_node">폴더, 파일 또는 웹사이트를 선택한 후 확인하세요</string>
     <string name="shortcut_pick_command">로컬 폴더 또는 SSH(SFTP) 위치를 선택하세요</string>
     <string name="cmd_use_privileged">권한 세션 사용(%1$s)</string>
+    <string name="android_data_hide_system">시스템 앱 폴더 숨기기</string>
 </resources>

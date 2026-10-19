@@ -52,11 +52,13 @@ object AppDataFolderDialog {
             adapter.setNotifyOnChange(false)
             adapter.clear()
             adapter.addAll(source.filter {
-                it.label.contains(query, ignoreCase = true) || it.file.name.contains(query, ignoreCase = true)
+                (!b.hideSystem.isChecked || !it.system) &&
+                    (it.label.contains(query, ignoreCase = true) || it.file.name.contains(query, ignoreCase = true))
             })
             adapter.notifyDataSetChanged()
         }
         b.filter.doAfterTextChanged { filter() }
+        b.hideSystem.setOnCheckedChangeListener { _, _ -> filter() }
         b.existing.setOnCheckedChangeListener { _, checked ->
             scan?.cancel()
             filter()

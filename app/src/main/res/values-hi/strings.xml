@@ -1004,4 +1004,5 @@
     <string name="shortcut_pick_node">फ़ोल्डर, फ़ाइल या वेबसाइट चुनें, फिर पुष्टि करें</string>
     <string name="shortcut_pick_command">स्थानीय फ़ोल्डर या SSH (SFTP) स्थान चुनें</string>
     <string name="cmd_use_privileged">विशेषाधिकार सत्र का उपयोग करें (%1$s)</string>
+    <string name="android_data_hide_system">सिस्टम ऐप के फ़ोल्डर छिपाएँ</string>
 </resources>

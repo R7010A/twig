@@ -1003,4 +1003,5 @@
     <string name="shortcut_pick_node">Chọn thư mục, tệp hoặc trang web rồi xác nhận</string>
     <string name="shortcut_pick_command">Chọn thư mục cục bộ hoặc vị trí SSH (SFTP)</string>
     <string name="cmd_use_privileged">Sử dụng phiên đặc quyền (%1$s)</string>
+    <string name="android_data_hide_system">Ẩn thư mục ứng dụng hệ thống</string>
 </resources>

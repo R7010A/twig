@@ -1082,4 +1082,5 @@
     <string name="shortcut_pick_node">Choose a directory, file or website, then confirm</string>
     <string name="shortcut_pick_command">Choose a local directory or SSH (SFTP) location</string>
     <string name="cmd_use_privileged">Use privileged session (%1$s)</string>
+    <string name="android_data_hide_system">Hide system app folders</string>
 </resources>
