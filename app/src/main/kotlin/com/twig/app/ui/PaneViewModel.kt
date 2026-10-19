@@ -611,6 +611,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                         }
                     }.getOrNull()
                 }
+                if (!restoring) return@launch // A collapse-all action abandoned this restoration.
                 fetched?.let {
                     if (p[0] == "apps" && !it.file.isDir) forcedArchive.add(it.key)
                     applyRestored(it)
@@ -1396,6 +1397,25 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
             currentKey = null
             currentDir = null
         }
+        rebuild()
+    }
+
+    /** Collapse every branch and abandon pending expansions without discarding cached listings. */
+    fun collapseAll() {
+        abandoned.addAll(loadingKeys)
+        abandoned.addAll(connecting)
+        pendingExpand = null
+        revealSequence++
+        revealLoadingKey = null
+        restoring = false
+        pendingCurrentDesc = null
+        expanded.clear()
+        searchState.values.forEach { it.job?.cancel() }
+        searchState.clear()
+        infoOpen.clear()
+        closeSelectionInfo()
+        currentKey = null
+        currentDir = null
         rebuild()
     }
 

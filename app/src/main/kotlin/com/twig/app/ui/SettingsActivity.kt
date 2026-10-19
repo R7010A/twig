@@ -178,11 +178,6 @@ class SettingsActivity : AppCompatActivity() {
             get = { LanguagePref.current() },
             set = { LanguagePref.apply(it) },
         )
-        switchRow(
-            getString(R.string.settings_swipe_animation), getString(R.string.settings_swipe_animation_desc),
-            get = { Prefs.swipeAnimation(this) },
-            set = { Prefs.setSwipeAnimation(this, it) },
-        )
         choiceRow(
             getString(R.string.settings_date_format),
             arrayOf(

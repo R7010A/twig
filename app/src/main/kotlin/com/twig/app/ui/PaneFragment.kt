@@ -28,6 +28,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.twig.app.AppsFileSystem
 import com.twig.app.AndroidDataAccess
@@ -627,10 +628,30 @@ class PaneFragment : Fragment() {
         viewModel.up()
     }
 
-    /** Long-press Up scrolls the open list without changing navigation or selection. */
+    /** Long-press Up reveals an off-screen frame top; otherwise collapse the tree. */
     fun actionScrollToTop() {
         if (mapMode) return
-        (b.list.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(0, 0)
+        val key = viewModel.state.value.currentKey
+        val index = adapter.currentList.indexOfFirst { it.key == key }
+        val row = index.takeIf { it >= 0 }?.let { b.list.findViewHolderForAdapterPosition(it)?.itemView }
+        val topVisible = row != null && row.top >= b.list.paddingTop &&
+            row.top < b.list.height - b.list.paddingBottom
+        if (index >= 0 && !topVisible) {
+            scrollRowToTop(index)
+        } else {
+            b.list.stopScroll()
+            pendingScrollToCurrent = false
+            pendingSelectionInfoScroll = false
+            viewModel.collapseAll()
+        }
+    }
+
+    private fun scrollRowToTop(index: Int) {
+        val layout = b.list.layoutManager as? LinearLayoutManager ?: return
+        b.list.stopScroll()
+        layout.startSmoothScroll(object : LinearSmoothScroller(requireContext()) {
+            override fun getVerticalSnapPreference() = SNAP_TO_START
+        }.apply { targetPosition = index })
     }
 
     fun actionRefresh() {

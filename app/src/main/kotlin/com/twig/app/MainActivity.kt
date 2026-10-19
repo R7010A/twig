@@ -633,7 +633,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         if (activeIndex != i) {
             activeIndex = i
             Prefs.setActivePane(this, i)
-            applyLayoutMode(animateSwitch && Prefs.swipeAnimation(this))
+            applyLayoutMode(animateSwitch)
             invalidateOptionsMenu() // the swap icon direction follows the active pane (including swipe / touch switch)
             // The two panes can land on sources with different capabilities (one local, one a media server); switching active pane means recomputing the action strip — ★ must happen **after** activeIndex updates, otherwise we still read the previous pane
             syncStripEnabled()

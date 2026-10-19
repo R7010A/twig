@@ -872,8 +872,6 @@
     <string name="about_no_browser">لا تطبيق لفتح الرابط؛ نسخ العنوان إلى الحافظة</string>
     <string name="pdf_page_mode">صفحة واحدة لكل شاشة</string>
     <string name="pdf_open_failed">تعذر فتح PDF</string>
-    <string name="settings_swipe_animation">حركة السحب</string>
-    <string name="settings_swipe_animation_desc">تحريك تبديل اللوحات بالسحب</string>
     <string name="settings_date_format">صيغة التاريخ</string>
     <string name="date_format_system">حسب منطقة النظام</string>
     <string name="date_format_ymd">YY-MM-DD</string>
