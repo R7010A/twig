@@ -1036,8 +1036,8 @@
     <string name="batch_working">Переименование…</string>
     <string name="batch_done">Переименовано: %d</string>
     <string name="batch_failed">Переименовано: %1$d. Остановлено: %2$s</string>
-    <string name="twig_shortcut">Twig shortcut</string>
-    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="twig_shortcut">Ярлык Twig</string>
+    <string name="twig_command_shortcut">Ярлык команды Twig</string>
     <string name="shortcut_pick_node">Выберите папку, файл или сайт и подтвердите</string>
     <string name="shortcut_pick_command">Выберите локальную папку или SSH (SFTP)</string>
     <string name="cmd_use_privileged">Использовать привилегированный сеанс (%1$s)</string>

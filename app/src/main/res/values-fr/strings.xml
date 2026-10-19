@@ -970,7 +970,15 @@
     <string name="website_background_channel">Sites en arrière-plan</string>
     <string name="website_background_close">Fermer les sites en arrière-plan</string>
     <string name="website_background_failed">Impossible de maintenir les sites en arrière-plan.</string>
-    <string name="android_data_grant">Autoriser l’accès à Android/data…</string>
+    <string name="android_data_grant">Autoriser l’accès…</string>
+    <string name="android_data_grant_note">Les restrictions du système peuvent empêcher les deux méthodes de fonctionner. Si aucune ne fonctionne, essayez d’accéder au dossier avec root (su) ou Shizuku.</string>
+    <string name="android_data_whole">Tout Android/data</string>
+    <string name="android_data_app">Dossier d’une application précise…</string>
+    <string name="android_data_detect_empty">Aucune application disponible à sélectionner.</string>
+    <string name="android_data_filter">Filtrer par nom d’application ou de paquet</string>
+    <string name="android_data_existing">Afficher uniquement les dossiers de données détectés</string>
+    <string name="android_data_existing_note">Android peut masquer des dossiers. Désactivez cette option pour voir toutes les applications candidates.</string>
+    <string name="android_data_no_matches">Aucune application correspondante</string>
     <string name="android_data_wrong_folder">Ce dossier ne donne pas accès à l’emplacement demandé. Sélectionnez Android/data ou le dossier de l’application concernée.</string>
     <string name="pin_shortcut_failed">Impossible d’ajouter le raccourci</string>
 
@@ -999,8 +1007,8 @@
     <string name="batch_working">Renommage…</string>
     <string name="batch_done">%d éléments renommés</string>
     <string name="batch_failed">%1$d éléments renommés. Arrêt : %2$s</string>
-    <string name="twig_shortcut">Twig shortcut</string>
-    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="twig_shortcut">Raccourci Twig</string>
+    <string name="twig_command_shortcut">Raccourci de commande Twig</string>
     <string name="shortcut_pick_node">Choisissez un dossier, fichier ou site, puis confirmez</string>
     <string name="shortcut_pick_command">Choisissez un dossier local ou un emplacement SSH (SFTP)</string>
     <string name="cmd_use_privileged">Utiliser une session privilégiée (%1$s)</string>

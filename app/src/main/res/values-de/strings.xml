@@ -970,7 +970,15 @@
     <string name="website_background_channel">Websites im Hintergrund</string>
     <string name="website_background_close">Hintergrund-Websites schließen</string>
     <string name="website_background_failed">Websites können nicht im Hintergrund weiterlaufen.</string>
-    <string name="android_data_grant">Zugriff auf Android/data erlauben…</string>
+    <string name="android_data_grant">Zugriff erlauben…</string>
+    <string name="android_data_grant_note">Systembeschränkungen können beide Methoden verhindern. Falls keine funktioniert, versuchen Sie, mit Root (su) oder Shizuku auf den Ordner zuzugreifen.</string>
+    <string name="android_data_whole">Gesamter Ordner Android/data</string>
+    <string name="android_data_app">Ordner einer bestimmten App…</string>
+    <string name="android_data_detect_empty">Keine Apps zur Auswahl verfügbar.</string>
+    <string name="android_data_filter">Nach App- oder Paketnamen filtern</string>
+    <string name="android_data_existing">Nur erkannte Datenordner anzeigen</string>
+    <string name="android_data_existing_note">Android kann Ordner ausblenden. Deaktivieren Sie diese Option, um alle infrage kommenden Apps anzuzeigen.</string>
+    <string name="android_data_no_matches">Keine passenden Apps</string>
     <string name="android_data_wrong_folder">Dieser Ordner gewährt keinen Zugriff auf den gewünschten Speicherort. Wähle Android/data oder den entsprechenden App-Ordner.</string>
     <string name="pin_shortcut_failed">Verknüpfung konnte nicht hinzugefügt werden</string>
 
@@ -999,8 +1007,8 @@
     <string name="batch_working">Umbenennen…</string>
     <string name="batch_done">%d Einträge umbenannt</string>
     <string name="batch_failed">%1$d Einträge umbenannt. Abgebrochen: %2$s</string>
-    <string name="twig_shortcut">Twig shortcut</string>
-    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="twig_shortcut">Twig-Verknüpfung</string>
+    <string name="twig_command_shortcut">Twig-Befehlsverknüpfung</string>
     <string name="shortcut_pick_node">Ordner, Datei oder Website wählen und bestätigen</string>
     <string name="shortcut_pick_command">Lokalen Ordner oder SSH-Ort (SFTP) wählen</string>
     <string name="cmd_use_privileged">Privilegierte Sitzung verwenden (%1$s)</string>

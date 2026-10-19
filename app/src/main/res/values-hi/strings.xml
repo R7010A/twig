@@ -970,7 +970,15 @@
     <string name="website_background_channel">बैकग्राउंड में चल रही वेबसाइट</string>
     <string name="website_background_close">बैकग्राउंड वेबसाइट बंद करें</string>
     <string name="website_background_failed">वेबसाइट को बैकग्राउंड में चालू नहीं रख सके।</string>
-    <string name="android_data_grant">Android/data का ऐक्सेस दें…</string>
+    <string name="android_data_grant">ऐक्सेस दें…</string>
+    <string name="android_data_grant_note">सिस्टम की पाबंदियों के कारण दोनों तरीके काम करने में विफल हो सकते हैं। अगर कोई भी तरीका काम न करे, तो root (su) या Shizuku से फ़ोल्डर खोलने की कोशिश करें।</string>
+    <string name="android_data_whole">पूरा Android/data</string>
+    <string name="android_data_app">किसी खास ऐप का फ़ोल्डर…</string>
+    <string name="android_data_detect_empty">चुनने के लिए कोई ऐप उपलब्ध नहीं है।</string>
+    <string name="android_data_filter">ऐप के नाम या पैकेज से फ़िल्टर करें</string>
+    <string name="android_data_existing">केवल मिले हुए डेटा फ़ोल्डर दिखाएँ</string>
+    <string name="android_data_existing_note">Android कुछ फ़ोल्डर छिपा सकता है। सभी संभावित ऐप देखने के लिए इसे बंद करें।</string>
+    <string name="android_data_no_matches">कोई मेल खाने वाला ऐप नहीं</string>
     <string name="android_data_wrong_folder">इस फ़ोल्डर से अनुरोधित स्थान का ऐक्सेस नहीं मिलता। Android/data या संबंधित ऐप का फ़ोल्डर चुनें।</string>
     <string name="pin_shortcut_failed">शॉर्टकट नहीं जोड़ा जा सका</string>
 
@@ -999,8 +1007,8 @@
     <string name="batch_working">नाम बदला जा रहा है…</string>
     <string name="batch_done">%d आइटम का नाम बदला गया</string>
     <string name="batch_failed">%1$d आइटम का नाम बदला गया। रोका गया: %2$s</string>
-    <string name="twig_shortcut">Twig shortcut</string>
-    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="twig_shortcut">Twig शॉर्टकट</string>
+    <string name="twig_command_shortcut">Twig कमांड शॉर्टकट</string>
     <string name="shortcut_pick_node">फ़ोल्डर, फ़ाइल या वेबसाइट चुनें, फिर पुष्टि करें</string>
     <string name="shortcut_pick_command">स्थानीय फ़ोल्डर या SSH (SFTP) स्थान चुनें</string>
     <string name="cmd_use_privileged">विशेषाधिकार सत्र का उपयोग करें (%1$s)</string>

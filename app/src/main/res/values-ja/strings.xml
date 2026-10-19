@@ -970,7 +970,15 @@
     <string name="website_background_channel">バックグラウンドで実行中のサイト</string>
     <string name="website_background_close">バックグラウンドのサイトを閉じる</string>
     <string name="website_background_failed">ウェブサイトをバックグラウンドで実行できませんでした。</string>
-    <string name="android_data_grant">Android/data へのアクセスを許可…</string>
+    <string name="android_data_grant">アクセスを許可…</string>
+    <string name="android_data_grant_note">システムの制限により、どちらの方法も機能しない場合があります。その場合は、root (su) または Shizuku を使用してフォルダーへのアクセスを試してください。</string>
+    <string name="android_data_whole">Android/data 全体</string>
+    <string name="android_data_app">特定のアプリのフォルダー…</string>
+    <string name="android_data_detect_empty">選択できるアプリがありません。</string>
+    <string name="android_data_filter">アプリ名またはパッケージ名で絞り込む</string>
+    <string name="android_data_existing">検出されたデータフォルダーのみ表示</string>
+    <string name="android_data_existing_note">Android によりフォルダーが非表示になる場合があります。すべての候補アプリを表示するには、この設定をオフにしてください。</string>
+    <string name="android_data_no_matches">一致するアプリはありません</string>
     <string name="android_data_wrong_folder">このフォルダでは対象の場所へのアクセスを許可できません。Android/data または該当アプリのフォルダを選択してください。</string>
     <string name="pin_shortcut_failed">ショートカットを追加できませんでした</string>
 
@@ -999,8 +1007,8 @@
     <string name="batch_working">名前を変更中…</string>
     <string name="batch_done">%d 項目の名前を変更しました</string>
     <string name="batch_failed">%1$d 項目を変更後に停止：%2$s</string>
-    <string name="twig_shortcut">Twig shortcut</string>
-    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="twig_shortcut">Twig ショートカット</string>
+    <string name="twig_command_shortcut">Twig コマンドショートカット</string>
     <string name="shortcut_pick_node">フォルダ、ファイル、ウェブサイトを選択して確定</string>
     <string name="shortcut_pick_command">ローカルフォルダまたは SSH（SFTP）の場所を選択</string>
     <string name="cmd_use_privileged">特権セッションを使用（%1$s）</string>

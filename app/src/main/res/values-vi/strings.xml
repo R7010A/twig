@@ -936,7 +936,7 @@
     <string name="website_download_http_error">Tải xuống thất bại (HTTP %1$d).</string>
     <string name="website_download_incomplete">Tải xuống chưa hoàn tất.</string>
     <string name="website_debug">Gỡ lỗi trang web</string>
-    <string name="website_debug_console">Console</string>
+    <string name="website_debug_console">Bảng điều khiển</string>
     <string name="website_debug_pc">Gỡ lỗi qua máy tính (phiên này)</string>
     <string name="website_debug_pc_help">Bật gỡ lỗi USB trên điện thoại và kết nối máy tính đáng tin cậy. Mở chrome://inspect/#devices trong Chrome trên máy tính rồi chọn Inspect.\n\nCông tắc áp dụng cho mọi WebView của Twig và tự tắt khi rời màn hình trang web.</string>
     <string name="website_debug_js_input">JavaScript chạy trên trang hiện tại</string>
@@ -969,7 +969,15 @@
     <string name="website_background_channel">Trang web chạy trong nền</string>
     <string name="website_background_close">Đóng các trang web chạy nền</string>
     <string name="website_background_failed">Không thể giữ các trang web chạy trong nền.</string>
-    <string name="android_data_grant">Cấp quyền truy cập Android/data…</string>
+    <string name="android_data_grant">Cấp quyền truy cập…</string>
+    <string name="android_data_grant_note">Các hạn chế của hệ thống có thể khiến cả hai cách đều không hoạt động. Nếu cả hai đều không được, hãy thử truy cập thư mục bằng root (su) hoặc Shizuku.</string>
+    <string name="android_data_whole">Toàn bộ Android/data</string>
+    <string name="android_data_app">Thư mục của ứng dụng cụ thể…</string>
+    <string name="android_data_detect_empty">Không có ứng dụng nào để chọn.</string>
+    <string name="android_data_filter">Lọc theo tên ứng dụng hoặc tên gói</string>
+    <string name="android_data_existing">Chỉ hiển thị các thư mục dữ liệu đã phát hiện</string>
+    <string name="android_data_existing_note">Android có thể ẩn các thư mục. Tắt tùy chọn này để xem tất cả ứng dụng có thể có thư mục dữ liệu.</string>
+    <string name="android_data_no_matches">Không có ứng dụng phù hợp</string>
     <string name="android_data_wrong_folder">Thư mục này không cấp quyền truy cập vị trí được yêu cầu. Hãy chọn Android/data hoặc thư mục của ứng dụng tương ứng.</string>
     <string name="pin_shortcut_failed">Không thể thêm lối tắt</string>
 
@@ -998,8 +1006,8 @@
     <string name="batch_working">Đang đổi tên…</string>
     <string name="batch_done">Đã đổi tên %d mục</string>
     <string name="batch_failed">Đã đổi tên %1$d mục. Đã dừng: %2$s</string>
-    <string name="twig_shortcut">Twig shortcut</string>
-    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="twig_shortcut">Lối tắt Twig</string>
+    <string name="twig_command_shortcut">Lối tắt lệnh Twig</string>
     <string name="shortcut_pick_node">Chọn thư mục, tệp hoặc trang web rồi xác nhận</string>
     <string name="shortcut_pick_command">Chọn thư mục cục bộ hoặc vị trí SSH (SFTP)</string>
     <string name="cmd_use_privileged">Sử dụng phiên đặc quyền (%1$s)</string>

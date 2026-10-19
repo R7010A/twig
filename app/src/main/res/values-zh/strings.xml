@@ -967,7 +967,7 @@
     <string name="website_download_http_error">下载失败（HTTP %1$d）。</string>
     <string name="website_download_incomplete">文件下载不完整。</string>
     <string name="website_debug">网页调试</string>
-    <string name="website_debug_console">Console</string>
+    <string name="website_debug_console">控制台</string>
     <string name="website_debug_pc">电脑调试（本次会话）</string>
     <string name="website_debug_pc_help">开启手机的 USB 调试并连接可信任的电脑，在电脑 Chrome 中打开 chrome://inspect/#devices，选择 Inspect。\n\n此开关影响 Twig 的所有 WebView；离开网站页面后自动关闭。</string>
     <string name="website_debug_js_input">在当前页面执行的 JavaScript</string>
@@ -1037,8 +1037,8 @@
     <string name="batch_working">正在重命名…</string>
     <string name="batch_done">已重命名 %d 项</string>
     <string name="batch_failed">已重命名 %1$d 项，操作停止：%2$s</string>
-    <string name="twig_shortcut">Twig shortcut</string>
-    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="twig_shortcut">Twig 快捷方式</string>
+    <string name="twig_command_shortcut">Twig 命令快捷方式</string>
     <string name="shortcut_pick_node">选择目录、文件或网站，然后确定</string>
     <string name="shortcut_pick_command">选择本地目录或 SSH（SFTP）位置</string>
     <string name="cmd_use_privileged">使用特权会话（%1$s）</string>

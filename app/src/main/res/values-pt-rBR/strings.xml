@@ -970,7 +970,15 @@
     <string name="website_background_channel">Sites em segundo plano</string>
     <string name="website_background_close">Fechar sites em segundo plano</string>
     <string name="website_background_failed">Não foi possível manter os sites em segundo plano.</string>
-    <string name="android_data_grant">Autorizar acesso a Android/data…</string>
+    <string name="android_data_grant">Autorizar acesso…</string>
+    <string name="android_data_grant_note">As restrições do sistema podem impedir o funcionamento dos dois métodos. Se nenhum funcionar, tente acessar a pasta usando root (su) ou Shizuku.</string>
+    <string name="android_data_whole">Todo o Android/data</string>
+    <string name="android_data_app">Pasta de um aplicativo específico…</string>
+    <string name="android_data_detect_empty">Nenhum aplicativo disponível para seleção.</string>
+    <string name="android_data_filter">Filtrar por nome do aplicativo ou pacote</string>
+    <string name="android_data_existing">Mostrar apenas as pastas de dados detectadas</string>
+    <string name="android_data_existing_note">O Android pode ocultar pastas. Desative esta opção para ver todos os aplicativos candidatos.</string>
+    <string name="android_data_no_matches">Nenhum aplicativo correspondente</string>
     <string name="android_data_wrong_folder">Esta pasta não permite acessar o local solicitado. Selecione Android/data ou a pasta do aplicativo correspondente.</string>
     <string name="pin_shortcut_failed">Não foi possível adicionar o atalho</string>
 
@@ -999,8 +1007,8 @@
     <string name="batch_working">Renomeando…</string>
     <string name="batch_done">%d itens renomeados</string>
     <string name="batch_failed">%1$d itens renomeados. Interrompido: %2$s</string>
-    <string name="twig_shortcut">Twig shortcut</string>
-    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="twig_shortcut">Atalho do Twig</string>
+    <string name="twig_command_shortcut">Atalho de comando do Twig</string>
     <string name="shortcut_pick_node">Escolha uma pasta, arquivo ou site e confirme</string>
     <string name="shortcut_pick_command">Escolha uma pasta local ou um local SSH (SFTP)</string>
     <string name="cmd_use_privileged">Usar sessão privilegiada (%1$s)</string>

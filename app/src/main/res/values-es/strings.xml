@@ -970,7 +970,15 @@
     <string name="website_background_channel">Sitios en segundo plano</string>
     <string name="website_background_close">Cerrar sitios en segundo plano</string>
     <string name="website_background_failed">No se pudieron mantener los sitios en segundo plano.</string>
-    <string name="android_data_grant">Autorizar acceso a Android/data…</string>
+    <string name="android_data_grant">Autorizar acceso…</string>
+    <string name="android_data_grant_note">Las restricciones del sistema pueden impedir que funcione cualquiera de los dos métodos. Si ninguno funciona, intenta acceder a la carpeta mediante root (su) o Shizuku.</string>
+    <string name="android_data_whole">Todo Android/data</string>
+    <string name="android_data_app">Carpeta de una aplicación concreta…</string>
+    <string name="android_data_detect_empty">No hay aplicaciones disponibles para seleccionar.</string>
+    <string name="android_data_filter">Filtrar por nombre de aplicación o paquete</string>
+    <string name="android_data_existing">Mostrar solo las carpetas de datos detectadas</string>
+    <string name="android_data_existing_note">Android puede ocultar carpetas. Desactiva esta opción para ver todas las aplicaciones candidatas.</string>
+    <string name="android_data_no_matches">No hay aplicaciones coincidentes</string>
     <string name="android_data_wrong_folder">Esta carpeta no permite acceder a la ubicación solicitada. Selecciona Android/data o la carpeta de la aplicación correspondiente.</string>
     <string name="pin_shortcut_failed">No se pudo añadir el acceso directo</string>
 
@@ -999,8 +1007,8 @@
     <string name="batch_working">Renombrando…</string>
     <string name="batch_done">%d elementos renombrados</string>
     <string name="batch_failed">%1$d elementos renombrados. Detenido: %2$s</string>
-    <string name="twig_shortcut">Twig shortcut</string>
-    <string name="twig_command_shortcut">Twig command shortcut</string>
+    <string name="twig_shortcut">Acceso directo de Twig</string>
+    <string name="twig_command_shortcut">Acceso directo a un comando de Twig</string>
     <string name="shortcut_pick_node">Elige una carpeta, archivo o sitio web y confirma</string>
     <string name="shortcut_pick_command">Elige una carpeta local o una ubicación SSH (SFTP)</string>
     <string name="cmd_use_privileged">Usar sesión privilegiada (%1$s)</string>
