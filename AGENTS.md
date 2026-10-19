@@ -130,7 +130,7 @@ each write `= null`.
 | `:fs-restic` | Read-only decrypting reader for restic repositories (pure Kotlin) |
 | `:fs-zstd` | zstd JNI: `NativeZstd` (whole-block, restic) + `ZstdInputStream` (streaming, `.zst` archives) |
 | `:git-lite` | Mini git in pure Kotlin (`GitRepo`/`ObjectStore`/`IndexFile`/patience `Diff`) for browsing worktree status and history; worktrees/submodules via `GitLayout` + `WorktreeGitFs` |
-| `:app` | Dual-pane UI, permissions, mutations, viewers, terminal, SAF fallback, WiFi sharing service |
+| `:app` | Dual-pane UI, permissions, mutations, viewers, terminal, SAF fallback, WiFi sharing service, website bookmarks and customization |
 
 ### Key UI classes (`:app`)
 
@@ -144,6 +144,19 @@ each write `= null`.
   The tree always expands/collapses **in place**, it never "enters" a directory.
 - Persistence: connections in `ConnectionStore`, favorites in `FavoritesStore`,
   preferences in `Prefs` — all SharedPreferences.
+- Websites: `WebsiteStore` persists per-site options in `twig_websites`; `WebsiteActivity`
+  opens each bookmark in its own reusable document task using the shared WebView profile.
+  `WebsiteDialogs` edits options; `WebsiteCustomization` scopes JS/CSS, hidden selectors,
+  navigation headers and Basic auth to the saved origin. Headers apply to same-origin
+  GET page navigation, not all resources. `WebsiteRequestBlocker` handles manual resource
+  rules, excluding main-frame navigation. `WebsiteDebugPanel` / `WebsiteElementInspector`
+  provide page tools; `WebsiteRemoteDebug` owns the session-only computer debugging switch.
+  `WebsiteDownloads` / `WebsiteDownloadTask` use Twig's picker and transfer service,
+  defaulting to `Downloads/twig`. Opt-in background sessions use `WebsiteBackgroundService`
+  (see [website background execution](docs/lessons/website-background.md)). Basic credentials
+  and header values use `Secrets`; `.twigbak` includes website configuration with those
+  fields decrypted for export and re-encrypted on import, but excludes WebView cookies
+  and sessions. Import restores the website list as a whole, rather than merging entries.
 - Viewers: `TextViewerActivity` / `HexViewerActivity` / `ImageViewerActivity` /
   `MediaPlayerActivity` (ExoPlayer + ffmpeg software audio decoding).
   Music inside mounted restic repositories and archives uses an in-memory queue

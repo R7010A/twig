@@ -138,6 +138,10 @@ only after their APK cost is measured.
   encoding, inspect bytes in hex, or preview documents and media from the source
   you are browsing. Local and network music can share playlists, with waveform
   seeking, synchronised bilingual lyrics and background playback.
+- **Make websites your own.** Keep a self-hosted dashboard or web player alongside
+  your files, pin it to the home screen, and tinker with its scripts, styles and
+  visible elements using the built-in page tools. Downloads can go straight to
+  a destination picked in Twig. See [Websites and page customization](#websites-and-page-customization).
 
 ---
 
@@ -227,7 +231,7 @@ needs no special case.
 ### Browsing
 
 - **One complete tree.** Top-level nodes are internal storage, root, LAN (SMB),
-  FTP, SSH, WebDAV, S3, document tree and favourites. Archives are expandable
+  FTP, SSH, WebDAV, S3, document tree, favourites, websites and installed apps. Archives are expandable
   file nodes.
 - **Always expand in place, never "enter" a directory.** The current directory is
   the last one you tapped, and it is the target for new folders, copies and moves.
@@ -483,10 +487,13 @@ Twig can find it and save it as a connection.
   since reconnecting there does need the saved (encrypted) credentials.
 - **Fingerprint unlock** through the platform `BiometricPrompt` (not androidx.biometric —
   zero APK cost) exists alongside the master password, which stays the root key.
-- **Config backup** (`.twigbak`): connections and settings as JSON, optionally encrypted
+- **Config backup** (`.twigbak`): connections, settings and website bookmarks (including
+  scripts, styles and rules) as JSON, optionally encrypted
   with a separate export password, and written through Twig's own directory picker — so a
   backup can go straight to SMB, WebDAV or S3. Import merges rather than replaces, and
-  tokens, host keys and the data key are never exported.
+  tokens, host keys and the data key are never exported. Website bookmark lists are
+  restored as a whole; their Basic credentials and headers are re-encrypted for the
+  destination device. WebView cookies and login sessions are not included.
 
 ---
 
@@ -503,7 +510,7 @@ Twig can find it and save it as a connection.
 | `:fs-restic` | restic repository reader (pure Kotlin) |
 | `:fs-zstd` | `NativeZstd` — zstd via JNI |
 | `:git-lite` | Miniature git in pure Kotlin |
-| `:app` | Dual-pane UI, viewers, terminal, git views, treemap, Wi-Fi sharing |
+| `:app` | Dual-pane UI, viewers, terminal, git views, treemap, Wi-Fi sharing, websites and page customization |
 
 ---
 

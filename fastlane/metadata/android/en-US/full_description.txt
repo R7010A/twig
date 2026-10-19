@@ -20,6 +20,8 @@ A per-device download is around 6.7 MB — including an FFmpeg audio decoder, an
 <li>A git client written from scratch: status, history, side-by-side diff, worktrees and submodules, on local and remote repositories</li>
 <li>SSH terminal with multiple sessions, plus a local shell</li>
 <li>Wi-Fi sharing: Twig becomes an HTTP and WebDAV server, so a desktop can mount it</li>
+<li>Website bookmarks with home-screen shortcuts, per-site display settings, custom JavaScript/CSS, element hiding, manual resource blocking and page debugging</li>
+<li>Website downloads default to Downloads/twig; optional background running uses a foreground service with a notification</li>
 <li>Privileged access through root or Shizuku, as a fallback for the local filesystem rather than a separate tree</li>
 </ul>
 
@@ -36,6 +38,6 @@ A per-device download is around 6.7 MB — including an FFmpeg audio decoder, an
 
 The F-Droid build is the <i>libre</i> flavor and is entirely free software. It does not include RAR support: the only practical RAR library for Android carries the UnRAR license, whose use restriction makes it non-free. Everything else is identical to the developer's own builds.
 
-Twig contains no advertising, no analytics and no telemetry, and uses the network only for the connections you configure yourself.
+Twig includes no advertising, no analytics and no telemetry. Network access follows your actions: configured connections, opened websites and their resources, downloads and sharing. Websites may load their own ads or trackers.
 
 Licensed under GPL-3.0.
