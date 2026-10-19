@@ -4,6 +4,13 @@
 > shared conventions are in [AGENTS.md](../../AGENTS.md); the other sections live
 > beside this file in [docs/lessons/](.).
 
+- **Batch-rename preview columns shifted until scrolling** (2026-10-19): top alignment
+  alone did not fix weighted columns during the dialog's initial `AT_MOST` measure.
+  `BatchRenameDialog.NameColumns` divides the available width explicitly for both
+  headers and rows. `BatchRenameTest` covers first measurement and rebound long names.
+  Rename preflight uses tree parents for opaque URIs and rejects failed listings,
+  conflicting destinations and selected ancestors before changing any names.
+
 - **Fast pane swipes also clicked a node (2026-10-16)**: the gesture listener switched
   panes but returned false, leaving the row's click active. Intercept recognized swipes
   through release; check UP too when no MOVE arrives. Property cards also classify UP,

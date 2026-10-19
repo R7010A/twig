@@ -190,9 +190,6 @@ and the app can be built in trimmed configurations by dropping modules.
 
 ## Features
 
-This list covers the current source. Android/data authorization, Activity home-screen
-shortcuts, multi-file sharing and selection properties are available in the
-[1.14 preview](https://github.com/dev2ex/twig/releases/tag/v1.14.0-beta.3).
 
 ### Storage sources
 
@@ -237,6 +234,10 @@ needs no special case.
 - Multi-select, cross-pane copy and move with progress and cancellation, mkdir,
   rename, recursive delete, clipboard-style paste, and sharing multiple selected
   files through the system chooser.
+- **Batch rename** selected files and folders with live original/new-name previews.
+  Replace text or use regular expressions, choose case sensitivity, and target names,
+  extensions or both. Add numbering before or after names with a configurable start
+  and zero padding. Duplicate and existing destination names are checked before renaming.
 - **Favourites** and **recent locations** store *how to get there* (connection
   label + path), not a session-scoped scheme, so they survive restarts.
 - **Restores your last position** across restarts, level by level, releasing

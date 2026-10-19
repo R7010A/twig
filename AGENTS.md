@@ -545,7 +545,7 @@ add its symptom here.
   spinner that never stops, the whole list flickering when you tick a box, collapsing
   Apps / Installed crashing after an app APK was opened as an archive and restored,
   the Properties ripple disappearing on the first tap with folder counts enabled,
-  fast pane swipes also clicking a node.
+  fast pane swipes also clicking a node, batch-rename preview columns shifting until scrolling.
 - **[Text handling and editing](docs/lessons/text-handling.md)** — one decoding entry
   point (`TextCodec`), where order is priority; write back in the encoding the file was
   read with and never silently substitute `?`.
