@@ -12,7 +12,7 @@ object Prefs {
 
     private fun sp(ctx: Context) = ctx.getSharedPreferences(FILE, Context.MODE_PRIVATE)
 
-    /** Pane transitions are opt-in and apply to both swipes and switch-button taps. */
+    /** Opt-in animations for pane switching and scrolling to the top. */
     fun swipeAnimation(ctx: Context): Boolean = sp(ctx).getBoolean("swipe_animation", false)
 
     fun setSwipeAnimation(ctx: Context, on: Boolean) {
