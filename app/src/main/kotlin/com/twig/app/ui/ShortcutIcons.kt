@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.IconCompat
@@ -31,6 +32,11 @@ object ShortcutIcons {
     fun of(ctx: Context, @DrawableRes res: Int): IconCompat {
         val d = AppCompatResources.getDrawable(ctx, res)
             ?: return IconCompat.createWithResource(ctx, res)
+        return of(ctx, d)
+    }
+
+    /** Installed Activity icons also need to be rendered before passing them to another app. */
+    fun of(ctx: Context, d: Drawable): IconCompat {
         val size = (ctx.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager)
             ?.launcherLargeIconSize?.takeIf { it > 0 } ?: FALLBACK_PX
         val bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)

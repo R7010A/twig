@@ -657,6 +657,7 @@
     <string name="info_section_image">Görüntü</string>
     <string name="info_section_media">Medya</string>
     <string name="info_section_app">Uygulama</string>
+    <string name="info_selected">Seçili</string>
     <string name="info_name">Ad</string>
     <string name="info_path">Yol</string>
     <string name="info_copied">Kopyalandı</string>
@@ -971,4 +972,7 @@
     <string name="website_background_channel">Arka planda çalışan web siteleri</string>
     <string name="website_background_close">Arka plan sitelerini kapat</string>
     <string name="website_background_failed">Web siteleri arka planda çalışır tutulamadı.</string>
+    <string name="android_data_grant">Android/data erişimine izin ver…</string>
+    <string name="android_data_wrong_folder">Bu klasör, istenen konuma erişim sağlamıyor. Android/data veya ilgili uygulamanın klasörünü seçin.</string>
+    <string name="pin_shortcut_failed">Kısayol eklenemedi</string>
 </resources>

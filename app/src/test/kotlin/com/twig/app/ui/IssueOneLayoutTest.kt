@@ -23,7 +23,7 @@ class IssueOneLayoutTest {
         val activity = Robolectric.buildActivity(MainActivity::class.java).get()
         val ctx = ContextThemeWrapper(activity, R.style.Theme_Twig)
         val strip = ActionStripBinding.inflate(LayoutInflater.from(ctx))
-        ReflectionHelpers.callInstanceMethod<Void>(activity, "applyStripTop",
+        ReflectionHelpers.callInstanceMethod<Void>(activity, "applyStripState",
             ReflectionHelpers.ClassParameter.from(ActionStripBinding::class.java, strip),
             ReflectionHelpers.ClassParameter.from(Boolean::class.javaPrimitiveType, true))
         val top = strip.asTop

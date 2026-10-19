@@ -657,6 +657,7 @@
     <string name="info_section_image">이미지</string>
     <string name="info_section_media">미디어</string>
     <string name="info_section_app">앱</string>
+    <string name="info_selected">선택됨</string>
     <string name="info_name">이름</string>
     <string name="info_path">경로</string>
     <string name="info_copied">복사됨</string>
@@ -971,4 +972,7 @@
     <string name="website_background_channel">백그라운드에서 실행 중인 웹사이트</string>
     <string name="website_background_close">백그라운드 웹사이트 닫기</string>
     <string name="website_background_failed">웹사이트를 백그라운드에서 계속 실행할 수 없습니다.</string>
+    <string name="android_data_grant">Android/data 접근 허용…</string>
+    <string name="android_data_wrong_folder">이 폴더로는 요청한 위치에 접근할 수 없습니다. Android/data 또는 해당 앱의 폴더를 선택하세요.</string>
+    <string name="pin_shortcut_failed">바로가기를 추가할 수 없습니다</string>
 </resources>

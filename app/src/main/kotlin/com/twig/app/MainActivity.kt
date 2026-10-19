@@ -212,6 +212,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
             if (uri != null) {
                 val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 runCatching { contentResolver.takePersistableUriPermission(uri, flags) }
+                AndroidDataAccess.instance?.refresh()
                 refreshTrees()
                 activePane()?.viewModel?.expandGroup("saf")
             }
@@ -228,9 +229,15 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         // Portrait's "up" on the left of the title bar: same action as the strip's as_up
         // (landscape has no Toolbar, see applyLayoutMode) — placed here because one-handed
         // use reaches the top-left more easily than the right-side action strip
-        b.toolbar.setNavigationIcon(R.drawable.ic_up)
+        b.toolbar.setNavigationIcon(R.drawable.ic_parent_directory)
         b.toolbar.setNavigationContentDescription(R.string.strip_up)
         b.toolbar.setNavigationOnClickListener { activePane()?.actionUp() }
+        for (i in 0 until b.toolbar.childCount) {
+            val child = b.toolbar.getChildAt(i)
+            if (child is android.widget.ImageButton && child.drawable === b.toolbar.navigationIcon) {
+                child.setOnLongClickListener { activePane()?.actionScrollToTop(); true }
+            }
+        }
 
         TwigApp.registerBaseFs(this) // Base sources (local / archive / SAF / apps / content://)
 
@@ -376,7 +383,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         activePane()?.let { p -> com.twig.app.ui.Transfers.consumeFinished()?.let { p.finishTransfer(it) } }
         invalidateOptionsMenu() // terminal sessions may have been added/removed in another Activity; refresh the entry's visibility
         val land = isLandscape()
-        for (s in listOf(b.stripMid, b.stripLeft, b.stripRight)) applyStripTop(s, land)
+        for (s in listOf(b.stripMid, b.stripLeft, b.stripRight)) applyStripState(s, land)
         // Sharing may have been turned off via the notification bar's "stop" button (the UI wasn't even present); sync once on returning to foreground
         syncShareIcon()
         WebShare.onStateChanged = { runOnUiThread { syncShareIcon() } }
@@ -446,6 +453,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
     private fun wireStrip(s: ActionStripBinding) {
         s.sizeIconsLikeRows(this)
         s.asUp.setOnClickListener { activePane()?.actionUp() }
+        s.asUp.setOnLongClickListener { activePane()?.actionScrollToTop(); true }
         s.asSort.setOnClickListener { showSortDialog() }
         s.asRefresh.setOnClickListener { activePane()?.actionRefresh() }
         s.asNewFolder.setOnClickListener { activePane()?.actionNewFolder() }
@@ -514,7 +522,10 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         for (s in listOf(b.stripMid, b.stripLeft, b.stripRight)) s.asShareIcon.setImageResource(res)
     }
 
-    private fun applyStripTop(s: ActionStripBinding, land: Boolean) {
+    private fun applyStripState(s: ActionStripBinding, land: Boolean) {
+        val direction = if (activeIndex == 0) 1f else -1f
+        s.asMoveIcon.scaleX = direction
+        s.asCompareIcon.scaleX = direction
         s.asTop.visibility = if (land) View.VISIBLE else View.GONE
         s.asTopDivider.visibility = if (land) View.VISIBLE else View.GONE
         if (!land) return
@@ -595,7 +606,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         // Landscape's height can't fit a full single column, so the strip becomes two columns (width doubles)
         for (s in listOf(b.stripMid, b.stripLeft, b.stripRight)) {
             applyStripColumns(s, land)
-            applyStripTop(s, land)
+            applyStripState(s, land)
         }
         b.panes.showPane(activeIndex, animateSwitch && !land)
         paneAt(0)?.setActive(activeIndex == 0)

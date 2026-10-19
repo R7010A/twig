@@ -91,6 +91,7 @@ class SlowExpandRaceTest {
     private fun row(name: String) =
         vm.state.value.rows.filterIsInstance<PaneViewModel.FileNode>().single { it.file.name == name }
 
+
     private fun failingFavorite(): PaneViewModel.FavoriteNode {
         val conn = SavedConnection(type = "sftp", host = "favorite-failure.test", user = "u")
         ConnectionStore.save(app, conn)

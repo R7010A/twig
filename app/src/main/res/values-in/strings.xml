@@ -657,6 +657,7 @@
     <string name="info_section_image">Gambar</string>
     <string name="info_section_media">Media</string>
     <string name="info_section_app">Aplikasi</string>
+    <string name="info_selected">Dipilih</string>
     <string name="info_name">Nama</string>
     <string name="info_path">Jalur</string>
     <string name="info_copied">Disalin</string>
@@ -971,4 +972,7 @@
     <string name="website_background_channel">Situs berjalan di latar belakang</string>
     <string name="website_background_close">Tutup situs latar belakang</string>
     <string name="website_background_failed">Tidak dapat mempertahankan situs di latar belakang.</string>
+    <string name="android_data_grant">Izinkan akses ke Android/data…</string>
+    <string name="android_data_wrong_folder">Folder ini tidak memberikan akses ke lokasi yang diminta. Pilih Android/data atau folder aplikasi yang sesuai.</string>
+    <string name="pin_shortcut_failed">Tidak dapat menambahkan pintasan</string>
 </resources>

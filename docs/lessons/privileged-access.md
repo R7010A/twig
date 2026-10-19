@@ -81,6 +81,11 @@
   Android 16), so the "Root directory" node is empty by nature and the privileged fallback is
   exactly what it is for — do not assume `/` is readable by everyone and call it "elevating for
   nothing".
+  Direct children can still be readable: an ordinary targetSdk 34 app on Android 16 could
+  list `/system` and read `/system/etc/hosts`, while `/system/bin` remained denied (2026-10-18).
+  `PaneViewModel` offers checked, readable known directories when `/` cannot be enumerated.
+  Keep this fallback in the browsing UI: a partial list must never masquerade as a complete
+  filesystem listing for copies, comparisons or recursive scans.
 - **Diagnostic logging must distinguish "non-zero exit = something went wrong" from "non-zero
   exit = the answer"** (`exec(quiet=)`): `[ -e path ]` returns 1 when the file does not exist,
   and `exists()` is on the batch-copy hot path, so one line per missing target drowns logcat;

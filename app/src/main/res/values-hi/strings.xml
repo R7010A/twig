@@ -657,6 +657,7 @@
     <string name="info_section_image">छवि</string>
     <string name="info_section_media">मीडिया</string>
     <string name="info_section_app">ऐप</string>
+    <string name="info_selected">चयनित</string>
     <string name="info_name">नाम</string>
     <string name="info_path">पथ</string>
     <string name="info_copied">कॉपी हुआ</string>
@@ -971,4 +972,7 @@
     <string name="website_background_channel">बैकग्राउंड में चल रही वेबसाइट</string>
     <string name="website_background_close">बैकग्राउंड वेबसाइट बंद करें</string>
     <string name="website_background_failed">वेबसाइट को बैकग्राउंड में चालू नहीं रख सके।</string>
+    <string name="android_data_grant">Android/data का ऐक्सेस दें…</string>
+    <string name="android_data_wrong_folder">इस फ़ोल्डर से अनुरोधित स्थान का ऐक्सेस नहीं मिलता। Android/data या संबंधित ऐप का फ़ोल्डर चुनें।</string>
+    <string name="pin_shortcut_failed">शॉर्टकट नहीं जोड़ा जा सका</string>
 </resources>

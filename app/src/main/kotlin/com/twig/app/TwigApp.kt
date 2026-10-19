@@ -56,6 +56,7 @@ class TwigApp : Application() {
             FsRegistry.register(SingleFileSystem.zstd { com.twig.fs.zstd.ZstdInputStream(it) })
             rarFileSystem()?.let { FsRegistry.register(it) } // the libre flavor has no RAR, see RarSupport.kt
             FsRegistry.register(SafFileSystem(app))
+            AndroidDataAccess.install(app)
             FsRegistry.register(AppsFileSystem(app))
             FsRegistry.register(ShareSourceFileSystem(app))
         }

@@ -1,6 +1,7 @@
 package com.twig.app
 
 import android.content.ActivityNotFoundException
+import android.content.ClipData
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -165,9 +166,26 @@ object OpenFiles {
 
     /** Share to another app (also via [StreamProvider] for streamed authorization, no whole-file cache). */
     fun share(context: Context, file: XFile) {
-        val send = Intent(Intent.ACTION_SEND).apply {
-            type = mimeOf(file.name)
-            putExtra(Intent.EXTRA_STREAM, StreamProvider.uriFor(context, file))
+        share(context, listOf(file))
+    }
+
+    /** Multiple streams keep their individual URI grants, including across backends. */
+    fun share(context: Context, files: List<XFile>) {
+        require(files.isNotEmpty() && files.none { it.isDir })
+        val uris = ArrayList(files.map { StreamProvider.uriFor(context, it) })
+        val types = files.map { mimeOf(it.name) }.distinct()
+        val majorTypes = types.map { it.substringBefore('/') }.distinct()
+        val send = Intent(if (files.size == 1) Intent.ACTION_SEND else Intent.ACTION_SEND_MULTIPLE).apply {
+            type = when {
+                types.size == 1 -> types.single()
+                majorTypes.size == 1 -> "${majorTypes.single()}/*"
+                else -> "*/*"
+            }
+            if (files.size == 1) putExtra(Intent.EXTRA_STREAM, uris.single())
+            else putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+            clipData = ClipData.newRawUri("", uris.first()).apply {
+                uris.drop(1).forEach { addItem(ClipData.Item(it)) }
+            }
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         context.startActivity(Intent.createChooser(send, context.getString(R.string.action_share)))

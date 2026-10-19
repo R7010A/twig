@@ -6,6 +6,7 @@ import android.os.StatFs
 import android.provider.DocumentsContract
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.twig.app.AndroidDataAccess
 import com.twig.app.AppsFileSystem
 import com.twig.app.CompareSession
 import com.twig.app.CompareStore
@@ -135,8 +136,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /** Per-group action item, e.g. "Add server…". */
-    data class ActionNode(val id: String, val label: String) : Node {
-        override val depth: Int get() = 1
+    data class ActionNode(val id: String, val label: String, override val depth: Int = 1) : Node {
         override val key: String get() = "a:$id"
     }
 
@@ -187,8 +187,9 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         val hashing: Boolean = false,
         val dirStat: DirStat? = null,
         val scanning: Boolean = false,
+        val selection: Boolean = false,
     ) : Node {
-        override val key: String get() = "info:${fileKey(file)}"
+        override val key: String get() = if (selection) "info:selection" else "info:${fileKey(file)}"
     }
 
     /**
@@ -255,6 +256,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         val restoring: Boolean = false,
         /** Preferred target row when restoring position (the file last opened); when it doesn't resolve, the UI falls back to [currentKey]. */
         val scrollKey: String? = null,
+        val dataAccessFor: XFile? = null,
     )
 
     // ---- State ----
@@ -407,6 +409,8 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
     private val confirmedMaterialize = HashSet<String>()
     /** File key (fileKey) for which the properties card is open; the card content is cached and dropped when closed/folded. */
     private val infoOpen = LinkedHashSet<String>()
+    private data class SelectionInfo(val anchor: String, val targets: List<XFile>, val scan: DirScanState)
+    private var selectionInfo: SelectionInfo? = null
     private val infoCache = HashMap<String, com.twig.app.FileInfo.Details>()
     private val infoLoads = HashMap<String, kotlinx.coroutines.Job>()
     /** Currently selected tab on the card, already-computed hashes, keys currently computing. */
@@ -861,6 +865,11 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
             is WebsiteNode -> Unit // Handled by Fragment (opens the website).
             is ActionNode -> Unit // Handled by Fragment.
             is InfoNode -> { // The ✕ button
+                if (node.selection) {
+                    closeSelectionInfo()
+                    rebuild()
+                    return
+                }
                 val key = fileKey(node.file)
                 infoOpen.remove(key)
                 stopDirScan(key)
@@ -901,6 +910,16 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Rebuild the tree only (groups re-read saved connections / SAF grants), without re-listing directories. */
     fun refreshTree() = rebuild()
+
+    fun dismissDataAccessRequest() { _state.value = _state.value.copy(dataAccessFor = null) }
+
+    fun revealGrantedDataFolder(file: XFile) {
+        // Cached parent listings may predate this grant (and must not keep hiding the new entry).
+        val root = file.path.substringBefore("/Android/data") + "/Android/data"
+        children.keys.filter { it.startsWith("f:file:$root") }.forEach { children.remove(it) }
+        DirectoryCounts.invalidate(XFile("file", root, true))
+        revealPath(file)
+    }
 
     /**
      * When non-null the tree only keeps this one root — used by the picker's
@@ -1640,6 +1659,38 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
      */
     fun toggleInfo(n: FileNode) = toggleInfo(n.file)
 
+    /** Snapshot the selection and attach its aggregate properties above the first selected row. */
+    fun toggleSelectionInfo(targets: List<XFile>, anchorKey: String? = null) {
+        val selectedKeys = targets.mapTo(HashSet()) { fileKey(it) }
+        val anchor = _state.value.rows.filterIsInstance<FileNode>()
+            .firstOrNull { fileKey(it.file) in selectedKeys && (anchorKey == null || it.key == anchorKey) } ?: return
+        val previous = selectionInfo
+        closeSelectionInfo()
+        if (previous?.targets == targets && previous.anchor == anchor.key) {
+            rebuild()
+            return
+        }
+        val scan = DirScanState()
+        selectionInfo = SelectionInfo(anchor.key, targets.toList(), scan)
+        rebuild()
+        scan.job = viewModelScope.launch {
+            val start = android.os.SystemClock.elapsedRealtime()
+            scanSelectionStat(targets, io).collect {
+                scan.stat = it
+                rebuild()
+            }
+            val left = DIR_SCAN_MIN_SPIN_MS - (android.os.SystemClock.elapsedRealtime() - start)
+            if (left > 0) kotlinx.coroutines.delay(left)
+            scan.scanning = false
+            rebuild()
+        }
+    }
+
+    private fun closeSelectionInfo() {
+        selectionInfo?.scan?.job?.cancel()
+        selectionInfo = null
+    }
+
     /** Same as above but takes a file directly (favorite rows have no matching [FileNode]; the menu's "Properties" entry uses this). */
     fun toggleInfo(file: XFile) {
         val key = fileKey(file)
@@ -1725,7 +1776,8 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /** For unit tests only: count of in-flight directory-recursive stat scans (must drop to zero after the card is closed/collapsed). */
-    internal fun activeDirScans(): Int = dirScan.count { it.value.job?.isActive == true }
+    internal fun activeDirScans(): Int = dirScan.count { it.value.job?.isActive == true } +
+        if (selectionInfo?.scan?.job?.isActive == true) 1 else 0
 
     /**
      * Switch the properties card's tab. Switching to the "Hash" tab (index == section
@@ -1733,6 +1785,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
      * to tap "Compute" (a whole-file read — bandwidth/time is up to the user).
      */
     fun selectInfoTab(n: InfoNode, idx: Int) {
+        if (n.selection) return // Aggregate properties have only the Basic tab, with no single-file hash.
         val key = fileKey(n.file)
         infoTab[key] = idx
         val isHash = !n.file.isDir && idx == (n.details?.sections?.size ?: 0)
@@ -1744,6 +1797,7 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Manual "compute hash" button on the Hash tab (network files). */
     fun computeHash(n: InfoNode) {
+        if (n.selection) return
         val key = fileKey(n.file)
         if (!hashCache.containsKey(key) && !hashing.contains(key)) startHash(key, n.file)
         rebuild()
@@ -2001,7 +2055,13 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                             }
                             rebuild()
                         },
-                        { rebuild(); if (mine) emitFailure(it, n.file) },
+                        {
+                            // Keep the authorization action reachable even when Android hides data's contents.
+                            val keepOpen = mine && AndroidDataAccess.isRoot(n.file)
+                            if (keepOpen) accordionExpand(key)
+                            rebuild()
+                            if (mine && !keepOpen) emitFailure(it, n.file)
+                        },
                     )
                 }
             }
@@ -2435,7 +2495,23 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
      */
     private fun listChildren(file: XFile, rowKey: String? = null): Listing =
         if (file.isDir) {
-            val kids = FsRegistry.of(file).list(file)
+            val fs = FsRegistry.of(file)
+            val listed = runCatching { fs.list(file) }
+            // Android can deny enumerating / while allowing direct access to known children.
+            // These are navigation shortcuts only: filesystem listings must still fail for
+            // copy, comparison and recursive scans rather than pretending this is a complete root.
+            val rootShortcuts = if (file.scheme == "file" && file.path == "/" && listed.getOrNull().isNullOrEmpty()) {
+                listOf("/system", "/vendor", "/product", "/system_ext", "/apex", "/odm", "/oem", "/proc", "/mnt", "/storage")
+                    .mapNotNull { path -> runCatching { fs.stat(path) }.getOrNull()?.takeIf { it.isDir && it.canRead } }
+            } else emptyList()
+            val granted = if (AndroidDataAccess.isRoot(file)) AndroidDataAccess.instance?.let { access ->
+                (listOfNotNull(access.ownFolder(file)) + access.grantedFolders(file)).distinctBy { it.path }
+            }.orEmpty() else emptyList()
+            val kids = when {
+                rootShortcuts.isNotEmpty() -> rootShortcuts
+                granted.isNotEmpty() -> listed.getOrDefault(emptyList()).filter { entry -> granted.none { it.name == entry.name } } + granted
+                else -> listed.getOrThrow()
+            }
             Listing(
                 children = kids,
                 resticRepo = if (ResticRepo.looksLikeRepo(kids)) fileKey(file) else null,
@@ -2673,8 +2749,18 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                 str(R.string.apps_root),
             )
         }
+        selectionInfo?.let { info ->
+            val index = rows.indexOfFirst { it.key == info.anchor }
+            if (index < 0) closeSelectionInfo()
+            else {
+                val anchor = rows[index] as FileNode
+                rows.add(index, InfoNode(anchor.file, anchor.depth + 1,
+                    com.twig.app.FileInfo.selection(getApplication(), info.targets, info.scan.stat),
+                    scanning = info.scan.scanning, selection = true))
+            }
+        }
         // Auto-close and discard the cache of info cards whose containing directory was collapsed (so no card row was built).
-        val liveInfo = rows.mapNotNullTo(HashSet()) { (it as? InfoNode)?.let { n -> fileKey(n.file) } }
+        val liveInfo = rows.mapNotNullTo(HashSet()) { (it as? InfoNode)?.takeUnless { it.selection }?.let { n -> fileKey(n.file) } }
         infoOpen.retainAll(liveInfo)
         infoCache.keys.retainAll(infoOpen)
         infoLoads.keys.toList().forEach { key -> if (key !in infoOpen) infoLoads.remove(key)?.cancel() }
@@ -2731,6 +2817,10 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                 addFile(rows, XFile(s, "/", isDir = true, displayName = live, canWrite = false), depth + 1)
             }
             visible(children[key]).forEach { addFile(rows, it, depth + 1, keyPrefix = keyPrefix) }
+            if (AndroidDataAccess.isRoot(file)) {
+                rows += ActionNode(AndroidDataAccess.ACTION_PREFIX + file.path,
+                    str(R.string.android_data_grant), depth + 1)
+            }
             if (resticRepos.contains(fileKey(file))) addRestic(rows, file, depth + 1)
         }
     }
@@ -2885,7 +2975,8 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                 val docUri = DocumentsContract.buildDocumentUriUsingTree(perm.uri, docId)
                 // The document id can be "primary:DCIM" or a real path; last-segment cut on both separators.
                 val tail = docId.substringAfterLast('/').substringAfterLast(':').ifEmpty { docId }
-                val file = XFile("saf", docUri.toString(), isDir = true, displayName = tail)
+                val file = XFile("saf", docUri.toString(), isDir = true, displayName = tail,
+                    canRead = perm.isReadPermission, canWrite = perm.isWritePermission)
                 Triple(file, SafFileSystem.providerApp(app, file)?.label, tail)
             }.getOrNull()
         }
@@ -2956,6 +3047,8 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                 passwordFor = file,
                 error = if (t.wrong) str(R.string.archive_wrong_pw) else null,
             )
+        } else if (file != null && AndroidDataAccess.supports(file)) {
+            _state.value = _state.value.copy(dataAccessFor = file)
         } else {
             emitError(t.message)
         }

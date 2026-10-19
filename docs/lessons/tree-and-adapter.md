@@ -257,9 +257,15 @@
   Permitting short-edge cutouts and drawing the surround in the toolbar color was
   insufficient: adding the cutout's safe top inset recreated the same empty band in
   the app itself. In status-bar-only fullscreen, MainActivity lays out into that top
-  area and does not add top cutout padding. Side cutouts, navigation and IME insets
+  area and does not add cutout padding. Navigation and IME insets
   are still respected; the navigation bar remains visible. Do not substitute the
   hidden status bar's height or apply another copy of the insets in descendants.
   Leaving fullscreen restores the system-fitted layout and original background/padding.
   `StatusBarFullscreenTest` checks the toolbar's actual top position and API 24/28
   compatibility. Vendor cutout behavior still needs a device check.
+
+- **Landscape fullscreen still left an empty cutout strip (2026-10-18)**: the window
+  already permitted short-edge cutouts, but the shared root-padding policy kept their
+  left/right safe insets. Fullscreen must ignore cutout insets on every edge, retaining
+  navigation and IME insets. `StatusBarFullscreenTest` checks content bounds with a
+  cutout on either side and a narrower navigation inset on the same edge.

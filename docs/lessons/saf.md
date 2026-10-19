@@ -4,6 +4,20 @@
 > shared conventions are in [AGENTS.md](../../AGENTS.md); the other sections live
 > beside this file in [docs/lessons/](.).
 
+- **Android/data may allow probing a known child while denying enumeration** (2026-10-19):
+  the authorization dialog lists user-installed app paths and opens SAF at the exact child.
+  Existence checks can fail, so probing is an optional filter, off by default.
+  These are authorization candidates, never a complete filesystem listing.
+  Twig's own external data directory is shown by default and keeps direct local access.
+
+- **Local-to-SAF routes can return SAF entries** (2026-10-18): Android/data grants keep
+  local directory roots in the tree, but their children and newly created files carry document
+  URIs. `SafeWrite` keeps the destination filesystem while writing, deleting and renaming
+  those handles, so the local route must also dispatch by the returned entry's scheme.
+  Otherwise a copy creates its document but writes to a bogus `content:` local path.
+  Only the UI merges individually granted folders into an inaccessible parent listing;
+  filesystem operations must still report the inaccessible parent as unknown, not empty.
+
 - **Files in a SAF tree must not be treated as outsiders (★ 2026-08-26)**: the user's words were
   "SAF feels like a completely separate world" — music did not open in the music player, images
   could only be viewed one at a time, and there were no thumbnails. The three root causes are

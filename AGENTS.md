@@ -492,7 +492,7 @@ add its symptom here.
   *Explains*: a command that hangs until timeout, `/sdcard` listing as empty, "the dialog
   has no options at all", a root process left alive after an upgrade, a file that vanished
   when moved into a place even root could not write, a root terminal that exits with code 1
-  the moment it opens and prints nothing.
+  the moment it opens and prints nothing, `/system` being readable while `/` cannot be listed.
 - **[RAR and F-Droid](docs/lessons/rar-and-fdroid.md)** — `full` and `libre` differ in RAR
   **alone**; check the scheme via `Archives.RAR_SCHEME`, never `RarFileSystem.SCHEME`; the
   verification criterion is the dependency graph, not that it compiles. F-Droid's scanner reads
@@ -517,7 +517,8 @@ add its symptom here.
   slice it: ask the tree who contains a row instead of computing a parent. The grant is
   persistable, so SAF entries are *local* (real fd, pread), not outsiders.
   *Explains*: music opening in the single-track player, no thumbnails or PDF previews, the
-  green highlight disappearing on "Up", "why is there no *go to the containing folder* here".
+  green highlight disappearing on "Up", "why is there no *go to the containing folder* here",
+  a local-to-SAF copy creating an empty document but writing to a bogus local path.
 - **[Removable storage](docs/lessons/removable-storage.md)** — `getStorageVolumes()` does
   return invisible volumes, the event channels do not fire for them (the foreground UI
   polls), filter by `isPrimary` rather than `isRemovable`, and `/mnt/media_rw` needs
@@ -541,7 +542,7 @@ add its symptom here.
   accordionExpand" ≠ "do not expand"; writes are gated by `isMutable()` /
   `isWritableDir()` at six entry points; selection changes use payloads, never
   `notifyDataSetChanged`.
-  *Explains*: a fullscreen empty band above the toolbar on a cutout screen, a landscape Terminal button missing without active sessions, the same archive empty in one place, a directory that closes itself, a
+  *Explains*: a fullscreen empty band above the toolbar or beside the landscape cutout, a landscape Terminal button missing without active sessions, the same archive empty in one place, a directory that closes itself, a
   spinner that never stops, the whole list flickering when you tick a box, collapsing
   Apps / Installed crashing after an app APK was opened as an archive and restored,
   the Properties ripple disappearing on the first tap with folder counts enabled,

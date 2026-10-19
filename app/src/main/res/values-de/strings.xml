@@ -657,6 +657,7 @@
     <string name="info_section_image">Bild</string>
     <string name="info_section_media">Medien</string>
     <string name="info_section_app">App</string>
+    <string name="info_selected">Ausgewählt</string>
     <string name="info_name">Name</string>
     <string name="info_path">Pfad</string>
     <string name="info_copied">Kopiert</string>
@@ -971,4 +972,7 @@
     <string name="website_background_channel">Websites im Hintergrund</string>
     <string name="website_background_close">Hintergrund-Websites schließen</string>
     <string name="website_background_failed">Websites können nicht im Hintergrund weiterlaufen.</string>
+    <string name="android_data_grant">Zugriff auf Android/data erlauben…</string>
+    <string name="android_data_wrong_folder">Dieser Ordner gewährt keinen Zugriff auf den gewünschten Speicherort. Wähle Android/data oder den entsprechenden App-Ordner.</string>
+    <string name="pin_shortcut_failed">Verknüpfung konnte nicht hinzugefügt werden</string>
 </resources>

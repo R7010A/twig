@@ -85,6 +85,24 @@ class WebsiteDownloadTest {
         companion object { fun create(address: InetSocketAddress, ignored: Int) = HttpServer(address) }
     }
 
+    /** Model a distinct destination scheme, translating every delegated entry back to the local backend. */
+    private open class DestinationFs : FileSystem {
+        private val local = LocalFileSystem()
+        override val scheme = "download-test"
+        override val displayName = "Download test"
+        private fun local(file: XFile) = file.copy(scheme = "file")
+        private fun remote(file: XFile) = file.copy(scheme = scheme)
+        override fun root() = remote(local.root())
+        override fun resolve(path: String) = remote(local.resolve(path))
+        override fun list(dir: XFile) = local.list(local(dir)).map(::remote)
+        override fun openInput(file: XFile) = local.openInput(local(file))
+        override fun openOutput(file: XFile, append: Boolean) = local.openOutput(local(file), append)
+        override fun mkdir(parent: XFile, name: String) = remote(local.mkdir(local(parent), name))
+        override fun delete(file: XFile) = local.delete(local(file))
+        override fun rename(file: XFile, newName: String) = remote(local.rename(local(file), newName))
+        override fun exists(file: XFile) = local.exists(local(file))
+    }
+
     @get:Rule val temporary = TemporaryFolder()
     private val app: Application = ApplicationProvider.getApplicationContext()
     private lateinit var server: HttpServer
@@ -179,14 +197,12 @@ class WebsiteDownloadTest {
 
     @Test fun `transfer sessions stream to the selected filesystem and report completion`() {
         server.createContext("/file") { reply(it, "remote destination") }
-        FsRegistry.register(object : FileSystem by LocalFileSystem() {
-            override val scheme = "download-test"
-        })
+        FsRegistry.register(DestinationFs())
         val destination = directory.copy(scheme = "download-test")
         val session = Transfers.Session(Transfers.Work.Download(task("/file"), destination),
             R.string.share_web_download, destination.path, R.drawable.ic_copy, CopyEngine.Plan(0, 1, 0))
         Transfers.execute(app, session) {}
-        assertTrue(session.finished!!.isSuccess)
+        assertTrue(session.finished!!.exceptionOrNull()?.stackTraceToString(), session.finished!!.isSuccess)
         assertEquals(0, session.filesLeft)
         assertEquals(18L, session.plan!!.bytes)
         assertEquals("remote destination", File(folder, "file.txt").readText())
@@ -236,9 +252,7 @@ class WebsiteDownloadTest {
         server.createContext("/file") { reply(it, "new") }
         server.createContext("/loop") { e -> e.responseHeaders.add("Location", "/loop"); e.sendResponseHeaders(302, -1); e.close() }
         File(folder, "file.txt").writeText("original")
-        val underlying = LocalFileSystem()
-        FsRegistry.register(object : FileSystem by underlying {
-            override val scheme = "download-test"
+        FsRegistry.register(object : DestinationFs() {
             override fun list(dir: XFile): List<XFile> = throw java.io.IOException("Listing failed")
         })
         assertThrows(Exception::class.java) { execute(task("/file"), directory.copy(scheme = "download-test")) }

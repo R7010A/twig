@@ -657,6 +657,7 @@
     <string name="info_section_image">画像</string>
     <string name="info_section_media">メディア</string>
     <string name="info_section_app">アプリ</string>
+    <string name="info_selected">選択数</string>
     <string name="info_name">名前</string>
     <string name="info_path">パス</string>
     <string name="info_copied">コピーしました</string>
@@ -971,4 +972,7 @@
     <string name="website_background_channel">バックグラウンドで実行中のサイト</string>
     <string name="website_background_close">バックグラウンドのサイトを閉じる</string>
     <string name="website_background_failed">ウェブサイトをバックグラウンドで実行できませんでした。</string>
+    <string name="android_data_grant">Android/data へのアクセスを許可…</string>
+    <string name="android_data_wrong_folder">このフォルダでは対象の場所へのアクセスを許可できません。Android/data または該当アプリのフォルダを選択してください。</string>
+    <string name="pin_shortcut_failed">ショートカットを追加できませんでした</string>
 </resources>

@@ -41,7 +41,8 @@ class SafFileSystem(context: Context) : FileSystem {
     fun rootOf(treeUri: Uri): XFile {
         val docId = DocumentsContract.getTreeDocumentId(treeUri)
         val docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, docId)
-        return XFile(SCHEME, docUri.toString(), isDir = true, displayName = queryName(docUri) ?: "SAF")
+        return stat(docUri.toString()) ?: XFile(SCHEME, docUri.toString(), isDir = true,
+            displayName = queryName(docUri) ?: "SAF", canRead = false, canWrite = false)
     }
 
     override fun root(): XFile = throw FsException(s(R.string.err_saf_mount))
@@ -66,6 +67,7 @@ class SafFileSystem(context: Context) : FileSystem {
                 size = if (isDir) 0L else c.getLong(c.getColumnIndexOrThrow(Document.COLUMN_SIZE)),
                 lastModified = c.getLong(c.getColumnIndexOrThrow(Document.COLUMN_LAST_MODIFIED)),
                 displayName = name,
+                canWrite = writableGrant(uri) && writableFlags(c.getColumnIndex(Document.COLUMN_FLAGS).let { if (it < 0) -1 else c.getInt(it) }),
             )
         }
     }.getOrNull()
@@ -76,6 +78,7 @@ class SafFileSystem(context: Context) : FileSystem {
             dirUri, DocumentsContract.getDocumentId(dirUri),
         )
         val out = ArrayList<XFile>()
+        val write = writableGrant(dirUri)
         resolver.query(childrenUri, PROJECTION, null, null, null)?.use { c ->
             val idIdx = c.getColumnIndexOrThrow(Document.COLUMN_DOCUMENT_ID)
             val nameIdx = c.getColumnIndexOrThrow(Document.COLUMN_DISPLAY_NAME)
@@ -95,6 +98,7 @@ class SafFileSystem(context: Context) : FileSystem {
                         size = if (isDir) 0L else c.getLong(sizeIdx),
                         lastModified = c.getLong(lmIdx),
                         displayName = c.getString(nameIdx),
+                        canWrite = write && writableFlags(c.getColumnIndex(Document.COLUMN_FLAGS).let { if (it < 0) -1 else c.getInt(it) }),
                     ),
                 )
             }
@@ -182,6 +186,15 @@ class SafFileSystem(context: Context) : FileSystem {
             if (c.moveToFirst()) c.getString(0) else null
         }
 
+    private fun writableGrant(uri: Uri): Boolean = resolver.persistedUriPermissions.any { permission ->
+        permission.isWritePermission && permission.uri.authority == uri.authority && runCatching {
+            DocumentsContract.getTreeDocumentId(permission.uri) == DocumentsContract.getTreeDocumentId(uri)
+        }.getOrDefault(false)
+    }
+
+    private fun writableFlags(flags: Int): Boolean = flags and (Document.FLAG_SUPPORTS_WRITE or
+        Document.FLAG_DIR_SUPPORTS_CREATE or Document.FLAG_SUPPORTS_DELETE or Document.FLAG_SUPPORTS_RENAME) != 0
+
     companion object {
         const val SCHEME = "saf"
 
@@ -255,7 +268,8 @@ class SafFileSystem(context: Context) : FileSystem {
             val flags = (if (perm.isReadPermission) Intent.FLAG_GRANT_READ_URI_PERMISSION else 0) or
                 (if (perm.isWritePermission) Intent.FLAG_GRANT_WRITE_URI_PERMISSION else 0)
             if (flags == 0) return false
-            return runCatching { resolver.releasePersistableUriPermission(perm.uri, flags) }.isSuccess
+            return runCatching { resolver.releasePersistableUriPermission(perm.uri, flags) }
+                .onSuccess { AndroidDataAccess.instance?.refresh() }.isSuccess
         }
 
         private val PROJECTION = arrayOf(
@@ -264,6 +278,7 @@ class SafFileSystem(context: Context) : FileSystem {
             Document.COLUMN_MIME_TYPE,
             Document.COLUMN_SIZE,
             Document.COLUMN_LAST_MODIFIED,
+            Document.COLUMN_FLAGS,
         )
     }
 }
@@ -281,4 +296,5 @@ class SafFileSystem(context: Context) : FileSystem {
  * The check lives here, not in core-fs: `saf` is an :app-private source, the
  * core layer doesn't know about it.
  */
-fun XFile.isMovableSource(): Boolean = isMutable() && !SafFileSystem.isTreeRoot(this)
+fun XFile.isMovableSource(): Boolean = isMutable() && !SafFileSystem.isTreeRoot(this) &&
+    AndroidDataAccess.instance?.isGrantRoot(this) != true

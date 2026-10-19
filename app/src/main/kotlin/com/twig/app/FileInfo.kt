@@ -36,6 +36,18 @@ object FileInfo {
     )
     data class Details(val sections: List<Section>, val error: String? = null)
 
+    /** Aggregate fields use the same Basic tab and row renderer as single-item properties. */
+    fun selection(ctx: Context, files: List<XFile>, stat: com.twig.app.ui.DirStat): Details {
+        val dirs = files.count { it.isDir }
+        val rows = buildList {
+            add(s(ctx, R.string.info_selected) to files.size.toString())
+            add(s(ctx, R.string.info_contains) to s(ctx, R.string.info_contains_value, dirs, files.size - dirs))
+            if (dirs > 0) add(s(ctx, R.string.info_contains_all) to s(ctx, R.string.info_contains_value, stat.dirs, stat.files))
+            add(s(ctx, R.string.info_total_size) to s(ctx, R.string.info_size_value, Format.size(stat.bytes), "%,d".format(stat.bytes)))
+        }
+        return Details(listOf(Section(s(ctx, R.string.info_section_basic), rows)))
+    }
+
     /** Listing metadata first; no file reads or directory listings before the card appears. */
     fun initial(ctx: Context, file: XFile): Details = Details(buildList {
         add(basic(ctx, file, includeContents = false))

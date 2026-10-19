@@ -657,6 +657,7 @@
     <string name="info_section_image">Immagine</string>
     <string name="info_section_media">Media</string>
     <string name="info_section_app">App</string>
+    <string name="info_selected">Selezionati</string>
     <string name="info_name">Nome</string>
     <string name="info_path">Percorso</string>
     <string name="info_copied">Copiato</string>
@@ -971,4 +972,7 @@
     <string name="website_background_channel">Siti in esecuzione in background</string>
     <string name="website_background_close">Chiudi siti in background</string>
     <string name="website_background_failed">Impossibile mantenere i siti in esecuzione in background.</string>
+    <string name="android_data_grant">Autorizza l’accesso ad Android/data…</string>
+    <string name="android_data_wrong_folder">Questa cartella non consente l’accesso alla posizione richiesta. Seleziona Android/data o la cartella dell’app corrispondente.</string>
+    <string name="pin_shortcut_failed">Impossibile aggiungere la scorciatoia</string>
 </resources>

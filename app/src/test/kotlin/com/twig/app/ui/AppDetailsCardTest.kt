@@ -153,6 +153,8 @@ class AppDetailsCardTest {
         assertEquals(ContextCompat.getColor(app, R.color.text_secondary), service.currentTextColor)
         assertTrue(activity.isClickable)
         assertFalse(service.isClickable)
+        assertTrue(activity.isLongClickable)
+        assertFalse(service.isLongClickable)
         assertTrue(activity.text.contains("\n"))
         assertFalse(activity.text.contains("Open"))
         assertEquals("PublicActivity\nACTIVITIES detail", activity.text.toString())

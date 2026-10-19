@@ -699,6 +699,7 @@
     <string name="info_section_image">Image</string>
     <string name="info_section_media">Media</string>
     <string name="info_section_app">App</string>
+    <string name="info_selected">Selected</string>
     <string name="info_name">Name</string>
     <string name="info_path">Path</string>
     <string name="info_copied">Copied</string>
@@ -1041,4 +1042,15 @@
     <string name="website_background_channel">Websites running in the background</string>
     <string name="website_background_close">Close background websites</string>
     <string name="website_background_failed">Could not keep websites running in the background.</string>
+    <string name="android_data_grant">Authorize access…</string>
+    <string name="android_data_grant_note">System restrictions may prevent either method from working. If neither works, try accessing the folder using root (su) or Shizuku.</string>
+    <string name="android_data_wrong_folder">This folder does not grant access to the requested location. Select Android/data or the corresponding app folder.</string>
+    <string name="pin_shortcut_failed">Could not add shortcut</string>
+    <string name="android_data_whole">Entire Android/data</string>
+    <string name="android_data_app">Specific app folder…</string>
+    <string name="android_data_detect_empty">No apps available to select.</string>
+    <string name="android_data_filter">Filter by app name or package</string>
+    <string name="android_data_existing">Only show detected data folders</string>
+    <string name="android_data_existing_note">Android may hide folders. Turn this off to see all candidate apps.</string>
+    <string name="android_data_no_matches">No matching apps</string>
 </resources>

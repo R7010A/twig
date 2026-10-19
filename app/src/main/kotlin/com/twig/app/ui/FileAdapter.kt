@@ -24,6 +24,8 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -423,7 +425,7 @@ class FileAdapter(
 
         fun bind(node: PaneViewModel.InfoNode) {
             val sections = node.details?.sections.orEmpty()
-            val count = sections.size + if (node.file.isDir || sections.isEmpty()) 0 else 1
+            val count = sections.size + if (node.selection || node.file.isDir || sections.isEmpty()) 0 else 1
             val tab = node.tab.coerceIn(0, (count - 1).coerceAtLeast(0))
             b.root.swipeEnabled = count > 1
             b.root.onSwipe = { step ->
@@ -465,7 +467,7 @@ class FileAdapter(
             }
 
             val titles = ArrayList(d.sections.map { it.title })
-            val hashIdx = if (node.file.isDir) -1 else titles.size
+            val hashIdx = if (node.selection || node.file.isDir) -1 else titles.size
             if (hashIdx >= 0) titles += ctx.getString(R.string.info_tab_hash)
             val cur = node.tab.coerceIn(0, titles.size - 1)
             buildTabs(node, titles, cur)
@@ -570,6 +572,24 @@ class FileAdapter(
                                         R.string.info_app_shortcut_failed else R.string.info_activity_failed
                                     Toast.makeText(ctx, ctx.getString(message), Toast.LENGTH_SHORT).show()
                                 }
+                            }
+                            if (entry.action is AppDetails.Action.Activity) row.setOnLongClickListener { anchor ->
+                                PopupMenu(ctx, anchor).apply {
+                                    menu.add(R.string.action_pin_shortcut).setOnMenuItemClickListener {
+                                        if (!ShortcutManagerCompat.isRequestPinShortcutSupported(ctx)) {
+                                            Toast.makeText(ctx, R.string.pin_shortcut_unsupported, Toast.LENGTH_SHORT).show()
+                                        } else {
+                                            runCatching {
+                                                check(ShortcutManagerCompat.requestPinShortcut(ctx, AppDetails.activityShortcut(ctx, entry), null))
+                                            }.onFailure {
+                                                Toast.makeText(ctx, R.string.pin_shortcut_failed, Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                        true
+                                    }
+                                    show()
+                                }
+                                true
                             }
                         }
                         content.addView(row, LinearLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT,
@@ -933,10 +953,12 @@ class FileAdapter(
                     // Directories on media servers are all virtual (albums / artists / libraries…), give them a distinguishable icon
                     val mediaIcon = FileIcons.mediaDirIcon(file)
                     b.icon.setImageResource(mediaIcon ?: R.drawable.ic_folder)
-                    // Third-party app-authorised document tree roots: the whole tree is that app's data; use its icon
-                    // (the row name is also swapped for the app name, see PaneViewModel.safRoots). The icon is filled in
-                    // asynchronously; the folder-icon assignment above is its placeholder.
-                    if (com.twig.app.SafFileSystem.isTreeRoot(file)) {
+                    // Android/data package folders reuse the installed-app icon cache; missing apps keep the folder icon.
+                    val appPackage = com.twig.app.AndroidDataAccess.appPackage(file)
+                    if (appPackage != null) {
+                        FileIcons.bindApp(b.icon, appPackage)
+                    } else if (com.twig.app.SafFileSystem.isTreeRoot(file)) {
+                        // Other providers' granted roots represent the provider app's data.
                         com.twig.app.SafFileSystem.providerApp(ctx, file)?.let {
                             FileIcons.bindApp(b.icon, it.pkg)
                         }
@@ -945,7 +967,7 @@ class FileAdapter(
                     // most directories don't have covers, and stretching to thumbnail size at bind time would make every
                     // folder icon on screen look huge ("they look big" was reported before).
                     // Movie / series posters are 2:3 portraits, so once stretched the row also grows accordingly.
-                    if (thumbs && Thumbs.canThumb(file)) {
+                    if (appPackage == null && thumbs && Thumbs.canThumb(file)) {
                         // ★ Vertical margins must match the file branch: skip them and adjacent covers touch directly.
                         // Series / collections / playlists / media libraries **are all directories** going through this
                         // branch — movies are files, taking the branch below, hence the symptom "only the movie library has spacing".

@@ -55,7 +55,7 @@ class StatusBarFullscreenTest {
             .setInsets(WindowInsetsCompat.Type.navigationBars(), Insets.of(0, 0, 0, 20))
             .setInsets(WindowInsetsCompat.Type.ime(), Insets.of(0, 0, 0, 200)).build()
         ViewCompat.dispatchApplyWindowInsets(root, insets)
-        assertEquals(11, root.paddingLeft)
+        assertEquals(1, root.paddingLeft)
         assertEquals(2, root.paddingTop)
         root.measure(android.view.View.MeasureSpec.makeMeasureSpec(400, android.view.View.MeasureSpec.EXACTLY),
             android.view.View.MeasureSpec.makeMeasureSpec(600, android.view.View.MeasureSpec.EXACTLY))
@@ -75,8 +75,31 @@ class StatusBarFullscreenTest {
             .setInsets(WindowInsetsCompat.Type.displayCutout(), Insets.of(10, 30, 0, 0))
             .setInsets(WindowInsetsCompat.Type.navigationBars(), Insets.of(0, 0, 0, 20))
             .setInsets(WindowInsetsCompat.Type.ime(), Insets.of(0, 0, 0, 200)).build()
-        assertEquals(Insets.of(10, 0, 0, 20), StatusBarFullscreen.contentInsets(insets, fullscreen = true))
+        assertEquals(Insets.of(0, 0, 0, 20), StatusBarFullscreen.contentInsets(insets, fullscreen = true))
         assertEquals(Insets.of(10, 80, 0, 20), StatusBarFullscreen.contentInsets(insets, fullscreen = false))
+    }
+
+    @Test
+    fun `landscape fills either side cutout while preserving navigation and keyboard space`() {
+        for (cutout in listOf(Insets.of(80, 0, 0, 0), Insets.of(0, 0, 80, 0))) {
+            val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
+            val root = FrameLayout(activity)
+            val content = android.view.View(activity)
+            root.addView(content, FrameLayout.LayoutParams(-1, -1))
+            activity.setContentView(root)
+            StatusBarFullscreen(activity, root).apply(true)
+            val insets = WindowInsetsCompat.Builder()
+                .setInsets(WindowInsetsCompat.Type.displayCutout(), cutout)
+                .setInsets(WindowInsetsCompat.Type.navigationBars(), Insets.of(0, 0, 24, 0))
+                .setInsets(WindowInsetsCompat.Type.ime(), Insets.of(0, 0, 0, 200)).build()
+            ViewCompat.dispatchApplyWindowInsets(root, insets)
+            root.measure(android.view.View.MeasureSpec.makeMeasureSpec(800, android.view.View.MeasureSpec.EXACTLY),
+                android.view.View.MeasureSpec.makeMeasureSpec(400, android.view.View.MeasureSpec.EXACTLY))
+            root.layout(0, 0, 800, 400)
+            assertEquals(0, content.left)
+            assertEquals(776, content.right)
+            assertEquals(200, content.bottom)
+        }
     }
 
     @Test
