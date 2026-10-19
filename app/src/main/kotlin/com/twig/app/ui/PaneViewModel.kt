@@ -1393,25 +1393,6 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
         rebuild()
     }
 
-    /** Return to the top-level overview without constructing paths or listing any backend. */
-    fun top() {
-        pendingExpand?.let { abandoned.add(it) }
-        pendingExpand = null
-        val files = _state.value.rows.filterIsInstance<FileNode>().map { it.file }
-        Thumbs.cancelPending(files)
-        SizeProbes.cancelPending(files)
-        DirectoryCounts.cancelPending(files)
-        expanded.clear()
-        infoOpen.clear()
-        closeSelectionInfo()
-        searchState.values.forEach { it.job?.cancel() }
-        searchState.clear()
-        currentKey = null
-        currentDir = null
-        scrollKey = null
-        rebuild()
-    }
-
     /**
      * Collapse the current directory and move "current directory" up one level.
      * Server/favorite roots are not standalone [FileNode] rows (their children hang
@@ -2517,8 +2498,9 @@ class PaneViewModel(app: Application) : AndroidViewModel(app) {
                 listOf("/system", "/vendor", "/product", "/system_ext", "/apex", "/odm", "/oem", "/proc", "/mnt", "/storage")
                     .mapNotNull { path -> runCatching { fs.stat(path) }.getOrNull()?.takeIf { it.isDir && it.canRead } }
             } else emptyList()
-            val granted = if (AndroidDataAccess.isRoot(file))
-                AndroidDataAccess.instance?.grantedFolders(file).orEmpty() else emptyList()
+            val granted = if (AndroidDataAccess.isRoot(file)) AndroidDataAccess.instance?.let { access ->
+                (listOfNotNull(access.ownFolder(file)) + access.grantedFolders(file)).distinctBy { it.path }
+            }.orEmpty() else emptyList()
             val kids = when {
                 rootShortcuts.isNotEmpty() -> rootShortcuts
                 granted.isNotEmpty() -> listed.getOrDefault(emptyList()).filter { entry -> granted.none { it.name == entry.name } } + granted

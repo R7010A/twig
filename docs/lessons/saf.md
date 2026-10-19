@@ -4,6 +4,12 @@
 > shared conventions are in [AGENTS.md](../../AGENTS.md); the other sections live
 > beside this file in [docs/lessons/](.).
 
+- **Android/data may allow probing a known child while denying enumeration** (2026-10-19):
+  the authorization dialog lists user-installed app paths and opens SAF at the exact child.
+  Existence checks can fail, so probing is an optional filter, off by default.
+  These are authorization candidates, never a complete filesystem listing.
+  Twig's own external data directory is shown by default and keeps direct local access.
+
 - **Local-to-SAF routes can return SAF entries** (2026-10-18): Android/data grants keep
   local directory roots in the tree, but their children and newly created files carry document
   URIs. `SafeWrite` keeps the destination filesystem while writing, deleting and renaming

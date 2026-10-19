@@ -235,7 +235,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
         for (i in 0 until b.toolbar.childCount) {
             val child = b.toolbar.getChildAt(i)
             if (child is android.widget.ImageButton && child.drawable === b.toolbar.navigationIcon) {
-                child.setOnLongClickListener { activePane()?.actionTop(); true }
+                child.setOnLongClickListener { activePane()?.actionScrollToTop(); true }
             }
         }
 
@@ -453,7 +453,7 @@ class MainActivity : AppCompatActivity(), PaneFragment.Host {
     private fun wireStrip(s: ActionStripBinding) {
         s.sizeIconsLikeRows(this)
         s.asUp.setOnClickListener { activePane()?.actionUp() }
-        s.asUp.setOnLongClickListener { activePane()?.actionTop(); true }
+        s.asUp.setOnLongClickListener { activePane()?.actionScrollToTop(); true }
         s.asSort.setOnClickListener { showSortDialog() }
         s.asRefresh.setOnClickListener { activePane()?.actionRefresh() }
         s.asNewFolder.setOnClickListener { activePane()?.actionNewFolder() }

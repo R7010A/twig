@@ -138,6 +138,7 @@ class AndroidDataAccessTest {
         val data = root.copy(path = root.parentPath)
         assertEquals("primary:Android/data", DocumentsContract.getDocumentId(AndroidDataAccess.initialUri(data)))
         assertEquals(packageId, DocumentsContract.getDocumentId(AndroidDataAccess.initialUri(root)))
+        assertEquals("primary:", DocumentsContract.getTreeDocumentId(AndroidDataAccess.initialUri(root)))
         assertTrue(access.accepts(tree, root))
         assertTrue(access.accepts(tree, data))
         assertTrue(access.accepts(uri("primary:Android/data"), root))
@@ -147,6 +148,57 @@ class AndroidDataAccessTest {
         assertFalse(access.accepts(uri("primary:Android"), root))
         assertFalse(access.accepts(uri("ABCD-1234:Android/data/com.example"), root))
         assertFalse(access.accepts(DocumentsContract.buildTreeDocumentUri("other.provider", packageId), root))
+    }
+
+    @Test fun `app folder candidates include user apps without directories and exclude system apps`() {
+        val data = root.copy(path = root.parentPath)
+        val pm = shadowOf(app.packageManager)
+        pm.installPackage(android.content.pm.PackageInfo().apply {
+            packageName = "com.missing"
+            applicationInfo = android.content.pm.ApplicationInfo().apply {
+                packageName = "com.missing"; nonLocalizedLabel = "Missing App"
+            }
+        })
+        for ((pkg, flag) in listOf("com.system" to android.content.pm.ApplicationInfo.FLAG_SYSTEM,
+            "com.updated" to android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) {
+            pm.installPackage(android.content.pm.PackageInfo().apply {
+                packageName = pkg
+                applicationInfo = android.content.pm.ApplicationInfo().apply { packageName = pkg; flags = flag }
+            })
+        }
+        assertFalse(File(data.path, "com.missing").exists())
+        val candidates = AndroidDataAccess.instance!!.appFolderCandidates(data)
+        assertTrue(candidates.any { it.file.path == File(data.path, "com.missing").path && it.label == "Missing App" })
+        assertTrue(candidates.none { it.file.name in listOf("com.system", "com.updated") })
+    }
+
+    @Test fun `own data folder is visible and readable even when parent listing fails`() = runTest(dispatcher) {
+        val data = root.copy(path = root.parentPath)
+        val access = AndroidDataAccess.instance!!
+        // Robolectric puts getExternalFilesDirs outside Environment's external-storage root.
+        val ownDir = File(data.path, app.packageName).apply { mkdirs() }
+        val own = access.ownFolder(data)!!
+        val source = File(own.path, "local.txt").apply { writeText("local") }
+        val wholeData = DocumentsContract.buildTreeDocumentUri(AndroidDataAccess.AUTHORITY, "primary:Android/data")
+        app.contentResolver.takePersistableUriPermission(wholeData,
+            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        access.refresh()
+        FsRegistry.register(object : com.twig.core.FileSystem by fs {
+            override fun list(dir: XFile): List<XFile> {
+                if (dir.path == data.path) throw com.twig.core.FsException("blocked")
+                return fs.list(dir)
+            }
+        })
+        try {
+            val vm = com.twig.app.ui.PaneViewModel(app).apply { io = dispatcher; lockRoot = data }
+            vm.refreshTree()
+            vm.toggle(vm.state.value.rows.first())
+            val node = vm.state.value.rows.filterIsInstance<com.twig.app.ui.PaneViewModel.FileNode>().first { it.file.path == own.path }
+            vm.toggle(node)
+            assertTrue(vm.state.value.rows.filterIsInstance<com.twig.app.ui.PaneViewModel.FileNode>().any { it.file.path == source.path })
+            assertNull(access.route(own.path))
+            assertEquals("local", fs.openInput(XFile("file", source.path, false)).bufferedReader().use { it.readText() })
+        } finally { ownDir.deleteRecursively() }
     }
 
     @Test fun `app icons match only direct data directories for both local and SAF listings`() {

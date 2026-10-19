@@ -165,12 +165,26 @@ class PaneFragment : Fragment() {
         }
         AlertDialog.Builder(requireContext())
             .setTitle(R.string.android_data_grant)
-            .setItems(arrayOf(getString(R.string.android_data_whole), getString(R.string.android_data_app))) { _, _ ->
-                // Both choices start at the real parent; SAF supplies the existing folders.
-                launchDataPicker(file)
+            .setItems(arrayOf(getString(R.string.android_data_whole),
+                getString(R.string.android_data_app))) { _, which ->
+                if (which == 0) launchDataPicker(file) else showAppDataFolders(file)
             }
             .setNegativeButton(R.string.dialog_cancel, null)
             .show()
+    }
+
+    private fun showAppDataFolders(root: XFile) {
+        val ctx = requireContext()
+        viewLifecycleOwner.lifecycleScope.launch {
+            val folders = withContext(Dispatchers.IO) {
+                AndroidDataAccess.instance?.appFolderCandidates(root).orEmpty()
+            }
+            if (folders.isEmpty()) {
+                toast(getString(R.string.android_data_detect_empty))
+                return@launch
+            }
+            AppDataFolderDialog.show(ctx, viewLifecycleOwner.lifecycleScope, folders, ::launchDataPicker)
+        }
     }
 
     private fun launchDataPicker(file: XFile) {
@@ -610,17 +624,10 @@ class PaneFragment : Fragment() {
         viewModel.up()
     }
 
-    fun actionTop() {
-        if (mapMode) exitTreemap()
-        pendingScrollToCurrent = false
-        pendingSelectionInfoScroll = false
-        adapter.clearSelection()
-        viewModel.top()
-        b.list.post {
-            _b?.list?.let { list ->
-                (list.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(0, 0)
-            }
-        }
+    /** Long-press Up scrolls the open list without changing navigation or selection. */
+    fun actionScrollToTop() {
+        if (mapMode) return
+        (b.list.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(0, 0)
     }
 
     fun actionRefresh() {

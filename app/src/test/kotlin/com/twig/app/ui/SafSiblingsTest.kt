@@ -14,8 +14,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
@@ -89,20 +87,6 @@ class SafSiblingsTest {
         advanceUntilIdle()
     }
 
-    @Test
-    fun `returning to the top collapses document URI trees and cancels aggregate properties`() = runTest(dispatcher) {
-        expandRoot()
-        vm.toggleSelectionInfo(kids.filter { !it.isDir }.take(2))
-        assertEquals(1, vm.activeDirScans())
-        vm.top()
-        assertEquals(0, vm.activeDirScans())
-        advanceUntilIdle()
-        assertTrue(vm.state.value.rows.all { it.depth == 0 })
-        assertTrue(vm.state.value.rows.filterIsInstance<PaneViewModel.InfoNode>().isEmpty())
-        assertFalse(vm.state.value.rows.filterIsInstance<PaneViewModel.FileNode>().single().expanded)
-        assertTrue(vm.state.value.currentKey == null)
-        assertTrue(vm.currentDir == null)
-    }
 
     @Test
     fun `images in the same directory can all be paged, not just the one opened`() = runTest(dispatcher) {

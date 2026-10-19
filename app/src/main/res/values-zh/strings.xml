@@ -917,4 +917,9 @@
     <string name="pin_shortcut_failed">无法添加快捷方式</string>
     <string name="android_data_whole">整个 Android/data</string>
     <string name="android_data_app">指定应用目录…</string>
+    <string name="android_data_detect_empty">未找到应用，仍可尝试通过系统选择器选择目录。</string>
+    <string name="android_data_filter">按应用名称或包名过滤</string>
+    <string name="android_data_existing">仅显示检测到的数据目录</string>
+    <string name="android_data_existing_note">系统可能隐藏目录，关闭可查看全部候选应用。</string>
+    <string name="android_data_no_matches">没有匹配的应用</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.twig.app
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -39,6 +40,10 @@ class AndroidDataAccess(private val ctx: Context) {
     fun route(path: String): FileSystem? {
         if (grants.isEmpty() || !path.contains("/Android/data")) return null
         val normalized = runCatching { File(path).canonicalPath }.getOrNull() ?: return null
+        val relative = documentId(normalized)?.substringAfter(':') ?: return null
+        val own = "Android/data/${ctx.packageName}"
+        if ((relative == own || relative.startsWith("$own/")) &&
+            File(normalized.removeSuffix(relative), own).canRead()) return null
         val grant = grants.firstOrNull { normalized == it.path || normalized.startsWith(it.path + "/") } ?: return null
         return Tree(grant)
     }
@@ -49,6 +54,32 @@ class AndroidDataAccess(private val ctx: Context) {
         if (relative == grant.path || relative.contains('/')) null
         else Tree(grant).stat(grant.path)
     }.distinctBy { it.path }
+
+    /** Browsing shortcuts only; these do not make an unreadable parent listing complete. */
+    fun ownFolder(root: XFile): XFile? {
+        if (!isRoot(root)) return null
+        // Ensure the app's external files directory exists, including on removable volumes.
+        ctx.getExternalFilesDirs(null)
+        val folder = File(root.path, ctx.packageName)
+        return if (folder.isDirectory && folder.canRead()) localFolder(folder) else null
+    }
+
+    /** Authorization candidates only; Android may hide whether these paths exist. */
+    data class AppFolder(val file: XFile, val label: String)
+
+    fun appFolderCandidates(root: XFile): List<AppFolder> {
+        if (!isRoot(root)) return emptyList()
+        val pm = ctx.packageManager
+        return pm.getInstalledApplications(0)
+            .filter { it.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0 }
+            .distinctBy { it.packageName }.map { info ->
+                AppFolder(XFile("file", File(root.path, info.packageName).path, true),
+                    info.loadLabel(pm).toString())
+            }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.label })
+    }
+
+    private fun localFolder(folder: File) = XFile("file", folder.canonicalPath, true,
+        lastModified = folder.lastModified(), canRead = folder.canRead(), canWrite = folder.canWrite())
 
     fun accepts(uri: Uri, requested: XFile): Boolean {
         if (uri.scheme != "content" || uri.authority != AUTHORITY) return false
@@ -166,7 +197,10 @@ class AndroidDataAccess(private val ctx: Context) {
                 it.isNotEmpty() && '/' !in it && it != "." && it != ".."
             }
         }
-        fun initialUri(file: XFile): Uri = DocumentsContract.buildDocumentUri(
-            AUTHORITY, documentId(file.path)!!)
+        fun initialUri(file: XFile): Uri {
+            val id = documentId(file.path)!!
+            val volume = DocumentsContract.buildTreeDocumentUri(AUTHORITY, id.substringBefore(':') + ":")
+            return DocumentsContract.buildDocumentUriUsingTree(volume, id)
+        }
     }
 }
