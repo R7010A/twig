@@ -102,44 +102,42 @@ review.
 
 ## Why Twig
 
-**One tree, every source.** Local storage, archives, FTP, SFTP, SMB, WebDAV, S3,
-restic repositories and Jellyfin/Emby servers are all the same thing to the UI. Copying between any two
-of them is the same code path — an SMB folder can be compressed straight into a
-local zip, a file inside a remote archive can be streamed to an FTP server.
+**One tree, every source.** Local storage, archives, FTP, SFTP, SMB, WebDAV,
+S3, restic repositories and Jellyfin/Emby libraries expand in place. Keep two
+sources side by side: compress an SMB folder into a local zip, or copy a file
+from a remote archive straight to an FTP server.
 
-**It stays small.** The arm64-v8a download is 7.76 MiB *including* an FFmpeg
-audio decoder, an SMB implementation and a video player. Comparable file managers
-ship several times that. Dependencies are added only after their APK cost is
-measured.
+**A small package.** The 1.13.0 full build's arm64-v8a download measured 7.76 MiB,
+including the terminal, network backends and media player. Dependencies are added
+only after their APK cost is measured.
 
-**It goes where other file managers stop.**
+**Tools that work together.**
 
-- Browse **restic backup repositories** read-only, decrypted on device, snapshots
-  presented as dated folders — as far as we know, nothing else on Android does this.
-- **Thumbnails for network video without downloading the file.** Twig parses the
-  container itself (MP4 sample tables, Matroska EBML cues), locates the keyframe
-  at 1/10 of the duration, and fetches roughly 2 MB — as much for a huge file as for
-  a small one, because the amount read does not scale with its size.
-- A **git client written from scratch in Kotlin** — status, history, side-by-side
-  patience diff, worktrees and submodules, over local *and* remote repositories.
-- **Real Blu-ray M2TS playback**: 192-byte BDAV packets, HDMV private stream
-  types (DTS-HD MA, TrueHD via its embedded AC-3 core) and PGS bitmap subtitles,
-  none of which media3 handles out of the box.
-- **Privileged access via root or Shizuku** as a *fallback for the local
-  filesystem*, not a separate tree — so `/data/data/…` copies to SMB, thumbnails
-  and search all work with no extra code.
-- **Media servers as a filesystem.** Jellyfin and Emby libraries browse like any
-  other source, with playback position synced back to the server and posters,
-  tags, lyrics and external subtitles all coming from the API instead of by
-  reading the media file. One implementation covers both, and it added **zero
-  dependencies**.
-- **Directory compare with one-way sync**, Beyond Compare style, between *any* two
-  sources — an SMB share against a local folder, a document tree against an archive —
-  with incremental or mirror mode and a separate confirmation for files that are newer
-  on the target.
-- **Wi-Fi sharing**: Twig becomes an HTTP and WebDAV server, so a desktop can
-  mount it — and download files that live on an SMB share or inside an archive,
-  because to the server they are all just `openInput()`.
+- **Browse encrypted backups.** Open a restic repository, browse its snapshots as
+  dated folders, and copy individual files to another source. Decryption happens
+  on the device.
+- **Git beside your files.** Inspect status, history, worktrees and submodules in
+  local or SFTP repositories, compare changes side by side, and open a terminal
+  for the directory you are working in.
+- **A terminal connected to your file manager.** Open a local, SSH or privileged
+  shell from a directory, then locate the shell's working directory back in the
+  tree. Dedicated `SHIFT` and `|` keys make interactive tools and shell pipelines
+  easier to use on a phone; fonts, colours and text size are customisable.
+- **Media libraries in the same tree.** Browse Jellyfin and Emby alongside your
+  storage, with posters, metadata and subtitles from the server. Resume playback
+  and keep progress synced back to the library.
+- **Compare across sources.** Compare an SMB directory with local storage, or a
+  document tree with an archive. Review differences, then run incremental or
+  mirror sync with separate confirmation for newer destination files.
+- **Share beyond local storage.** Twig's HTTP/WebDAV server lets a desktop browse
+  and download files from connected sources and archives through one connection.
+- **Privileged access in the existing tree.** Root or Shizuku extends local access
+  when ordinary permissions fall short; protected paths can participate in the
+  same copy, search and thumbnail workflows as other directories.
+- **Viewers and a dedicated music player.** Read and edit text in its original
+  encoding, inspect bytes in hex, or preview documents and media from the source
+  you are browsing. Local and network music can share playlists, with waveform
+  seeking, synchronised bilingual lyrics and background playback.
 
 ---
 
@@ -192,11 +190,17 @@ and the app can be built in trimmed configurations by dropping modules.
 
 ## Features
 
+This list covers the current source. Android/data authorization, Activity home-screen
+shortcuts, multi-file sharing and selection properties are available in the
+[1.14 preview](https://github.com/dev2ex/twig/releases/tag/v1.14.0-beta.3).
+
 ### Storage sources
 
 | Source | Capability | Implementation |
 |---|---|---|
 | **Local** | Full read/write | `java.io.File` |
+| **Android/data/** | Read/write with permission | Saved SAF grants for the whole folder or individual app folders where the system permits; root/Shizuku access also supported |
+| **System directories** (`/system`, `/vendor`, etc.) | Browse readable directories and files | Direct access to readable system paths even when listing `/` is blocked; protected contents require root/Shizuku, and read-only mounts remain read-only |
 | **ZIP** | **Read + write**, legacy GBK names detected | Mounted as a filesystem; opens like a folder |
 | **7z** | Read + **create** (LZMA2) | commons-compress + xz |
 | **tar** | Read-only | Entries are contiguous, so they are read by slicing — a nested archive inside opens without being unpacked first |
@@ -228,16 +232,36 @@ needs no special case.
 - **Always expand in place, never "enter" a directory.** The current directory is
   the last one you tapped, and it is the target for new folders, copies and moves.
 - Single pane in portrait (swipe to switch), **dual pane side by side in
-  landscape**.
+  landscape**, with animated pane switching. Long-press the pane-switch button to
+  pin the current directory on the other side and switch to it.
 - Multi-select, cross-pane copy and move with progress and cancellation, mkdir,
-  rename, recursive delete, clipboard-style paste.
+  rename, recursive delete, clipboard-style paste, and sharing multiple selected
+  files through the system chooser.
 - **Favourites** and **recent locations** store *how to get there* (connection
   label + path), not a session-scoped scheme, so they survive restarts.
 - **Restores your last position** across restarts, level by level, releasing
-  control the moment you touch the list.
+  control the moment you touch the list. With position memory off, favourites
+  expand by default.
 - **Grid view**, independent of the thumbnail toggle, with adaptive column count.
+- **Thumbnails** for images and videos on local and network sources.
+- **Optional folder/file counts** beneath local and SMB directories, off by default;
+  configurable date formats, including the system region's format.
 - **Property cards** inline under a row: EXIF, media tracks, app info, hashes —
-  all from system APIs, and never reading a whole file just to fill a field.
+  tap the left edge to show or hide them, and swipe between tabs. Basic fields
+  appear before slower media details finish loading. Multi-selection has an inline
+  card for aggregate size and counts.
+- **App inspection** in Properties → App: signing certificates, Activities,
+  declared shortcuts, services, receivers and providers. Launch accessible
+  Activities and shortcuts directly; long-press a launchable Activity to pin it
+  to the home screen.
+- **Android/data through SAF**, integrated into the local tree with saved grants
+  and app icons. Authorize the whole folder where permitted, or pick a user-installed
+  app using icons and name/package filtering, then authorize its folder directly.
+  Folder detection is optional because Android can hide existing paths. Availability
+  depends on the system picker; root or Shizuku remains an alternative.
+- **Readable system directories** such as `/system` and `/vendor` remain reachable
+  when Android blocks listing `/`; access to their contents still follows system
+  permissions.
 - **Treemap disk usage** (SpaceSniffer style) embedded in the pane, pinch to zoom,
   with the same long-press actions as the tree.
 - **SD cards and USB drives** get their own rows at the root, named and sized by the
@@ -294,15 +318,35 @@ all work the same way.
 - **PDF reader** on the platform renderer: continuous or single-page scrolling,
   double-tap to crop the page margins away, text selection, and full-text search
   where the system provides it (Android 15+)
-- Image viewer with downsampling, plus a slideshow that starts on the first image
-  found while still scanning
-- **Video/audio player** (media3 + FFmpeg software decoding) covering AVI, real
-  Blu-ray M2TS, HDMV private audio tracks and PGS subtitles, with two-stage
-  automatic fallback when a system decoder crashes
+- Image viewer with downsampling, horizontal or vertical swipes to switch images,
+  plus a slideshow that starts on the first image found while still scanning
+- **Video/audio player** (media3 + FFmpeg software decoding) supporting AVI,
+  M2TS, HDMV audio tracks and PGS subtitles, with two-stage
+  automatic fallback when a system decoder crashes. Seeking in M2TS can be slow
 - **Episode auto-play**: the queue comes from the server on Jellyfin/Emby, and
   from filename numbering (`SxxExx`, `E01`, bare digits) everywhere else. Previous
   and next buttons appear only when a queue could actually be worked out
-- Music player with waveform display
+- **Playback preferences** remember manually selected audio/subtitle tracks and
+  picture scaling for the next episode and when reopening a file
+- **Playback controls** include swipe seeking, brightness/volume gestures and
+  temporary speed-up while holding the screen; embedded and external subtitles
+  can be selected alongside audio tracks
+
+#### Dedicated music player
+
+- **Music across sources.** Play local, network and SAF tracks, and organise them
+  in playlists. Files inside mounted archives and backups can play in temporary
+  queues while their source remains mounted.
+- **Cover art and lyrics.** The interface takes its colours from the cover; tap to
+  switch between cover and lyrics, or see both side by side in landscape. Swipe
+  to change tracks.
+- **Synchronised bilingual lyrics** from sidecar LRC files, embedded tags or the
+  media server. Tap a timed lyric to seek to that line; the waveform also acts as
+  a seek bar.
+- **Playlist management** with favourites, name/metadata search, sorting, manual
+  drag-to-reorder, shuffle and repeat. Export saved playlists as `.m3u8` files.
+- **Background playback** with notification, lock-screen and headset/Bluetooth
+  controls. The last queue can be restored when reopening the player.
 
 ### Media servers (Jellyfin / Emby)
 
@@ -328,15 +372,34 @@ here, and `org.json` ships with Android.
 
 ### Terminal
 
-- **Local shell** on a real PTY, and **SSH sessions** over SSHJ, in one session
-  list with a switcher at the top
-- **Privileged terminal** via root or Shizuku, always a separate, clearly labelled
-  entry — never a silent upgrade of the ordinary shell
-- Importable fonts and colour schemes (any Termux `colors.properties` works);
-  pinch to resize, which resyncs the remote PTY; hold an arrow key on the accessory bar
-  to repeat it
+- **Local, SSH and privileged shells.** Open a local system shell or an SSH session
+  in the selected directory, with multiple sessions and a switcher at the top.
+  Root and Shizuku shells have a separate, clearly labelled entry. Local shells
+  use a real PTY, supporting interactive terminal programs.
+- **From files to commands and back.** “Open terminal here” starts at the directory
+  you are browsing. “Locate current directory” brings the shell's working directory
+  back into the file tree, including remote SSH paths when the shell reports its
+  current directory.
+- **Extra keys for touch screens.** Two rows put `CTRL`, `ALT`, `SHIFT`, `ESC`, `TAB`,
+  arrows, Home/End, Page Up/Down and common shell symbols within reach. Tap `SHIFT`,
+  then an arrow or `TAB`, to send the combination; hold an arrow to repeat it.
+- **Shift combinations for interactive tools.** Examples include `Shift+←` to open
+  a question for answering in [Codex](https://github.com/openai/codex/blob/main/codex-rs/tui/src/chatwidget/tests/questions_tests.rs),
+  and `Shift+Tab` to cycle permission modes in
+  [Claude Code](https://code.claude.com/docs/en/interactive-mode#general-controls).
+- **A dedicated pipe key (`|`).** Connect one command's output to the next—for
+  example, `ls -l | grep .apk`—without switching to the phone keyboard's symbol
+  pages. Pipelines make it practical to filter logs, search output and combine
+  command-line tools.
+- **Soft-keyboard control.** A toolbar button explicitly shows or hides the Android
+  keyboard. Tapping a prompt opens it; programs that hide the cursor avoid opening
+  it automatically. Keyboard and orientation changes resize the terminal, including
+  the remote SSH PTY.
+- **Customise the terminal.** Import a font and a Termux-compatible
+  `colors.properties` scheme, or use the defaults. Pinch to change text size;
+  terminal colours also apply to the extra-key bar, independently of the app theme.
 - **Command shortcuts**: attach a command to an SFTP directory or server, run it
-  in a terminal or silently in the background, and pin it to the home screen
+  in a terminal or silently in the background, and pin it to the home screen.
 
 ### Git
 
