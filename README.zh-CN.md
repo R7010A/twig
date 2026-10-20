@@ -10,7 +10,7 @@
 一个要「进去」的界面。原生 Kotlin + XML View,不引入 Material 库,依赖压到最低。
 能手写就手写——WebDAV、S3 签名、git、restic 全部从零实现。
 
-**版本 1.13.1**(versionCode 301)· minSdk 24 / targetSdk 34 / compileSdk 36 ·
+**版本 1.14.0**(versionCode 305)· minSdk 24 / targetSdk 34 / compileSdk 36 ·
 [GPL-3.0](LICENSE)
 
 <p align="center">
