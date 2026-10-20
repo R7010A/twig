@@ -201,6 +201,6 @@ fi
 say "Done"
 echo "  https://github.com/dev2ex/twig/releases/tag/$TAG"
 echo
-echo "  Not done by this script: the fdroiddata MR still points at the previous"
-echo "  release. Update metadata/com.twig.app.yml there when you want F-Droid to"
-echo "  test this one — each push spends about twelve minutes of their shared CI."
+echo "  F-Droid automatically tracks stable tags and verifies the published libre APK."
+echo "  Routine releases need no manual fdroiddata update or merge request."
+echo "  Wait for F-Droid's update, build and publish jobs; inspect their logs if it fails."

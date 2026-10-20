@@ -90,8 +90,10 @@ set *Filter APKs by Regular Expression* to pick one, or Obtainium will ask every
 cannot update in the background — `-full\.apk$` for the default build, `-libre\.apk$` for
 the free one.
 
-An F-Droid listing (the `libre` build, reproducible and signed with the same key) is in
-review.
+**[Get Twig on F-Droid](https://f-droid.org/packages/com.twig.app/)**: the `libre`
+build includes all features except RAR and uses the same signing key as the GitHub
+APKs, verified through reproducible builds. F-Droid automatically tracks stable
+release tags; updates appear after its build and repository publication steps.
 
 ---
 

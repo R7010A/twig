@@ -87,7 +87,9 @@
 *Filter APKs by Regular Expression* 里指定一个,否则 Obtainium 每次都会让你手选、也没法后台更新——
 默认版填 `-full\.apk$`,自由软件版填 `-libre\.apk$`。
 
-F-Droid 上架(`libre` 版,可复现构建,与上面同一签名)正在审核中。
+**[从 F-Droid 安装 Twig](https://f-droid.org/packages/com.twig.app/)**：提供 `libre` 版，
+包含除 RAR 外的全部功能，通过可复现构建验证，使用与 GitHub APK 相同的签名密钥。
+F-Droid 自动跟踪正式版标签，完成构建与仓库发布流程后提供更新。
 
 ---
 
