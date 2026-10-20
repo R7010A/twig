@@ -102,7 +102,7 @@ S3, restic repositories and Jellyfin/Emby libraries expand in place. Keep two
 sources side by side: compress an SMB folder into a local zip, or copy a file
 from a remote archive straight to an FTP server.
 
-**A small package.** The 1.14.0 full build's arm64-v8a download measures 8.19 MiB,
+**Small and resource-conscious.** The 1.14.0 full build's arm64-v8a download measures 8.19 MiB,
 including the terminal, network backends and media player. Dependencies are added
 only after their APK cost is measured.
 
