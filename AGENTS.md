@@ -560,7 +560,7 @@ add its symptom here.
   accordionExpand" ≠ "do not expand"; writes are gated by `isMutable()` /
   `isWritableDir()` at six entry points; selection changes use payloads, never
   `notifyDataSetChanged`.
-  *Explains*: a fullscreen empty band above the toolbar or beside the landscape cutout, a landscape Terminal button missing without active sessions, the same archive empty in one place, a directory that closes itself, a
+  *Explains*: a fullscreen empty band above the toolbar or beside the landscape cutout (including websites with the status bar hidden), a landscape Terminal button missing without active sessions, the same archive empty in one place, a directory that closes itself, a
   spinner that never stops, the whole list flickering when you tick a box, collapsing
   Apps / Installed crashing after an app APK was opened as an archive and restored,
   the Properties ripple disappearing on the first tap with folder counts enabled,

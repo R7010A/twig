@@ -276,3 +276,10 @@
   left/right safe insets. Fullscreen must ignore cutout insets on every edge, retaining
   navigation and IME insets. `StatusBarFullscreenTest` checks content bounds with a
   cutout on either side and a narrower navigation inset on the same edge.
+
+- **Website hidden-status-bar mode kept the landscape cutout strip (2026-10-20)**:
+  WebsiteActivity has independent status/navigation bar settings and its own inset listener;
+  fixing the shared fullscreen helper did not change it. Ignore cutout insets on every edge
+  when the status bar is hidden, preserving visible navigation and keyboard insets. The
+  Chromium fullscreen overlay likewise fills the cutout area. `WebsiteFullscreenTest`
+  covers either side, navigation visibility, keyboard space and restoring status-bar mode.

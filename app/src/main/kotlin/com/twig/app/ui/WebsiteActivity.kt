@@ -217,12 +217,11 @@ class WebsiteActivity : AppCompatActivity() {
             if (hideStatus || hideNavigation) {
                 val types = WindowInsetsCompat.Type.ime() or
                     (if (hideStatus) 0 else WindowInsetsCompat.Type.statusBars()) or
-                    (if (hideNavigation) 0 else WindowInsetsCompat.Type.navigationBars())
+                    (if (hideNavigation) 0 else WindowInsetsCompat.Type.navigationBars()) or
+                    (if (hideStatus) 0 else WindowInsetsCompat.Type.displayCutout())
                 val bars = insets.getInsets(types)
-                val cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
-                view.setPadding(maxOf(bars.left, cutout.left),
-                    if (hideStatus) 0 else maxOf(bars.top, cutout.top),
-                    maxOf(bars.right, cutout.right), maxOf(bars.bottom, cutout.bottom))
+                // Hidden status bars use the cutout area on every edge, as in the file panes.
+                view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
             } else view.setPadding(0, 0, 0, 0)
             insets
         }
@@ -486,7 +485,7 @@ class WebsiteActivity : AppCompatActivity() {
         fullscreenLayer = layer
         fullscreenCallback = callback
         ViewCompat.setOnApplyWindowInsetsListener(layer) { container, insets ->
-            val safe = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
+            val safe = insets.getInsets(WindowInsetsCompat.Type.ime())
             container.setPadding(safe.left, safe.top, safe.right, safe.bottom)
             WindowInsetsCompat.CONSUMED
         }
