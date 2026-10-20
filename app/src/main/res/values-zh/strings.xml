@@ -997,6 +997,7 @@
     <string name="website_blocked_requests_invalid">规则无效。请输入域名或 HTTP(S) 网址，可包含 * 通配符。</string>
     <string name="website_double_tap_toolbar">双击隐藏/显示工具栏</string>
     <string name="website_allow_background_running">后台运行</string>
+    <string name="website_allow_background_running_hint">%1$s（如后台播放音乐）</string>
     <string name="website_background_channel">网站后台运行</string>
     <string name="website_background_close">关闭后台网站</string>
     <string name="website_background_failed">无法保持网站后台运行。</string>

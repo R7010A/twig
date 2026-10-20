@@ -967,6 +967,7 @@
     <string name="website_blocked_requests_invalid">Regola non valida. Inserisci un dominio o URL HTTP(S), eventualmente con *.</string>
     <string name="website_double_tap_toolbar">Doppio tocco per nascondere/mostrare la barra degli strumenti</string>
     <string name="website_allow_background_running">Esecuzione in background</string>
+    <string name="website_allow_background_running_hint">%1$s (ad es. riprodurre musica in background)</string>
     <string name="website_background_channel">Siti in esecuzione in background</string>
     <string name="website_background_close">Chiudi siti in background</string>
     <string name="website_background_failed">Impossibile mantenere i siti in esecuzione in background.</string>

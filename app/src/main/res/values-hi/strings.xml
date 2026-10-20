@@ -967,6 +967,7 @@
     <string name="website_blocked_requests_invalid">अमान्य नियम। डोमेन या HTTP(S) URL दर्ज करें; * का उपयोग कर सकते हैं।</string>
     <string name="website_double_tap_toolbar">टूलबार छिपाने/दिखाने के लिए दो बार टैप करें</string>
     <string name="website_allow_background_running">बैकग्राउंड में चलाएँ</string>
+    <string name="website_allow_background_running_hint">%1$s (जैसे बैकग्राउंड में संगीत चलाना)</string>
     <string name="website_background_channel">बैकग्राउंड में चल रही वेबसाइट</string>
     <string name="website_background_close">बैकग्राउंड वेबसाइट बंद करें</string>
     <string name="website_background_failed">वेबसाइट को बैकग्राउंड में चालू नहीं रख सके।</string>

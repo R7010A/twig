@@ -967,6 +967,7 @@
     <string name="website_blocked_requests_invalid">Ungültige Regel. Domain oder HTTP(S)-URL eingeben; * ist erlaubt.</string>
     <string name="website_double_tap_toolbar">Doppeltippen blendet die Werkzeugleiste ein/aus</string>
     <string name="website_allow_background_running">Im Hintergrund ausführen</string>
+    <string name="website_allow_background_running_hint">%1$s (z. B. Musik im Hintergrund abspielen)</string>
     <string name="website_background_channel">Websites im Hintergrund</string>
     <string name="website_background_close">Hintergrund-Websites schließen</string>
     <string name="website_background_failed">Websites können nicht im Hintergrund weiterlaufen.</string>

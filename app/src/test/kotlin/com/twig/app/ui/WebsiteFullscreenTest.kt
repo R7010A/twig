@@ -9,6 +9,9 @@ import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.test.core.app.ApplicationProvider
 import com.twig.app.R
 import com.twig.app.Website
@@ -55,6 +58,53 @@ class WebsiteFullscreenTest {
         }
     }
     private class Request(val view: View, var hidden: Int = 0)
+
+    @Test fun `hidden status bar fills landscape cutouts while retaining visible navigation and keyboard space`() {
+        for (cutout in listOf(Insets.of(80, 0, 0, 0), Insets.of(0, 0, 80, 0))) {
+            for (hideNavigation in listOf(false, true)) {
+                Page(Website(name = "Cutout", url = "https://example.com", hideStatusBar = true,
+                    hideNavigationBar = hideNavigation)).use { page ->
+                    page.controller.configurationChange(Configuration(page.activity.resources.configuration).apply {
+                        orientation = Configuration.ORIENTATION_LANDSCAPE
+                    })
+                    val insets = WindowInsetsCompat.Builder()
+                        .setInsets(WindowInsetsCompat.Type.displayCutout(), cutout)
+                        .setInsets(WindowInsetsCompat.Type.statusBars(), Insets.of(0, 24, 0, 0))
+                        .setInsets(WindowInsetsCompat.Type.navigationBars(), Insets.of(0, 0, 20, 0))
+                        .setInsets(WindowInsetsCompat.Type.ime(), Insets.of(0, 0, 0, 200))
+                        .build()
+                    ViewCompat.dispatchApplyWindowInsets(page.root, insets)
+                    assertEquals(0, page.root.paddingLeft)
+                    assertEquals(0, page.root.paddingTop)
+                    assertEquals(if (hideNavigation) 0 else 20, page.root.paddingRight)
+                    assertEquals(200, page.root.paddingBottom)
+
+                    WebsiteStore.save(app, page.site.copy(hideStatusBar = false, hideNavigationBar = true))
+                    page.controller.newIntent(WebsiteActivity.intent(app, page.site.id))
+                    ViewCompat.dispatchApplyWindowInsets(page.root, insets)
+                    assertEquals(cutout.left, page.root.paddingLeft)
+                    assertEquals(24, page.root.paddingTop)
+                    assertEquals(cutout.right, page.root.paddingRight)
+                    assertEquals(200, page.root.paddingBottom)
+                }
+            }
+        }
+    }
+
+    @Test fun `page fullscreen fills the cutout area on every edge`() {
+        Page().use { page ->
+            val layer = page.show().view.parent as View
+            val insets = WindowInsetsCompat.Builder()
+                .setInsets(WindowInsetsCompat.Type.displayCutout(), Insets.of(80, 30, 80, 0))
+                .setInsets(WindowInsetsCompat.Type.systemBars(), Insets.of(0, 24, 20, 0))
+                .build()
+            ViewCompat.dispatchApplyWindowInsets(layer, insets)
+            assertEquals(0, layer.paddingLeft)
+            assertEquals(0, layer.paddingTop)
+            assertEquals(0, layer.paddingRight)
+            assertEquals(0, layer.paddingBottom)
+        }
+    }
 
     @Test fun `double tapping toggles toolbar independently from system bars and preserves page across recreation`() {
         Page(Website(name = "Toolbar", url = "https://example.com", fullscreen = true,

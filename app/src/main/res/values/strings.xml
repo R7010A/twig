@@ -1037,6 +1037,7 @@
     <string name="website_blocked_requests_invalid">Invalid rule. Enter a domain or an HTTP(S) URL, optionally containing *.</string>
     <string name="website_double_tap_toolbar">Double-tap to hide/show toolbar</string>
     <string name="website_allow_background_running">Run in background</string>
+    <string name="website_allow_background_running_hint">%1$s (e.g. playing music in the background)</string>
     <string name="website_background_channel">Websites running in the background</string>
     <string name="website_background_close">Close background websites</string>
     <string name="website_background_failed">Could not keep websites running in the background.</string>
