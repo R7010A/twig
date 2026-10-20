@@ -119,7 +119,12 @@ sha() { sha256sum "$OUT/$1" | cut -d' ' -f1; }
 mb()  { printf '%.2f MB' "$(echo "scale=4; $(stat -c %s "$OUT/$1") / 1048576" | bc)"; }
 
 NOTES="$OUT/notes.md"
-cat "fastlane/metadata/android/en-US/changelogs/$VERSION_CODE.txt" > "$NOTES"
+{
+  cat "fastlane/metadata/android/en-US/changelogs/$VERSION_CODE.txt"
+  printf '\n\n'
+  cat "fastlane/metadata/android/zh-CN/changelogs/$VERSION_CODE.txt"
+  printf '\n'
+} > "$NOTES"
 cat >> "$NOTES" <<EOF
 
 ---

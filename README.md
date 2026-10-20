@@ -15,12 +15,6 @@ restic are all implemented from scratch.
 **Version 1.13.1** (versionCode 301) · minSdk 24 / targetSdk 34 / compileSdk 36 ·
 [GPL-3.0](LICENSE)
 
-<!-- The eight screenshots above are referenced out of fastlane/ rather than copied
-     here: F-Droid needs them at that exact path, and a second copy would put the
-     same 2 MB in the repository twice. The rest of the gallery is not part of the
-     store listing, so it lives in docs/img/screenshots/ as WebP — same 822x1920
-     resolution, 1.3 MB for nineteen images instead of 4.5 MB. -->
-
 <p align="center">
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/02-dual-pane.png" width="88%" alt="Dual pane in landscape">
 </p>
@@ -451,9 +445,7 @@ here, and `org.json` ships with Android.
   arrows, Home/End, Page Up/Down and common shell symbols within reach. Tap `SHIFT`,
   then an arrow or `TAB`, to send the combination; hold an arrow to repeat it.
 - **Shift combinations for interactive tools.** Examples include `Shift+←` to open
-  a question for answering in [Codex](https://github.com/openai/codex/blob/main/codex-rs/tui/src/chatwidget/tests/questions_tests.rs),
-  and `Shift+Tab` to cycle permission modes in
-  [Claude Code](https://code.claude.com/docs/en/interactive-mode#general-controls).
+  a question for answering in [Codex], and `Shift+Tab` to cycle permission modes in [Claude Code].
 - **A dedicated pipe key (`|`).** Connect one command's output to the next—for
   example, `ls -l | grep .apk`—without switching to the phone keyboard's symbol
   pages. Pipelines make it practical to filter logs, search output and combine

@@ -13,11 +13,6 @@
 **版本 1.13.1**(versionCode 301)· minSdk 24 / targetSdk 34 / compileSdk 36 ·
 [GPL-3.0](LICENSE)
 
-<!-- 上面这八张直接引用 fastlane/ 下的那份,不在这里再放一遍:F-Droid 要求它们位于
-     那个确切路径,复制一份等于把同样的 2 MB 在仓库里存两次。其余的截图不进商店页,
-     所以以 WebP 放在 docs/img/screenshots/ ——分辨率仍是 822x1920,十九张合计
-     1.3 MB,而不是 4.5 MB。 -->
-
 <p align="center">
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/02-dual-pane.png" width="88%" alt="横屏双面板">
 </p>
