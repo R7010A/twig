@@ -71,6 +71,7 @@ restic are all implemented from scratch.
 
 ## Download
 
+The version above tracks the source tree; downloads follow the published releases.
 Signed APKs are attached to every [GitHub release](https://github.com/dev2ex/twig/releases/latest):
 
 | File | Take it if |
@@ -101,7 +102,7 @@ S3, restic repositories and Jellyfin/Emby libraries expand in place. Keep two
 sources side by side: compress an SMB folder into a local zip, or copy a file
 from a remote archive straight to an FTP server.
 
-**A small package.** The 1.13.0 full build's arm64-v8a download measured 7.76 MiB,
+**A small package.** The 1.14.0 full build's arm64-v8a download measures 8.19 MiB,
 including the terminal, network backends and media player. Dependencies are added
 only after their APK cost is measured.
 
@@ -141,26 +142,26 @@ only after their APK cost is measured.
 
 ## Size
 
-Measured on the 1.13.0 full release build (R8 + resource shrinking; MiB = 1,048,576 bytes):
+Measured on the 1.14.0 release builds (R8 + resource shrinking; MiB = 1,048,576 bytes):
 
 | | Size |
 |---|---|
-| Full APK (`arm64-v8a` + `x86_64`) | 9.90 MiB |
-| Libre APK (`arm64-v8a` + `x86_64`) | 9.85 MiB |
-| **Per-device download (`arm64-v8a`)** | **7.76 MiB** |
+| Full APK (`arm64-v8a` + `x86_64`) | 10.33 MiB |
+| Libre APK (`arm64-v8a` + `x86_64`) | 10.28 MiB |
+| **Per-device download (`arm64-v8a`)** | **8.19 MiB** |
 
-Where it goes (compressed sizes inside the APK):
+Where it goes (compressed entries inside the full `arm64-v8a` APK):
 
 | Component | Size |
 |---|---|
-| `classes*.dex` (all our code plus every JVM dependency) | 2.82 MiB |
+| `classes*.dex` (all our code plus every JVM dependency) | 3.04 MiB |
 | `libffmpegJNI.so` | 1.39 MiB |
-| Bouncy Castle data files | 1.16 MiB |
-| Resources (`resources.arsc` + `res`) | 1.50 MiB |
+| Bouncy Castle data files | 1.18 MiB |
+| Resources (`resources.arsc` + `res`) | 1.71 MiB |
 | `libsamba_jni.so` (libsmb2) | 484 KiB |
 | `libtwigzstd` / `libtermux` / `libtwigpty` | 109 KiB |
 
-Nearly all of the Bouncy Castle figure is three lookup tables for the `picnic`
+Of the Bouncy Castle data, 1.16 MiB is three lookup tables for the `picnic`
 post-quantum signature scheme (`lowmcL{1,3,5}.bin.properties`). Twig pulls in the
 full Bouncy Castle only because Android's cut-down build lacks X25519, so this is
 1.16 MiB of pure dead weight — see the roadmap.
@@ -269,6 +270,9 @@ needs no special case.
 - **Go to path**: type a path on any root — a server, internal storage, a removable
   volume, a document tree, a favourite — and the tree expands its way down to that
   directory or file, connecting the server on the way if it is not open yet.
+  Long-press or double-tap the path bar to edit the current directory’s path.
+- **Long-press Up** to bring the highlighted current directory back into view.
+  If its row is already visible, the same gesture collapses the tree.
 - **Split-APK bundles install directly**: `.xapk`, `.apks` and `.apkm` are read out of
   the archive and written to a `PackageInstaller` session, so a bundle from a mirror
   installs without a helper app.
@@ -371,7 +375,7 @@ all work the same way.
 - Text viewer with hand-written syntax highlighting, multiple themes, pinch-to-zoom and
   a Markdown preview mode
 - **Text encoding is a preference, not a guess**: one decoder (`TextCodec`) tries BOM,
-  then strict UTF-8, then the fallbacks you ordered (GBK by default). Editing is not
+  then strict UTF-8, then the fallbacks you ordered (GB18030 by default). Editing is not
   limited to UTF-8 — a file is written back in the encoding it was read with, and if the
   original encoding cannot represent something you typed, Twig asks instead of silently
   substituting `?`
@@ -512,12 +516,12 @@ Twig can find it and save it as a connection.
 |---|---|
 | `:core-fs` | Pure JVM: `XFile` / `FileSystem` / `FsRegistry` / `CopyEngine` |
 | `:fs-local` | `LocalFileSystem` plus `priv/` — the root/Shizuku privileged shell fallback |
-| `:fs-archive` | `ArchiveFileSystem` + zip (read/write, encryption) / 7z, and `ArchiveWriter` |
+| `:fs-archive` | `ArchiveFileSystem` + zip (read/write, encryption) / 7z / tar / gz·xz·bz2·zst single-stream compression, and `ArchiveWriter` |
 | `:fs-archive-rar` | `RarFileSystem` (RAR4 + RAR5) — a separate module purely so the `libre` build can drop it |
 | `:fs-network` | `FtpFileSystem` / `SftpFileSystem` / `WebDavFileSystem` / `S3FileSystem` / `JellyfinFileSystem` |
 | `:fs-smb` | `SmbFileSystem` — libsmb2 via NDK/JNI; `Smb1FileSystem` — opt-in legacy jcifs-ng backend |
 | `:fs-restic` | restic repository reader (pure Kotlin) |
-| `:fs-zstd` | `NativeZstd` — zstd via JNI |
+| `:fs-zstd` | `NativeZstd` + `ZstdInputStream` — block and streaming zstd decoding via JNI |
 | `:git-lite` | Miniature git in pure Kotlin |
 | `:app` | Dual-pane UI, viewers, terminal, git views, treemap, Wi-Fi sharing, websites and page customization |
 
@@ -525,28 +529,39 @@ Twig can find it and save it as a connection.
 
 ## Building
 
+Use JDK 21 and the Android SDK/NDK versions pinned in `app/build.gradle.kts`.
+
 ```bash
-./gradlew :app:assembleDebug      # installable debug APK
+./gradlew :app:assembleFullDebug       # installable debug APK (with RAR)
 ./gradlew :app:assembleFullRelease     # R8-optimised release (with RAR)
 ./gradlew :app:assembleLibreRelease    # F-Droid variant (no RAR, 100% FLOSS)
-./gradlew :app:bundleRelease      # AAB for store upload (smaller per-device download)
+./gradlew :app:bundleLibreRelease     # libre AAB for store upload
+./gradlew :app:assembleFullRelease -PabiSplit=true  # three single-ABI APKs
 ```
 
-Release builds are signed only if a `keystore.properties` file exists at the repo
+By default, release builds are signed only if a `keystore.properties` file exists at the repo
 root (`storeFile` / `storePassword` / `keyAlias` / `keyPassword`). Without it the
 release tasks emit an **unsigned** APK — `app-<flavor>-release-unsigned.apk` —
 rather than falling back to the public Android debug key. Sign it yourself, or use
-a debug build for local testing.
+a debug build for local testing. To explicitly sign a release build with the debug
+key, set `debugSign=true` in `local.properties` or pass `-PdebugSign=true` (the
+command-line option takes precedence). Published builds should use your own release key.
 
 Tests:
 
 ```bash
 ./gradlew :core-fs:test :fs-archive:test :fs-network:test :fs-restic:test :git-lite:test
-./gradlew :app:testReleaseUnitTest
+./gradlew :app:testFullReleaseUnitTest
 ```
 
 Notes: build-tools are pinned to 36.1.0; only `arm64-v8a` and `x86_64` ABIs are
-built; R8 is enabled, and JNI entry points for libsmb2 and zstd are kept by name.
+built by default. The opt-in ABI split also builds experimental `armeabi-v7a` APKs.
+R8 is enabled, and JNI entry points for libsmb2 and zstd are kept by name.
+
+For a release rehearsal, run `tools/release.sh` from a clean, committed tree with
+release signing configured. It builds and verifies all five APKs and generates
+bilingual release notes under `build/release/<version>/`, without tagging or pushing.
+`tools/release.sh --publish` also tags, pushes and creates the GitHub release.
 
 ### Adding a new source
 
@@ -709,5 +724,12 @@ changing subsystems like the terminal, thumbnails or the TS demuxer.
   target actually needs a decrypted secret (server files reconnect through the saved,
   encrypted credentials; local and SAF files never do). Shortcuts run in their own task, so
   opening one no longer routes through — or back-navigates into — the main screen.
+- **1.14** — **Website bookmarks** with per-site display controls, scripts, styles,
+  authentication, downloads, page tools and optional background sessions. Website tasks
+  respect the app lock. **Android/data** access through system-supported SAF grants,
+  readable system-directory entries, configurable launcher shortcuts, batch rename with
+  replacement and numbering, multi-file sharing and selection properties. The path bar
+  supports editing by long press or double tap; pane switching and fullscreen cutouts
+  are improved.
 
 </details>

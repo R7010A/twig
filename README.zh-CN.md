@@ -69,6 +69,7 @@
 
 ## 下载
 
+页首版本对应当前源码，下载请以已发布版本为准。
 每个 [GitHub Release](https://github.com/dev2ex/twig/releases/latest) 都附有签名 APK:
 
 | 文件 | 适合 |
@@ -96,7 +97,7 @@ F-Droid 上架(`libre` 版,可复现构建,与上面同一签名)正在审核中
 Jellyfin/Emby 媒体库都就地展开。两侧可以放不同来源:把 SMB 上的目录压成本地 zip,
 或把远程压缩包里的文件直接复制到 FTP 服务器。
 
-**体积小。** 1.13.0 full 构建的 arm64-v8a 单设备下载实测为 7.76 MiB,包含终端、
+**体积小。** 1.14.0 full 构建的 arm64-v8a 单设备下载实测为 8.19 MiB,包含终端、
 网络存储后端和媒体播放器。新增依赖前先测量 APK 增量。
 
 **这些工具可以一起用。**
@@ -126,26 +127,26 @@ Jellyfin/Emby 媒体库都就地展开。两侧可以放不同来源:把 SMB 上
 
 ## 体积
 
-1.13.0 full release 构建实测(R8 + 资源裁剪;1 MiB = 1,048,576 字节):
+1.14.0 release 构建实测(R8 + 资源裁剪;1 MiB = 1,048,576 字节):
 
 | | 大小 |
 |---|---|
-| Full APK(`arm64-v8a` + `x86_64`) | 9.90 MiB |
-| Libre APK(`arm64-v8a` + `x86_64`) | 9.85 MiB |
-| **单设备下载(`arm64-v8a`)** | **7.76 MiB** |
+| Full APK(`arm64-v8a` + `x86_64`) | 10.33 MiB |
+| Libre APK(`arm64-v8a` + `x86_64`) | 10.28 MiB |
+| **单设备下载(`arm64-v8a`)** | **8.19 MiB** |
 
-构成(APK 内的压缩后大小):
+构成(full `arm64-v8a` APK 内条目的压缩后大小):
 
 | 组件 | 大小 |
 |---|---|
-| `classes*.dex`(自研代码 + 全部 JVM 依赖) | 2.82 MiB |
+| `classes*.dex`(自研代码 + 全部 JVM 依赖) | 3.04 MiB |
 | `libffmpegJNI.so` | 1.39 MiB |
-| Bouncy Castle 的数据文件 | 1.16 MiB |
-| 资源(`resources.arsc` + `res`) | 1.50 MiB |
+| Bouncy Castle 的数据文件 | 1.18 MiB |
+| 资源(`resources.arsc` + `res`) | 1.71 MiB |
 | `libsamba_jni.so`(libsmb2) | 484 KiB |
 | `libtwigzstd` / `libtermux` / `libtwigpty` | 109 KiB |
 
-Bouncy Castle 那一项几乎全是 `picnic` 后量子签名算法的三张查找表
+Bouncy Castle 数据中有 1.16 MiB 来自 `picnic` 后量子签名算法的三张查找表
 (`lowmcL{1,3,5}.bin.properties`)。引入完整 Bouncy Castle 只是因为 Android 自带的
 阉割版缺 X25519,所以这 1.16 MiB 是纯粹的死重——见路线图。
 
@@ -233,6 +234,9 @@ Bouncy Castle 那一项几乎全是 `picnic` 后量子签名算法的三张查�
   读不动的卷,可以用 SAF 授权,或者走特权侧列。
 - **跳转到路径**:任何根行(服务器、内部存储、可移动卷、文档树、收藏)都能输入一条路径,
   树逐级展开到那个目录或那个文件所在的行;路上遇到没连的服务器会先连上。
+  长按或双击路径栏可编辑当前目录的路径。
+- **长按上级目录按钮**可将屏幕外绿色高亮的当前目录滚回可见位置；如果该行已在屏幕内，
+  则折叠目录树。
 - **分包 APK 直接安装**:`.xapk`、`.apks`、`.apkm` 从包里读出来写进 `PackageInstaller`
   会话,不用再装一个辅助 App。
 - **Twig 可以当文件选择器**,对外接 `GET_CONTENT`,对内替掉 SAF——所以能选到
@@ -309,7 +313,7 @@ Cookie 和原页面保留，已开启的后台运行继续。启用主密码时�
 
 - 文本查看器,手写词法着色,多主题,捏合缩放字号,带 Markdown 预览模式
 - **文本编码是设置项,不是猜**:统一走 `TextCodec`——BOM → 严格 UTF-8 → 你在设置里排好的
-  候选(默认 GBK)。编辑不再只限 UTF-8:保存用读进来那个编码写回;原编码表示不了新输入的
+  候选(默认 GB18030)。编辑不再只限 UTF-8:保存用读进来那个编码写回;原编码表示不了新输入的
   字符时会问你要不要转成 UTF-8,而不是静默替换成 `?`
 - Hex 查看器,虚拟滚动、可拖动滚动条、文本/HEX 搜索
 - **PDF 阅读器**,基于系统渲染器:连续或单页滚动、双击裁掉页边空白、文本选择,
@@ -423,7 +427,7 @@ UDP 探测让另一台 Twig 扫一下就能把它存成连接。
 | `:fs-network` | `FtpFileSystem` / `SftpFileSystem` / `WebDavFileSystem` / `S3FileSystem` / `JellyfinFileSystem` |
 | `:fs-smb` | `SmbFileSystem`——libsmb2,经 NDK/JNI;`Smb1FileSystem`——按连接开启的 jcifs-ng 旧协议后端 |
 | `:fs-restic` | restic 仓库读取器(纯 Kotlin) |
-| `:fs-zstd` | `NativeZstd`——zstd,经 JNI |
+| `:fs-zstd` | `NativeZstd` + `ZstdInputStream`——块解码与流式 zstd 解码,经 JNI |
 | `:git-lite` | 纯 Kotlin 迷你 git |
 | `:app` | 双面板 UI、查看器、终端、Git 视图、占用图、WiFi 共享、网站与页面定制 |
 
@@ -431,27 +435,36 @@ UDP 探测让另一台 Twig 扫一下就能把它存成连接。
 
 ## 构建
 
+使用 JDK 21，以及 `app/build.gradle.kts` 中指定版本的 Android SDK/NDK。
+
 ```bash
-./gradlew :app:assembleDebug      # 可安装的 debug APK
+./gradlew :app:assembleFullDebug       # 可安装的 debug APK(带 RAR)
 ./gradlew :app:assembleFullRelease     # R8 优化的 release(带 RAR)
 ./gradlew :app:assembleLibreRelease    # F-Droid 版(无 RAR,100% 自由软件)
-./gradlew :app:bundleRelease      # 上架用 AAB(按设备拆分,下载更小)
+./gradlew :app:bundleLibreRelease     # libre 版上架用 AAB
+./gradlew :app:assembleFullRelease -PabiSplit=true  # 三个单 ABI APK
 ```
 
-release 只有在仓库根存在 `keystore.properties` 时才签名(内含 `storeFile` /
+默认情况下，release 只有在仓库根存在 `keystore.properties` 时才签名(内含 `storeFile` /
 `storePassword` / `keyAlias` / `keyPassword`)。没有它时产出的是**无签名包**
 `app-<flavor>-release-unsigned.apk`,**不会**回落到公开的 Android debug key。
-自己签,或者本地测试直接用 debug 包。
+自己签,或者本地测试直接用 debug 包。也可在 `local.properties` 设置 `debugSign=true`，
+或传入 `-PdebugSign=true`，显式用 debug key 签名 release；命令行参数优先。
+正式发布应使用项目自己的签名密钥。
 
 测试:
 
 ```bash
 ./gradlew :core-fs:test :fs-archive:test :fs-network:test :fs-restic:test :git-lite:test
-./gradlew :app:testReleaseUnitTest
+./gradlew :app:testFullReleaseUnitTest
 ```
 
-说明:build-tools 固定 36.1.0;只构建 `arm64-v8a` 与 `x86_64`;R8 开启,
-libsmb2 与 zstd 的 JNI 入口按名 keep。
+说明:build-tools 固定 36.1.0;默认构建 `arm64-v8a` 与 `x86_64`。启用 ABI 拆分时还会
+构建实验性的 `armeabi-v7a` APK。R8 开启,libsmb2 与 zstd 的 JNI 入口按名 keep。
+
+准备发布时，在已提交且干净的工作区配置正式签名后，运行 `tools/release.sh`。脚本会
+构建并校验五种 APK，在 `build/release/<版本>/` 生成安装包和双语发布说明，不打标签也不推送。
+`tools/release.sh --publish` 还会打标签、推送并创建 GitHub Release。
 
 ### 加一种新来源
 
@@ -578,5 +591,9 @@ I have read the CLA (CLA.md) and I agree to its terms.
   图标在已有缓存缩略图时直接用缩略图。主密码只在目标真的需要解密时才弹——服务器文件要靠
   保存的加密凭据重连,本地和 SAF 文件从来不需要。快捷方式跑在独立任务栈里,打开不会经过
   主界面,返回也不会绕回主界面。
+- **1.14** —— **网站书签**支持按网站配置显示、脚本、样式、认证、下载、页面工具及可选后台运行，
+  网站任务遵循应用锁。新增系统允许的 **Android/data SAF 授权**、可读系统目录入口、可配置的
+  启动器快捷方式、支持替换与编号的批量重命名、多文件分享及选中项属性。长按或双击路径栏
+  可编辑路径；改进面板切换与全屏刘海适配。
 
 </details>
