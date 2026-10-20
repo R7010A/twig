@@ -967,6 +967,7 @@
     <string name="website_blocked_requests_invalid">無効なルールです。ドメインまたはHTTP(S) URLを入力してください。*を使用できます。</string>
     <string name="website_double_tap_toolbar">ダブルタップでツールバーを表示／非表示</string>
     <string name="website_allow_background_running">バックグラウンド実行</string>
+    <string name="website_allow_background_running_hint">%1$s（例：バックグラウンドで音楽を再生）</string>
     <string name="website_background_channel">バックグラウンドで実行中のサイト</string>
     <string name="website_background_close">バックグラウンドのサイトを閉じる</string>
     <string name="website_background_failed">ウェブサイトをバックグラウンドで実行できませんでした。</string>

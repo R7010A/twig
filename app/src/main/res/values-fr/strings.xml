@@ -967,6 +967,7 @@
     <string name="website_blocked_requests_invalid">Règle invalide. Saisissez un domaine ou une URL HTTP(S), avec * si nécessaire.</string>
     <string name="website_double_tap_toolbar">Toucher deux fois pour masquer/afficher la barre d’outils</string>
     <string name="website_allow_background_running">Exécution en arrière-plan</string>
+    <string name="website_allow_background_running_hint">%1$s (ex. : écouter de la musique en arrière-plan)</string>
     <string name="website_background_channel">Sites en arrière-plan</string>
     <string name="website_background_close">Fermer les sites en arrière-plan</string>
     <string name="website_background_failed">Impossible de maintenir les sites en arrière-plan.</string>

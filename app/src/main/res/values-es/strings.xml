@@ -967,6 +967,7 @@
     <string name="website_blocked_requests_invalid">Regla no válida. Introduce un dominio o URL HTTP(S); se permite *.</string>
     <string name="website_double_tap_toolbar">Doble toque para ocultar/mostrar la barra de herramientas</string>
     <string name="website_allow_background_running">Ejecución en segundo plano</string>
+    <string name="website_allow_background_running_hint">%1$s (p. ej., reproducir música en segundo plano)</string>
     <string name="website_background_channel">Sitios en segundo plano</string>
     <string name="website_background_close">Cerrar sitios en segundo plano</string>
     <string name="website_background_failed">No se pudieron mantener los sitios en segundo plano.</string>

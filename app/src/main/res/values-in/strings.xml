@@ -967,6 +967,7 @@
     <string name="website_blocked_requests_invalid">Aturan tidak valid. Masukkan domain atau URL HTTP(S), boleh memakai *.</string>
     <string name="website_double_tap_toolbar">Ketuk dua kali untuk menyembunyikan/menampilkan bilah alat</string>
     <string name="website_allow_background_running">Jalankan di latar belakang</string>
+    <string name="website_allow_background_running_hint">%1$s (mis. memutar musik di latar belakang)</string>
     <string name="website_background_channel">Situs berjalan di latar belakang</string>
     <string name="website_background_close">Tutup situs latar belakang</string>
     <string name="website_background_failed">Tidak dapat mempertahankan situs di latar belakang.</string>

@@ -966,6 +966,7 @@
     <string name="website_blocked_requests_invalid">規則無效。請輸入網域或 HTTP(S) 網址，可包含 * 萬用字元。</string>
     <string name="website_double_tap_toolbar">點兩下隱藏／顯示工具列</string>
     <string name="website_allow_background_running">背景執行</string>
+    <string name="website_allow_background_running_hint">%1$s（如背景播放音樂）</string>
     <string name="website_background_channel">網站背景執行</string>
     <string name="website_background_close">關閉背景網站</string>
     <string name="website_background_failed">無法保持網站在背景執行。</string>

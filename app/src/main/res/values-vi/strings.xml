@@ -966,6 +966,7 @@
     <string name="website_blocked_requests_invalid">Quy tắc không hợp lệ. Nhập tên miền hoặc URL HTTP(S), có thể dùng *.</string>
     <string name="website_double_tap_toolbar">Chạm hai lần để ẩn/hiện thanh công cụ</string>
     <string name="website_allow_background_running">Chạy trong nền</string>
+    <string name="website_allow_background_running_hint">%1$s (ví dụ: phát nhạc trong nền)</string>
     <string name="website_background_channel">Trang web chạy trong nền</string>
     <string name="website_background_close">Đóng các trang web chạy nền</string>
     <string name="website_background_failed">Không thể giữ các trang web chạy trong nền.</string>

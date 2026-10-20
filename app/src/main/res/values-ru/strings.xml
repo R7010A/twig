@@ -1001,6 +1001,7 @@
     <string name="website_blocked_requests_invalid">Недопустимое правило. Введите домен или HTTP(S) URL; допускается *.</string>
     <string name="website_double_tap_toolbar">Двойное касание скрывает/показывает панель инструментов</string>
     <string name="website_allow_background_running">Работа в фоне</string>
+    <string name="website_allow_background_running_hint">%1$s (например, воспроизведение музыки в фоне)</string>
     <string name="website_background_channel">Сайты работают в фоне</string>
     <string name="website_background_close">Закрыть фоновые сайты</string>
     <string name="website_background_failed">Не удалось сохранить работу сайтов в фоне.</string>
